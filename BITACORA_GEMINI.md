@@ -57,6 +57,11 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Badges dinámicos de camiones pendientes en patio (Segunda Pesada).
   - Mini-tarjeta integrada al pie que replica el peso y modo de la báscula en tiempo real.
   - Perfil de usuario con avatar por iniciales y botón de cambio de tema (Dark/Light).
+* Módulo Administrativo — Empresa:
+  - Creado `web/public/empresa.php` para consultar y actualizar los datos de la empresa en `t_empresas`.
+  - Validación estricta de longitudes (Razón Social obligatoria, RTN, Nombre Comercial, Dirección).
+  - Actualización atómica en MariaDB y sincronización inmediata con la sesión activa del usuario.
+  - Integrado enlace en el menú lateral bajo la sección Administración.
 
 ### 4. Siguientes Pasos
 1. Crear el enlace directo (`Junction`) entre `web/public` y `C:\xampp\htdocs\bascula`.

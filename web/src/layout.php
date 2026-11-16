@@ -138,7 +138,29 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
             <!-- Bloque Catálogos y Configuración (Admin / Super) -->
             <?php if ($usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR'])): ?>
             <div>
-                <span class="nav-group-title">Catálogos & Ajustes</span>
+                <span class="nav-group-title">Administración</span>
+                <a href="empresa.php" class="nav-item <?= $seccionActiva === 'empresa' ? 'active' : '' ?>" title="Datos de la Empresa">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V7l8-4v18"></path>
+                        <path d="M19 21V11l-6-4"></path>
+                        <path d="M9 9h1"></path>
+                        <path d="M9 13h1"></path>
+                        <path d="M9 17h1"></path>
+                    </svg>
+                    <span class="nav-label">Mi Empresa</span>
+                </a>
+
+                <a href="usuarios.php" class="nav-item <?= $seccionActiva === 'usuarios' ? 'active' : '' ?>" title="Usuarios y Roles">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    <span class="nav-label">Usuarios</span>
+                </a>
+
                 <a href="clientes.php" class="nav-item <?= $seccionActiva === 'clientes' ? 'active' : '' ?>" title="Clientes y Proveedores">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
