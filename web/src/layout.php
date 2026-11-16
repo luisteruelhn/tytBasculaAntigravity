@@ -204,12 +204,15 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                     <span class="nav-label">Taras de empaque</span>
                 </a>
 
-                <a href="taras.php" class="nav-item <?= $seccionActiva === 'taras' ? 'active' : '' ?>" title="Taras de Vehículos">
+                <a href="presentaciones_tipo.php" class="nav-item <?= $seccionActiva === 'presentaciones_tipo' ? 'active' : '' ?>" title="Tipos de Empaque">
                     <svg class="nav-icon" viewBox="0 0 24 24">
-                        <path d="M12 2v20"></path>
-                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        <!-- Ícono de camión / vehículo -->
+                        <path d="M1 3h15v13H1z"></path>
+                        <path d="M16 8h4l3 3v5h-7V8z"></path>
+                        <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                        <circle cx="18.5" cy="18.5" r="2.5"></circle>
                     </svg>
-                    <span class="nav-label">Taras de Vehículos</span>
+                    <span class="nav-label">Tipos de empaque</span>
                 </a>
 
                 <a href="config_bascula.php" class="nav-item <?= $seccionActiva === 'config' ? 'active' : '' ?>" title="Configuración de Báscula">
