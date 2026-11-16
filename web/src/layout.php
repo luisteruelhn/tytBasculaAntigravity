@@ -173,6 +173,18 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                     <span class="nav-label">Clientes / Proveedores</span>
                 </a>
 
+                <a href="categorias.php" class="nav-item <?= $seccionActiva === 'categorias' ? 'active' : '' ?>" title="Categorías de Producto">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    <span class="nav-label">Categorías</span>
+                </a>
+
                 <a href="productos.php" class="nav-item <?= $seccionActiva === 'productos' ? 'active' : '' ?>" title="Productos">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>

@@ -6,8 +6,8 @@
  * Módulo de Catálogo:
  * - Vista y diseño fiel a la imagen de referencia: Título "CATÁLOGO / Productos", subtítulo de empresa,
  *   botón azul "Nuevo producto", campo "Buscar producto" con botón "Buscar".
- * - Tabla con columnas: Producto, Presentaciones, Estado, Acción.
- * - Modal moderno para creación y edición de Producto con gestión de Presentaciones (Sacos, Granel, etc.).
+ * - Tabla con columnas: Producto, Categoría, Presentaciones, Estado, Acción.
+ * - Modal moderno para creación y edición de Producto con selector de Categoría (Café, Aceites, Granos Básicos).
  * - Alta y edición ágil, activación/desactivación y validación CSRF.
  */
 
@@ -21,18 +21,24 @@ $empresaId = (int)$usuarioActual['empresa_id'];
 $empresaNombre = $usuarioActual['empresa_nombre'] ?? 'INVERSIONES VALLECILLO, SB';
 $pdo = obtenerDB();
 
+// Cargar categorías activas para el formulario
+$stmtCats = $pdo->prepare("SELECT id, codigo, nombre FROM t_categorias WHERE empresa_id = :empresa_id AND activo = 1 ORDER BY nombre ASC");
+$stmtCats->execute([':empresa_id' => $empresaId]);
+$listaCategorias = $stmtCats->fetchAll();
+
 $mensajeExito = '';
 $error = '';
 $erroresCampos = [];
 
-// 1. PROCESAR CREAR O EDITAR PRODUCTO Y SUS PRESENTACIONES
+// 1. PROCESAR CREAR O EDITAR PRODUCTO
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array($_POST['accion'], ['crear', 'editar'], true)) {
     if (!validarCsrfToken($_POST['csrf_token'] ?? null)) {
         $error = 'La sesión del formulario venció. Por favor recarga e intenta de nuevo.';
     } else {
         $prodId = (int)($_POST['id_producto'] ?? 0);
+        $categoriaId = !empty($_POST['categoria_id']) ? (int)$_POST['categoria_id'] : null;
         $nombreProducto = trim((string)($_POST['nombre'] ?? ''));
-        $presentacionesTexto = trim((string)($_POST['presentaciones'] ?? '')); // líneas o separadas por comas
+        $presentacionesTexto = trim((string)($_POST['presentaciones'] ?? ''));
         $activo = isset($_POST['activo']) ? 1 : 0;
 
         if ($nombreProducto === '') {
@@ -46,7 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                 $pdo->beginTransaction();
 
                 if ($_POST['accion'] === 'crear') {
-                    // Verificar si ya existe con el mismo nombre en la empresa
                     $stmtCheck = $pdo->prepare(
                         "SELECT id FROM t_productos WHERE empresa_id = :empresa_id AND UPPER(nombre) = UPPER(:nombre) LIMIT 1"
                     );
@@ -56,33 +61,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                     }
 
                     $stmtIns = $pdo->prepare(
-                        "INSERT INTO t_productos (empresa_id, nombre, activo) VALUES (:empresa_id, :nombre, :activo)"
+                        "INSERT INTO t_productos (empresa_id, categoria_id, nombre, activo) 
+                         VALUES (:empresa_id, :categoria_id, :nombre, :activo)"
                     );
                     $stmtIns->execute([
-                        ':empresa_id' => $empresaId,
-                        ':nombre'     => mb_strtoupper($nombreProducto, 'UTF-8'),
-                        ':activo'     => 1,
+                        ':empresa_id'    => $empresaId,
+                        ':categoria_id'  => $categoriaId,
+                        ':nombre'        => mb_strtoupper($nombreProducto, 'UTF-8'),
+                        ':activo'        => 1,
                     ]);
                     $prodId = (int)$pdo->lastInsertId();
                     $mensajeExito = "Producto registrado exitosamente.";
                 } else {
-                    // Modo edición
                     $stmtUpd = $pdo->prepare(
                         "UPDATE t_productos 
-                         SET nombre = :nombre, activo = :activo 
+                         SET categoria_id = :categoria_id, nombre = :nombre, activo = :activo 
                          WHERE id = :id AND empresa_id = :empresa_id"
                     );
                     $stmtUpd->execute([
-                        ':nombre'     => mb_strtoupper($nombreProducto, 'UTF-8'),
-                        ':activo'     => $activo,
-                        ':id'         => $prodId,
-                        ':empresa_id' => $empresaId,
+                        ':categoria_id' => $categoriaId,
+                        ':nombre'       => mb_strtoupper($nombreProducto, 'UTF-8'),
+                        ':activo'       => $activo,
+                        ':id'           => $prodId,
+                        ':empresa_id'   => $empresaId,
                     ]);
                     $mensajeExito = "Producto actualizado correctamente.";
                 }
 
                 // Procesar presentaciones asociadas
-                // Si el usuario especificó presentaciones, las limpiamos y guardamos
                 $lineasPres = preg_split('/[\r\n,]+/', $presentacionesTexto);
                 $presentacionesLimpias = [];
                 foreach ($lineasPres as $lp) {
@@ -92,13 +98,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                     }
                 }
 
-                // Si no especificó ninguna, por defecto se añade 'SACOS' o 'GRANEL'
                 if (empty($presentacionesLimpias)) {
                     $presentacionesLimpias[] = 'SACOS';
                 }
 
-                // Desactivar o reinsertar presentaciones
-                // Eliminamos las que ya no están y agregamos las nuevas
                 $stmtDel = $pdo->prepare("DELETE FROM t_producto_presentaciones WHERE producto_id = :prod_id");
                 $stmtDel->execute([':prod_id' => $prodId]);
 
@@ -144,56 +147,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
     }
 }
 
-// 3. CONSULTA DE PRODUCTOS CON CONTEO DE PRESENTACIONES
+// 3. CONSULTA DE PRODUCTOS CON CATEGORÍA Y CONTEO DE PRESENTACIONES
 $busqueda = trim((string)($_GET['q'] ?? ''));
 
-$sql = "SELECT p.id, p.nombre, p.activo, 
+$sql = "SELECT p.id, p.categoria_id, p.nombre, p.activo, 
+               COALESCE(c.nombre, 'Sin categoría') AS categoria_nombre,
                COUNT(pr.id) AS total_presentaciones,
                GROUP_CONCAT(pr.nombre ORDER BY pr.id SEPARATOR ', ') AS lista_presentaciones
         FROM t_productos p
+        LEFT JOIN t_categorias c ON c.id = p.categoria_id
         LEFT JOIN t_producto_presentaciones pr ON pr.producto_id = p.id AND pr.activo = 1
         WHERE p.empresa_id = :empresa_id";
 $params = [':empresa_id' => $empresaId];
 
 if ($busqueda !== '') {
-    $sql .= " AND p.nombre LIKE :busq";
+    $sql .= " AND (p.nombre LIKE :busq OR c.nombre LIKE :busq)";
     $params[':busq'] = '%' . $busqueda . '%';
 }
 
-$sql .= " GROUP BY p.id, p.nombre, p.activo ORDER BY p.nombre ASC";
+$sql .= " GROUP BY p.id, p.categoria_id, p.nombre, p.activo, c.nombre ORDER BY p.nombre ASC";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $productos = $stmt->fetchAll();
-
-// Si la tabla está vacía, sembramos los productos iniciales que se ven en la captura del usuario para su comodidad inmediata
-if (empty($productos) && $busqueda === '') {
-    $iniciales = [
-        ['nombre' => 'ACEITE', 'pres' => ['GRANEL', 'CISTERNA']],
-        ['nombre' => 'CAFE CORRIENTE', 'pres' => ['SACOS', 'QUINTALES']],
-        ['nombre' => 'CAFE GUACUCO', 'pres' => ['SACOS']],
-        ['nombre' => 'CAFE HÚMEDO', 'pres' => ['SACOS', 'GRANEL']],
-        ['nombre' => 'CAFE NATURAL', 'pres' => ['SACOS']],
-        ['nombre' => 'CAFE ORO SHG', 'pres' => ['SACOS']],
-        ['nombre' => 'CAFE RESACA', 'pres' => ['SACOS']],
-    ];
-    try {
-        $stmtInsP = $pdo->prepare("INSERT INTO t_productos (empresa_id, nombre, activo) VALUES (:empresa_id, :nombre, 1)");
-        $stmtInsPr = $pdo->prepare("INSERT INTO t_producto_presentaciones (producto_id, nombre, activo) VALUES (:prod_id, :nombre, 1)");
-        foreach ($iniciales as $item) {
-            $stmtInsP->execute([':empresa_id' => $empresaId, ':nombre' => $item['nombre']]);
-            $newId = (int)$pdo->lastInsertId();
-            foreach ($item['pres'] as $pr) {
-                $stmtInsPr->execute([':prod_id' => $newId, ':nombre' => $pr]);
-            }
-        }
-        // Re-consultar
-        $stmt->execute($params);
-        $productos = $stmt->fetchAll();
-    } catch (Exception $e) {
-        // En caso de que ya existan concurrencias, continúa normal
-    }
-}
 
 $tokenCsrf = obtenerCsrfToken();
 renderizarEncabezado('Productos', 'productos');
@@ -236,7 +212,7 @@ renderizarEncabezado('Productos', 'productos');
     <!-- TARJETA PRINCIPAL DEL CATÁLOGO -->
     <div class="card" style="padding: 2rem 2.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
 
-        <!-- BUSCADOR SUPERIOR CON FORMA Y TEXTO EXACTOS -->
+        <!-- BUSCADOR SUPERIOR -->
         <div style="margin-bottom: 2rem;">
             <label for="buscar_producto" class="form-label" style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.45rem;">
                 Buscar producto
@@ -259,21 +235,24 @@ renderizarEncabezado('Productos', 'productos');
             </form>
         </div>
 
-        <!-- TABLA DE PRODUCTOS CON ENCABEZADOS Y ESPACIADOS EXACTOS -->
+        <!-- TABLA DE PRODUCTOS CON COLUMNA CATEGORÍA -->
         <div class="table-responsive" style="border: none; background: transparent;">
             <table class="table" style="border-collapse: separate; border-spacing: 0; min-width: 100%;">
                 <thead>
                     <tr style="border-bottom: 1px solid var(--border-color);">
-                        <th style="background: transparent; color: var(--text-main); font-size: 0.95rem; font-weight: 700; text-transform: none; letter-spacing: normal; padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border-color); width: 42%;">
+                        <th style="background: transparent; color: var(--text-main); font-size: 0.95rem; font-weight: 700; text-transform: none; padding: 0.85rem 0.5rem; width: 34%;">
                             Producto
                         </th>
-                        <th style="background: transparent; color: var(--text-main); font-size: 0.95rem; font-weight: 700; text-transform: none; letter-spacing: normal; padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border-color); width: 22%;">
+                        <th style="background: transparent; color: var(--text-main); font-size: 0.95rem; font-weight: 700; text-transform: none; padding: 0.85rem 0.5rem; width: 22%;">
+                            Categoría
+                        </th>
+                        <th style="background: transparent; color: var(--text-main); font-size: 0.95rem; font-weight: 700; text-transform: none; padding: 0.85rem 0.5rem; width: 16%;">
                             Presentaciones
                         </th>
-                        <th style="background: transparent; color: var(--text-main); font-size: 0.95rem; font-weight: 700; text-transform: none; letter-spacing: normal; padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border-color); width: 20%;">
+                        <th style="background: transparent; color: var(--text-main); font-size: 0.95rem; font-weight: 700; text-transform: none; padding: 0.85rem 0.5rem; width: 14%;">
                             Estado
                         </th>
-                        <th style="background: transparent; color: var(--text-main); font-size: 0.95rem; font-weight: 700; text-transform: none; letter-spacing: normal; padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border-color); width: 16%;">
+                        <th style="background: transparent; color: var(--text-main); font-size: 0.95rem; font-weight: 700; text-transform: none; padding: 0.85rem 0.5rem; width: 14%;">
                             Acción
                         </th>
                     </tr>
@@ -281,7 +260,7 @@ renderizarEncabezado('Productos', 'productos');
                 <tbody>
                     <?php if (empty($productos)): ?>
                         <tr>
-                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
+                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
                                 No se encontraron productos registrados.
                             </td>
                         </tr>
@@ -290,6 +269,11 @@ renderizarEncabezado('Productos', 'productos');
                             <tr style="border-bottom: 1px solid var(--border-color);">
                                 <td style="padding: 1.15rem 0.5rem; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.3px; color: var(--text-main);">
                                     <?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td style="padding: 1.15rem 0.5rem; font-size: 0.92rem; color: var(--text-main);">
+                                    <span class="badge" style="background: rgba(59, 130, 246, 0.12); color: var(--primary); font-size: 0.8rem;">
+                                        <?= htmlspecialchars($p['categoria_nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                    </span>
                                 </td>
                                 <td style="padding: 1.15rem 0.5rem; color: var(--text-main); font-size: 0.95rem;">
                                     <span title="<?= htmlspecialchars($p['lista_presentaciones'] ?: 'Sin presentaciones') ?>">
@@ -331,6 +315,19 @@ renderizarEncabezado('Productos', 'productos');
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="accion" id="prodAccion" value="crear">
             <input type="hidden" name="id_producto" id="prodId" value="0">
+
+            <div class="form-group">
+                <label for="prod_categoria" class="form-label">Categoría del Producto</label>
+                <select id="prod_categoria" name="categoria_id" class="form-control">
+                    <option value="">-- Sin categoría asignada --</option>
+                    <?php foreach ($listaCategorias as $cat): ?>
+                        <option value="<?= (int)$cat['id'] ?>">
+                            <?= htmlspecialchars($cat['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <small style="color: var(--text-muted); font-size: 0.78rem;">Agrupa el producto para reportes consolidados.</small>
+            </div>
 
             <div class="form-group">
                 <label for="prod_nombre" class="form-label">Nombre del Producto <span style="color: var(--danger);">*</span></label>
@@ -383,6 +380,7 @@ function abrirModalNuevo() {
     document.getElementById('modalProdTitulo').innerText = '➕ Nuevo Producto';
     document.getElementById('prodAccion').value = 'crear';
     document.getElementById('prodId').value = '0';
+    document.getElementById('prod_categoria').value = '';
     document.getElementById('prod_nombre').value = '';
     document.getElementById('prod_presentaciones').value = 'SACOS\nGRANEL';
     document.getElementById('divEstadoActivo').style.display = 'none';
@@ -395,6 +393,7 @@ function abrirModalEditar(data) {
     document.getElementById('modalProdTitulo').innerText = '✏️ Editar Producto: ' + data.nombre;
     document.getElementById('prodAccion').value = 'editar';
     document.getElementById('prodId').value = data.id;
+    document.getElementById('prod_categoria').value = data.categoria_id || '';
     document.getElementById('prod_nombre').value = data.nombre || '';
     document.getElementById('prod_presentaciones').value = data.lista_presentaciones ? data.lista_presentaciones.replace(/, /g, '\n') : '';
     document.getElementById('divEstadoActivo').style.display = 'block';

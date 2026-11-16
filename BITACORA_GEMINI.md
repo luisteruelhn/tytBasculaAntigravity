@@ -117,5 +117,16 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
     * Desarrollada vista `web/public/presentaciones.php` con listado, buscador, y modal de alta/edición conectada a MariaDB.
     * Integrado enlace en la barra lateral bajo la sección de Administración -> "Taras de empaque".
 
+* Módulo de Catálogo — Categorías de Producto y Vínculo en MariaDB:
+  - Creada tabla `t_categorias` en MariaDB con clave única `(empresa_id, codigo)`.
+  - Sembradas las categorías base:
+    * `CAFE` (CAFÉ)
+    * `ACEITES` (ACEITES)
+    * `GRANOS_BASICOS` (GRANOS BÁSICOS)
+  - Modificada la tabla `t_productos` agregando la columna `categoria_id` (con índice `idx_categoria`) y actualizados los productos existentes según su rubro.
+  - Creado formulario administrativo [categorias.php](file:///k:/TYTOneBasculaAntigravity/web/public/categorias.php) con listado, buscador, conteo de productos por categoría y modal de creación/edición.
+  - Actualizado [productos.php](file:///k:/TYTOneBasculaAntigravity/web/public/productos.php) para mostrar la columna de categoría y selector en su modal.
+  - Integrado enlace en la barra lateral bajo la sección Administración -> **"Categorías"** (`categorias.php`).
+
 ### 4. Siguientes Pasos
 1. Continuar con el siguiente módulo: Formulario de **Primera Pesada** (`primera_pesada.php`) con captura de peso en vivo, indicador LED, datos de operación, vehículo/motorista y pantalla de confirmación post-guardado.
