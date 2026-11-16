@@ -240,40 +240,40 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
             </div>
 
             <!-- FILA 2: FECHA DESDE, HASTA, BOTÓN GENERAR Y ACCIONES -->
-            <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
-                <div style="width: 175px;">
+            <div style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
+                <div style="width: 160px;">
                     <label for="desde" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Desde
                     </label>
                     <input type="date" id="desde" name="desde" class="form-control" style="height: 40px; border-radius: 6px;" value="<?= htmlspecialchars($fechaDesdeSql, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
 
-                <div style="width: 175px;">
+                <div style="width: 160px;">
                     <label for="hasta" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Hasta
                     </label>
                     <input type="date" id="hasta" name="hasta" class="form-control" style="height: 40px; border-radius: 6px;" value="<?= htmlspecialchars($fechaHastaSql, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="height: 40px; padding: 0 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
+                <button type="submit" class="btn btn-primary" style="height: 40px; padding: 0 1.25rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
                     Generar reporte
                 </button>
 
-                <!-- BLOQUE DE BOTONES SEPARADO A PARTIR DE IMPRIMIR -->
-                <div style="display: flex; gap: 0.65rem; margin-left: auto; padding-left: 2.5rem; align-items: center; flex-wrap: wrap;">
-                    <button type="button" onclick="imprimirReporte()" class="btn btn-primary" style="height: 40px; background: #0b57d0; padding: 0 1.15rem; font-weight: 700; border-radius: 6px;">
-                        Imprimir
-                    </button>
-                    <a href="reportes.php?<?= http_build_query(array_merge($_GET, ['export' => 'excel'])) ?>" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center;">
-                        Generar Excel
-                    </a>
-                    <button type="button" onclick="imprimirReporte()" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; border-radius: 6px;">
-                        Descargar PDF
-                    </button>
-                    <a href="https://web.whatsapp.com/" target="_blank" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center;">
-                        WhatsApp Web
-                    </a>
-                </div>
+                <!-- LÍNEA VERTICAL SUAVE -->
+                <div style="width: 1px; height: 36px; background: #cbd5e1; margin: 0 0.35rem; align-self: flex-end; margin-bottom: 2px;"></div>
+
+                <button type="button" onclick="imprimirReporte()" class="btn btn-primary" style="height: 40px; background: #0b57d0; padding: 0 1.15rem; font-weight: 700; border-radius: 6px;">
+                    Imprimir
+                </button>
+                <a href="reportes.php?<?= http_build_query(array_merge($_GET, ['export' => 'excel'])) ?>" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center;">
+                    Generar Excel
+                </a>
+                <button type="button" onclick="imprimirReporte()" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; border-radius: 6px;">
+                    Descargar PDF
+                </button>
+                <a href="https://web.whatsapp.com/" target="_blank" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center;">
+                    WhatsApp Web
+                </a>
             </div>
 
             <p style="font-size: 0.82rem; color: #475569; margin: 1.25rem 0 0 0;">
