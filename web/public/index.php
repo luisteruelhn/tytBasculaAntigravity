@@ -38,7 +38,7 @@ try {
     $errorDB = $e->getMessage();
 }
 
-renderizarEncabezado('Tablero Principal', 'dashboard');
+renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
 ?>
 
 <!-- =======================================================================
