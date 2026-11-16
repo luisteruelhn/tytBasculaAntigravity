@@ -39,6 +39,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * Módulo 1: Control de Acceso y Autenticación:
   - Incorporado logo institucional `tytlogo.png` en `web/public/assets/img/tytlogo.png`.
   - Construido `web/public/login.php` con protección CSRF, sanitización, consulta preparada PDO a `t_usuarios` y verificación segura de hash.
+  - Diseño temático de báscula camionera de rastras con ilustración vectorial de cabezal chato/cuadradito (Cabover) sobre plataforma de celdas de carga y display de peso.
   - Construido `web/public/logout.php` para cierre seguro de sesión y destrucción de cookies.
   - Validada sintaxis de todos los archivos con PHP 8 en XAMPP (cero errores).
 
