@@ -77,16 +77,17 @@ $quintales = $pesoFinal / 100.0;
         body { background: #f1f5f9; color: #0f172a; padding: 2rem 1rem; }
         .boleta-contenedor { max-width: 900px; margin: 0 auto; background: #ffffff; padding: 2.5rem 3rem; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
         
-        /* ENCABEZADO CON OPERACIÓN EN GRANDE A LA IZQUIERDA Y EMPRESA A LA DERECHA */
+        /* ENCABEZADO CON EMPRESA A LA IZQUIERDA Y OPERACIÓN A LA DERECHA */
         .boleta-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0f233a; padding-bottom: 1.5rem; margin-bottom: 1.5rem; gap: 1.5rem; }
-        .op-tag { font-size: 2.4rem; font-weight: 900; letter-spacing: -0.5px; line-height: 1; color: <?= ($tipoOp === 'COMPRA' ? '#1e40af' : '#047857') ?>; }
-        .op-sub { font-size: 1.25rem; font-weight: 800; color: #475569; margin-top: 0.25rem; }
-        .op-cierre { font-size: 0.85rem; color: #64748b; margin-top: 0.35rem; }
-
-        .empresa-info { text-align: right; max-width: 450px; }
+        .empresa-info { text-align: left; max-width: 480px; }
         .empresa-logo { max-height: 60px; max-width: 180px; object-fit: contain; margin-bottom: 0.5rem; }
         .empresa-nombre { font-size: 1.25rem; font-weight: 800; color: #0f172a; line-height: 1.2; text-transform: uppercase; }
         .empresa-detalle { font-size: 0.85rem; color: #475569; margin-top: 0.25rem; line-height: 1.4; }
+
+        .op-contenedor { text-align: right; }
+        .op-tag { font-size: 2.4rem; font-weight: 900; letter-spacing: -0.5px; line-height: 1; color: <?= ($tipoOp === 'COMPRA' ? '#1e40af' : '#047857') ?>; }
+        .op-sub { font-size: 1.25rem; font-weight: 800; color: #475569; margin-top: 0.25rem; font-family: monospace; letter-spacing: 0.5px; }
+        .op-cierre { font-size: 0.85rem; color: #64748b; margin-top: 0.35rem; }
 
         /* GRID DE DATOS */
         .datos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem 2rem; margin-bottom: 1.75rem; font-size: 0.92rem; }
@@ -136,24 +137,8 @@ $quintales = $pesoFinal / 100.0;
 
 <div class="boleta-contenedor">
 
-    <!-- 1. ENCABEZADO CON COMPRA/VENTA EN GRANDE Y DATOS DE LA EMPRESA A LA DERECHA -->
+    <!-- 1. ENCABEZADO CON DATOS DE LA EMPRESA A LA IZQUIERDA Y OPERACIÓN A LA DERECHA -->
     <div class="boleta-header">
-        <div>
-            <div style="font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #64748b; margin-bottom: 0.25rem;">
-                BOLETA DE PESO
-            </div>
-            <!-- TIPO DE OPERACIÓN EN GRANDE -->
-            <div class="op-tag">
-                <?= $tipoOp ?>
-            </div>
-            <div class="op-sub">
-                <?= ($tipoOp === 'COMPRA' ? 'Compra #' . $pesada['id_compra'] : 'Venta #' . $pesada['id_venta']) ?>
-            </div>
-            <div class="op-cierre">
-                Cierre: <?= $fechaCierre ?>
-            </div>
-        </div>
-
         <div class="empresa-info">
             <?php if (!empty($empresa['logo']) && file_exists(__DIR__ . '/' . $empresa['logo'])): ?>
                 <img src="<?= htmlspecialchars($empresa['logo'], ENT_QUOTES, 'UTF-8') ?>" alt="Logo" class="empresa-logo"><br>
@@ -174,6 +159,22 @@ $quintales = $pesoFinal / 100.0;
                 <?php if (!empty($empresa['email'])): ?>
                     &middot; <?= htmlspecialchars($empresa['email'], ENT_QUOTES, 'UTF-8') ?>
                 <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="op-contenedor">
+            <div style="font-size: 0.8rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: #64748b; margin-bottom: 0.25rem;">
+                BOLETA DE PESO
+            </div>
+            <!-- TIPO DE OPERACIÓN EN GRANDE -->
+            <div class="op-tag">
+                <?= $tipoOp ?>
+            </div>
+            <div class="op-sub">
+                # <?= sprintf('%07d', $correlativo) ?>
+            </div>
+            <div class="op-cierre">
+                Cierre: <?= $fechaCierre ?>
             </div>
         </div>
     </div>
