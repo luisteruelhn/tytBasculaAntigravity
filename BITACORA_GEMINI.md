@@ -62,6 +62,12 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Validación estricta de longitudes (Razón Social obligatoria, RTN, Nombre Comercial, Dirección).
   - Actualización atómica en MariaDB y sincronización inmediata con la sesión activa del usuario.
   - Integrado enlace en el menú lateral bajo la sección Administración.
+* Módulo Administrativo — Usuarios y Roles:
+  - Creado `web/public/usuarios.php` con tabla interactiva de usuarios de la empresa y formulario de alta.
+  - Creación con cifrado `password_hash` (BCrypt cost 12), validación de unicidad de usuario y correo.
+  - Asignación de roles (`ADMINISTRADOR`, `SUPERVISOR`, `OPERADOR`).
+  - Activación y desactivación rápida con protección contra auto-desactivación de la cuenta en uso.
+  - Protección CSRF y control estricto de accesos.
 
 ### 4. Siguientes Pasos
 1. Crear el enlace directo (`Junction`) entre `web/public` y `C:\xampp\htdocs\bascula`.
