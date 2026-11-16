@@ -1,58 +1,64 @@
 /* ==========================================================================
    Estilos Principales — tytBasculaAntigravity
    Tema Industrial Moderno, Ultra-Ligero, 100% Responsivo, Dark & Light
-   Con Barra Lateral (Sidebar Cockpit) Moderna y Colapsable
+   Con Barra Lateral (Sidebar Cockpit) y Formularios UI Premium
    ========================================================================== */
 
 :root, [data-theme="dark"] {
     --bg-primary: #090d16;        /* Fondo profundo */
-    --bg-surface: #131b2e;        /* Superficie de tarjetas y sidebar */
+    --bg-surface: #111927;        /* Superficie de tarjetas y sidebar */
     --bg-surface-elevated: #1e293b;
+    --bg-input: #0a0f1d;
     --text-main: #f8fafc;
     --text-muted: #94a3b8;
     --primary: #3b82f6;          /* Azul acento */
     --primary-hover: #2563eb;
     --primary-light: rgba(59, 130, 246, 0.12);
     --success: #10b981;          /* Verde estable */
-    --success-bg: rgba(16, 185, 129, 0.15);
+    --success-bg: rgba(16, 185, 129, 0.12);
     --warning: #f59e0b;          /* Ámbar inestable */
-    --warning-bg: rgba(245, 158, 11, 0.15);
+    --warning-bg: rgba(245, 158, 11, 0.12);
     --danger: #ef4444;           /* Rojo error / alerta */
+    --danger-bg: rgba(239, 68, 68, 0.12);
     --led-color: #22c55e;        /* Verde fósforo industrial */
     --led-bg: #052e16;
     --border-color: rgba(255, 255, 255, 0.08);
+    --border-input: rgba(255, 255, 255, 0.12);
     --border-focus: #3b82f6;
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.5);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 12px 30px -4px rgba(0, 0, 0, 0.5);
     --sidebar-width: 260px;
     --sidebar-collapsed-width: 72px;
 }
 
 [data-theme="light"] {
-    --bg-primary: #f1f5f9;        /* Gris claro limpio */
+    --bg-primary: #f8fafc;        /* Fondo gris slate muy suave */
     --bg-surface: #ffffff;        /* Blanco puro en tarjetas */
-    --bg-surface-elevated: #f8fafc;
+    --bg-surface-elevated: #f1f5f9;
+    --bg-input: #f8fafc;
     --text-main: #0f172a;         /* Texto oscuro de alto contraste */
     --text-muted: #64748b;        /* Texto secundario gris slate */
     --primary: #2563eb;          /* Azul vivo */
     --primary-hover: #1d4ed8;
     --primary-light: rgba(37, 99, 235, 0.08);
     --success: #059669;          /* Verde oscuro */
-    --success-bg: rgba(5, 150, 105, 0.12);
+    --success-bg: rgba(5, 150, 105, 0.1);
     --warning: #d97706;          /* Ámbar */
-    --warning-bg: rgba(217, 119, 6, 0.12);
+    --warning-bg: rgba(217, 119, 6, 0.1);
     --danger: #dc2626;           /* Rojo */
+    --danger-bg: rgba(220, 38, 38, 0.1);
     --led-color: #22c55e;        /* Conserva el verde fósforo en el bisel oscuro */
     --led-bg: #020617;
     --border-color: #e2e8f0;     /* Borde suave gris */
+    --border-input: #cbd5e1;
     --border-focus: #2563eb;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-    --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 6px 16px -2px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 12px 28px -4px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -62,12 +68,13 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", "Helvetica Neue", Arial, sans-serif;
     background-color: var(--bg-primary);
     color: var(--text-main);
     line-height: 1.5;
     min-height: 100vh;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
 }
 
 /* ==========================================================================
@@ -159,9 +166,6 @@ body {
     background-color: var(--bg-surface-elevated);
 }
 
-/* ==========================================================================
-   Navegación del Menú por Grupos
-   ========================================================================== */
 .sidebar-nav {
     flex: 1;
     overflow-y: auto;
@@ -172,7 +176,6 @@ body {
     gap: 1.25rem;
 }
 
-/* Scrollbar refinado y fino */
 .sidebar-nav::-webkit-scrollbar {
     width: 4px;
 }
@@ -185,12 +188,11 @@ body {
     font-size: 0.68rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 1.2px;
     color: var(--text-muted);
-    padding: 0 0.65rem 0.4rem 0.65rem;
+    padding: 0 0.65rem 0.45rem 0.65rem;
     display: block;
     white-space: nowrap;
-    transition: opacity 0.2s ease;
 }
 
 .nav-item {
@@ -198,7 +200,7 @@ body {
     align-items: center;
     gap: 0.85rem;
     padding: 0.65rem 0.85rem;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     color: var(--text-muted);
     text-decoration: none;
     font-size: 0.92rem;
@@ -245,16 +247,13 @@ body {
     margin-left: auto;
     background-color: var(--primary);
     color: white;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    padding: 0.15rem 0.5rem;
+    padding: 0.2rem 0.55rem;
     border-radius: 20px;
     line-height: 1;
 }
 
-/* ==========================================================================
-   Mini-Monitor de Báscula al Pie del Sidebar
-   ========================================================================== */
 .sidebar-bascula-card {
     margin: 0.5rem 0.75rem;
     padding: 0.75rem 0.9rem;
@@ -308,9 +307,6 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* ==========================================================================
-   Pie de Usuario y Acciones en Sidebar
-   ========================================================================== */
 .sidebar-footer {
     padding: 0.85rem 0.9rem;
     border-top: 1px solid var(--border-color);
@@ -328,17 +324,18 @@ body {
 }
 
 .user-avatar {
-    width: 34px;
-    height: 34px;
-    border-radius: var(--radius-sm);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     background: linear-gradient(135deg, var(--primary), #1d4ed8);
     color: white;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
 }
 
 .user-details {
@@ -373,14 +370,14 @@ body {
     background-color: var(--bg-surface-elevated);
     color: var(--text-main);
     border: 1px solid var(--border-color);
-    padding: 0.35rem 0.6rem;
+    padding: 0.4rem 0.7rem;
     border-radius: var(--radius-sm);
     font-size: 0.82rem;
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
     transition: all 0.2s ease;
 }
 
@@ -390,7 +387,7 @@ body {
 
 .btn-logout {
     color: var(--text-muted);
-    padding: 0.35rem;
+    padding: 0.4rem;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
@@ -403,13 +400,10 @@ body {
     color: var(--danger);
 }
 
-/* ==========================================================================
-   Modo Colapsado de Escritorio (Compacto / Solo Íconos)
-   ========================================================================== */
+/* Modo Colapsado */
 .sidebar-collapsed {
     width: var(--sidebar-collapsed-width);
 }
-
 .sidebar-collapsed .sidebar-brand-text,
 .sidebar-collapsed .nav-group-title,
 .sidebar-collapsed .nav-label,
@@ -419,44 +413,37 @@ body {
 .sidebar-collapsed .tema-texto {
     display: none !important;
 }
-
 .sidebar-collapsed .sidebar-header {
     justify-content: center;
     padding: 1rem 0;
 }
-
 .sidebar-collapsed .sidebar-toggle-btn {
     display: none;
 }
-
 .sidebar-collapsed .sidebar-header:hover .sidebar-toggle-btn {
     display: flex;
     position: absolute;
     right: 5px;
 }
-
 .sidebar-collapsed .nav-item {
     justify-content: center;
     padding: 0.75rem 0;
 }
-
 .sidebar-collapsed .sidebar-bascula-card {
     justify-content: center;
     padding: 0.6rem 0;
     margin: 0.5rem;
 }
-
 .sidebar-collapsed .sidebar-footer {
     justify-content: center;
     padding: 0.75rem 0;
 }
-
 .sidebar-collapsed .sidebar-actions {
     flex-direction: column;
 }
 
 /* ==========================================================================
-   Contenido Principal con Espaciado para el Sidebar
+   Contenido Principal
    ========================================================================== */
 .app-main-wrapper {
     flex: 1;
@@ -475,7 +462,7 @@ body.sidebar-is-collapsed .app-main-wrapper {
 
 .main-content {
     flex: 1;
-    max-width: 1300px;
+    max-width: 1280px;
     width: 100%;
     margin: 1.5rem auto;
     padding: 0 1.5rem;
@@ -485,7 +472,7 @@ body.sidebar-is-collapsed .app-main-wrapper {
     display: none;
     background-color: var(--bg-surface);
     border-bottom: 1px solid var(--border-color);
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1.25rem;
     align-items: center;
     justify-content: space-between;
     position: sticky;
@@ -523,29 +510,312 @@ body.sidebar-is-collapsed .app-main-wrapper {
 }
 
 /* ==========================================================================
-   Tarjetas, Display LED de Báscula y Botones Generales
+   DISEÑO MODERNO DE TARJETAS Y CONTENEDORES (Glass / Clean Modern)
    ========================================================================== */
 .card {
     background-color: var(--bg-surface);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    padding: 1.5rem;
-    box-shadow: var(--shadow-md);
+    padding: 1.75rem;
+    box-shadow: var(--shadow-sm);
     margin-bottom: 1.5rem;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="light"] .card:hover {
+    border-color: #cbd5e1;
+    box-shadow: var(--shadow-md);
 }
 
 .card-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
     color: var(--text-main);
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.card-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+/* ==========================================================================
+   FORMULARIOS MODERNOS Y CAMPOS DE ENTRADA ESTILIZADOS
+   ========================================================================== */
+.form-section {
+    background-color: var(--bg-surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--primary);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
     gap: 0.5rem;
 }
 
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-main);
+    letter-spacing: 0.2px;
+}
+
+.form-control {
+    width: 100%;
+    min-height: 46px;
+    padding: 0.75rem 1rem;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-input);
+    border-radius: var(--radius-sm);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-family: inherit;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    background-color: var(--bg-surface);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+    opacity: 0.7;
+}
+
+select.form-control {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* ==========================================================================
+   BOTONES MODERNOS Y ACCIONES
+   ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.65rem 1.35rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    touch-action: manipulation;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.35);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success), #059669);
+    color: white;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.btn-success:hover {
+    background-color: #059669;
+}
+
+.btn-secondary {
+    background-color: var(--bg-surface-elevated);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--border-color);
+}
+
+.btn-danger-outline {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+}
+.btn-danger-outline:hover {
+    background: var(--danger-bg);
+}
+
+.btn-success-outline {
+    background: transparent;
+    color: var(--success);
+    border: 1px solid var(--success);
+}
+.btn-success-outline:hover {
+    background: var(--success-bg);
+}
+
+.btn-lg {
+    min-height: 48px;
+    padding: 0.85rem 1.65rem;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   ALERTAS Y MENSAJES DE ESTADO
+   ========================================================================== */
+.alert {
+    padding: 0.9rem 1.25rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.92rem;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: var(--success-bg);
+    border: 1px solid var(--success);
+    color: var(--success);
+}
+
+.alert-error {
+    background-color: var(--danger-bg);
+    border: 1px solid var(--danger);
+    color: #fca5a5;
+}
+[data-theme="light"] .alert-error {
+    color: var(--danger);
+}
+
+/* ==========================================================================
+   TABLAS MODERNAS
+   ========================================================================== */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-surface);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    min-width: 650px;
+}
+
+.table th {
+    background-color: var(--bg-surface-elevated);
+    padding: 0.85rem 1.15rem;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table td {
+    padding: 0.95rem 1.15rem;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.92rem;
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover td {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+[data-theme="light"] .table tr:hover td {
+    background-color: rgba(0, 0, 0, 0.015);
+}
+
+/* ==========================================================================
+   BADGES Y CHIPS
+   ========================================================================== */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.badge-estable {
+    background-color: var(--success-bg);
+    color: var(--success);
+    border: 1px solid var(--success);
+}
+
+.badge-inestable {
+    background-color: var(--warning-bg);
+    color: var(--warning);
+    border: 1px solid var(--warning);
+}
+
+.badge-modo {
+    background-color: var(--primary-light);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+/* ==========================================================================
+   BÁSCULA DISPLAY LED
+   ========================================================================== */
 .display-bascula-panel {
     background: linear-gradient(145deg, #090d16, #020617);
     border: 2px solid #1e3a8a;
@@ -600,136 +870,41 @@ body.sidebar-is-collapsed .app-main-wrapper {
     text-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
 }
 
-.display-badges {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.badge {
-    padding: 0.3rem 0.75rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-}
-
-.badge-estable {
-    background-color: var(--success-bg);
-    color: var(--success);
-    border: 1px solid var(--success);
-}
-
-.badge-inestable {
-    background-color: var(--warning-bg);
-    color: var(--warning);
-    border: 1px solid var(--warning);
-    animation: parpadeo 1.2s infinite;
-}
-
-.badge-modo {
-    background-color: rgba(59, 130, 246, 0.15);
-    color: var(--primary);
-    border: 1px solid var(--primary);
-}
-
-@keyframes parpadeo {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-}
-
 .grid-2 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.25rem;
 }
 
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-height: 44px;
-    padding: 0.65rem 1.25rem;
-    border-radius: var(--radius-md);
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    text-decoration: none;
-    transition: all 0.15s ease;
-    touch-action: manipulation;
-}
-
-.btn-primary {
-    background-color: var(--primary);
-    color: white;
-}
-.btn-primary:hover {
-    background-color: var(--primary-hover);
-}
-
-.btn-success {
-    background-color: var(--success);
-    color: white;
-}
-.btn-success:hover {
-    background-color: #059669;
-}
-
-.btn-secondary {
-    background-color: var(--bg-surface-elevated);
-    color: var(--text-main);
-}
-.btn-secondary:hover {
-    background-color: var(--border-color);
-}
-
-.btn-lg {
-    min-height: 50px;
-    padding: 0.85rem 1.5rem;
-    font-size: 1.05rem;
-}
-
 .footer {
     background-color: var(--bg-surface);
     border-top: 1px solid var(--border-color);
-    padding: 1rem 1.25rem;
+    padding: 1.25rem;
     text-align: center;
     font-size: 0.85rem;
     color: var(--text-muted);
     margin-top: auto;
 }
 
-/* ==========================================================================
-   Adaptación Móvil y Tablets (< 900px)
-   ========================================================================== */
+/* Adaptación Móvil */
 @media (max-width: 900px) {
     .app-sidebar {
         transform: translateX(-100%);
         width: 270px;
     }
-
     .app-sidebar.mobile-open {
         transform: translateX(0);
     }
-
     .sidebar-backdrop.active {
         display: block;
     }
-
     .app-main-wrapper {
         margin-left: 0 !important;
         width: 100% !important;
     }
-
     .mobile-topbar {
         display: flex;
     }
-
     .main-content {
         padding: 0 1rem;
         margin: 1rem auto;

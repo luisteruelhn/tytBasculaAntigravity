@@ -69,8 +69,14 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Activación y desactivación rápida con protección contra auto-desactivación de la cuenta en uso.
   - Protección CSRF y control estricto de accesos.
 
+* Módulo Administrativo — Modernización Visual y Permisos RBAC Granulares:
+  - Rediseño visual SaaS industrial moderno para `web/public/empresa.php` y `web/public/usuarios.php` con secciones agrupadas, íconos SVG, badges temáticos, avatares y estilos pulidos en `style.css`.
+  - Implementación de reglas estrictas de control de roles (RBAC):
+    * **SUPER y ADMINISTRADOR**: Control total (pueden ver todos, crear, cambiar contraseñas de otros usuarios con modal/prompt y activar/desactivar).
+    * **SUPERVISOR**: Puede ver a todos los usuarios de la empresa y registrar nuevos usuarios (roles OPERADOR o SUPERVISOR), pero NO puede modificar ni cambiar contraseñas de otros usuarios.
+    * **OPERADOR**: Solo puede ver la información de su propia cuenta de usuario y tiene acceso directo a cambiar su propia contraseña personal.
+  - Creación de `web/public/mi_clave.php` para cambio seguro de contraseña de cualquier usuario autenticado (con verificación de contraseña actual y requisitos de seguridad).
+  - Enlace rápido a "Mi Contraseña" desde el pie del menú lateral en el perfil de usuario.
+
 ### 4. Siguientes Pasos
-1. Crear el enlace directo (`Junction`) entre `web/public` y `C:\xampp\htdocs\bascula`.
-2. Configurar la conexión PDO en PHP a la base de datos de XAMPP (`dbBascula`).
-3. Construir el microservicio FastAPI (`api/main.py`) con endpoints `/api/v1/peso` (simulado/real), `/api/v1/puertos` y `/api/v1/modo`.
-4. Construir la pantalla principal y módulo de pesaje en PHP.
+1. Continuar con el siguiente módulo: Formulario de **Primera Pesada** (`primera_pesada.php`) con captura de peso en vivo, indicador LED, datos de operación, vehículo/motorista y pantalla de confirmación post-guardado.

@@ -135,10 +135,11 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                 </a>
             </div>
 
-            <!-- Bloque Catálogos y Configuración (Admin / Super) -->
-            <?php if ($usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR'])): ?>
+            <!-- Bloque Catálogos y Configuración (Admin / Super / Supervisor) -->
+            <?php if ($usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'SUPERVISOR'])): ?>
             <div>
                 <span class="nav-group-title">Administración</span>
+                <?php if (tieneRol($usuario, ['SUPER', 'ADMINISTRADOR'])): ?>
                 <a href="empresa.php" class="nav-item <?= $seccionActiva === 'empresa' ? 'active' : '' ?>" title="Datos de la Empresa">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <path d="M3 21h18"></path>
@@ -150,6 +151,7 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                     </svg>
                     <span class="nav-label">Mi Empresa</span>
                 </a>
+                <?php endif; ?>
 
                 <a href="usuarios.php" class="nav-item <?= $seccionActiva === 'usuarios' ? 'active' : '' ?>" title="Usuarios y Roles">
                     <svg class="nav-icon" viewBox="0 0 24 24">
@@ -212,13 +214,15 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
         <!-- 4. Pie de usuario, alternancia de tema y salida -->
         <div class="sidebar-footer">
             <div class="user-profile">
-                <div class="user-avatar" title="<?= htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8') ?>">
-                    <?= htmlspecialchars(strtoupper(substr($nombreUsuario, 0, 2)), ENT_QUOTES, 'UTF-8') ?>
-                </div>
-                <div class="user-details">
-                    <span class="user-name"><?= htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8') ?></span>
-                    <span class="user-role"><?= htmlspecialchars($rolUsuario, ENT_QUOTES, 'UTF-8') ?></span>
-                </div>
+                <a href="mi_clave.php" style="display: flex; align-items: center; gap: 0.75rem; text-decoration: none; color: inherit;" title="Cambiar mi contraseña">
+                    <div class="user-avatar" title="<?= htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8') ?>">
+                        <?= htmlspecialchars(strtoupper(substr($nombreUsuario, 0, 2)), ENT_QUOTES, 'UTF-8') ?>
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name"><?= htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="user-role"><?= htmlspecialchars($rolUsuario, ENT_QUOTES, 'UTF-8') ?> &bull; <small style="color: var(--primary);">Mi Clave</small></span>
+                    </div>
+                </a>
             </div>
 
             <div class="sidebar-actions">
