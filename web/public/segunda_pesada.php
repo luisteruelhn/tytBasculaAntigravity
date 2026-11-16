@@ -473,24 +473,31 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                 <!-- ALERTA SI EL BRUTO ES MENOR O IGUAL A LA TARA -->
                 <div id="avisoPesoInvalido" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;"></div>
 
-                <!-- RESUMEN PREVIO DE LIQUIDACIÓN -->
-                <div style="background: #f1f5f9; padding: 1.25rem 1.5rem; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; border: 1px solid #cbd5e1;">
-                    <div>
-                        <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Neto Inicial</span>
-                        <div id="resNetoInicial" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">0 lb</div>
+                <!-- RESUMEN PREVIO DE LIQUIDACIÓN CON AUDITORÍA MATEMÁTICA -->
+                <div style="background: #f8fafc; padding: 1.5rem; border-radius: 10px; border: 1px solid #cbd5e1;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Neto Inicial (Bruto - Tara)</span>
+                            <div id="resNetoInicial" style="font-size: 1.35rem; font-weight: 800; color: var(--text-main);">0 lb</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Tara Sacos</span>
+                            <div id="resTaraSacos" style="font-size: 1.35rem; font-weight: 800; color: #475569;">0 lb</div>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Desc. Humedad + Defectos</span>
+                            <div id="resDescuentosLb" style="font-size: 1.35rem; font-weight: 800; color: #b91c1c;">0 lb</div>
+                        </div>
+                        <div style="background: #eff6ff; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid #bfdbfe;">
+                            <span style="font-size: 0.78rem; color: #1e40af; font-weight: 800; text-transform: uppercase;">PESO FINAL ESTIMADO</span>
+                            <div id="resPesoFinal" style="font-size: 1.6rem; font-weight: 900; color: #1e40af; line-height: 1.1;">0 lb</div>
+                            <small id="resQuintales" style="font-weight: 800; color: #1e3a8a; font-size: 0.95rem;">0.00 QQ</small>
+                        </div>
                     </div>
-                    <div>
-                        <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Tara Sacos</span>
-                        <div id="resTaraSacos" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">0 lb</div>
-                    </div>
-                    <div>
-                        <span style="font-size: 0.78rem; color: #64748b; font-weight: 700; text-transform: uppercase;">Desc. Humedad + Defectos</span>
-                        <div id="resDescuentosLb" style="font-size: 1.25rem; font-weight: 800; color: #b91c1c;">0 lb</div>
-                    </div>
-                    <div>
-                        <span style="font-size: 0.78rem; color: #1e40af; font-weight: 800; text-transform: uppercase;">PESO FINAL ESTIMADO</span>
-                        <div id="resPesoFinal" style="font-size: 1.4rem; font-weight: 900; color: #1e40af;">0 lb</div>
-                        <small id="resQuintales" style="font-weight: 700; color: #475569;">0.00 QQ</small>
+
+                    <!-- DESGLOSE DETALLADO EN TEXTO -->
+                    <div id="resDesgloseTexto" style="font-size: 0.82rem; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 0.65rem; line-height: 1.5;">
+                        Fija el peso complementario para ver la liquidación en vivo.
                     </div>
                 </div>
             </div>
@@ -703,9 +710,11 @@ function calcularTotales() {
     // Tara de sacos
     const selEmpaque = document.getElementById('idempaque');
     let taraUnitaria = 0;
+    let empaqueNombre = 'Sin empaque';
     if (selEmpaque && selEmpaque.selectedIndex >= 0) {
         const optEmpaque = selEmpaque.options[selEmpaque.selectedIndex];
         taraUnitaria = parseFloat(optEmpaque.getAttribute('data-peso') || '0');
+        empaqueNombre = optEmpaque.text;
     }
     const cantEmpaques = parseInt(document.getElementById('cantidad_empaques').value || '0', 10);
     const taraSacos = Math.round(taraUnitaria * cantEmpaques);
@@ -726,6 +735,21 @@ function calcularTotales() {
     const pesoFinal = Math.max(0, baseDesc - totalDesc);
     document.getElementById('resPesoFinal').innerText = pesoFinal.toLocaleString('en-US') + ' lb';
     document.getElementById('resQuintales').innerText = (pesoFinal / 100.0).toFixed(2) + ' QQ';
+
+    // Retroalimentación explicativa en texto
+    const elTexto = document.getElementById('resDesgloseTexto');
+    if (elTexto) {
+        if (segundoPeso <= 0) {
+            elTexto.innerHTML = 'Fija el peso complementario para ver la liquidación en vivo.';
+        } else if (bruto <= tara) {
+            elTexto.innerHTML = '<strong style="color: #b91c1c;">No se puede liquidar:</strong> El Peso Bruto debe ser estrictamente mayor a la Tara del vehículo.';
+        } else {
+            elTexto.innerHTML = `<strong>Desglose:</strong> Bruto (${bruto.toLocaleString()} lb) &minus; Tara (${tara.toLocaleString()} lb) = <strong>Neto Inicial: ${netoInicial.toLocaleString()} lb</strong>. ` +
+                (taraSacos > 0 ? `Menos tara empaques (${cantEmpaques} &times; ${taraUnitaria} lb = ${taraSacos.toLocaleString()} lb) &rarr; Base: <strong>${baseDesc.toLocaleString()} lb</strong>. ` : '') +
+                (totalDesc > 0 ? `Menos descuentos (Humedad ${pctHum}%: ${descHum.toLocaleString()} lb + Defectos ${pctDef}%: ${descDef.toLocaleString()} lb) &rarr; ` : '') +
+                `<strong>Final: ${pesoFinal.toLocaleString()} lb (${(pesoFinal / 100.0).toFixed(2)} QQ)</strong>.`;
+        }
+    }
 }
 </script>
 
