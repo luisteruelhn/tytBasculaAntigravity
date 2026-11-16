@@ -41,6 +41,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Construido `web/public/login.php` con protección CSRF, sanitización, consulta preparada PDO a `t_usuarios` y verificación segura de hash.
   - Diseño temático de báscula camionera de rastras con ilustración vectorial de cabezal chato/cuadradito (Cabover) sobre plataforma de celdas de carga y display de peso.
   - Diseño 100% responsivo en `style.css` y `login.php`: tipografía fluida con `clamp()`, soporte de pantallas pequeñas (320px–480px), tablets y pantallas industriales, con tap-targets táctiles de mínimo 44px.
+  - Soporte global de temas Modo Oscuro (Dark) y Modo Claro (Light) persistente en `localStorage` con `assets/js/theme.js`, variables CSS y botón de alternancia en barra de navegación y pantalla de login.
   - Microservicio FastAPI: añadido alias `/api/v1/lecturas/actual` además de `/api/v1/peso` y reactivado en puerto 8018.
   - Construido `web/public/logout.php` para cierre seguro de sesión y destrucción de cookies.
   - Validada sintaxis de todos los archivos con PHP 8 en XAMPP (cero errores).

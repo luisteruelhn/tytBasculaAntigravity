@@ -1,9 +1,9 @@
 /* ==========================================================================
    Estilos Principales — tytBasculaAntigravity
-   Tema Industrial Moderno, Ultra-Ligero, 100% Responsivo
+   Tema Industrial Moderno, Ultra-Ligero, 100% Responsivo, Dark & Light
    ========================================================================== */
 
-:root {
+:root, [data-theme="dark"] {
     --bg-primary: #0f172a;        /* Azul medianoche profundo */
     --bg-surface: #1e293b;        /* Superficie de tarjetas */
     --bg-surface-elevated: #334155;
@@ -25,6 +25,47 @@
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -2px rgba(0, 0, 0, 0.2);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] {
+    --bg-primary: #f1f5f9;        /* Gris claro limpio */
+    --bg-surface: #ffffff;        /* Blanco puro en tarjetas */
+    --bg-surface-elevated: #e2e8f0;
+    --text-main: #0f172a;         /* Texto oscuro de alto contraste */
+    --text-muted: #64748b;        /* Texto secundario gris slate */
+    --primary: #2563eb;          /* Azul vivo */
+    --primary-hover: #1d4ed8;
+    --success: #059669;          /* Verde oscuro */
+    --success-bg: rgba(5, 150, 105, 0.12);
+    --warning: #d97706;          /* Ámbar */
+    --warning-bg: rgba(217, 119, 6, 0.12);
+    --danger: #dc2626;           /* Rojo */
+    --led-color: #22c55e;        /* Conserva el verde fósforo en el bisel oscuro */
+    --led-bg: #020617;
+    --border-color: #cbd5e1;     /* Borde suave gris */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-tema-toggle {
+    background-color: var(--bg-surface-elevated);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-tema-toggle:hover {
+    background-color: var(--border-color);
 }
 
 * {

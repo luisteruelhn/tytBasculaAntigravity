@@ -84,6 +84,7 @@ $tokenFormulario = obtenerCsrfToken();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso — Báscula de Rastras y Carga Pesada</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <script src="assets/js/theme.js"></script>
     <style>
         .login-page-container {
             min-height: 100vh;
@@ -399,9 +400,15 @@ $tokenFormulario = obtenerCsrfToken();
 
         <!-- PANEL DERECHO: FORMULARIO DE ACCESO -->
         <section class="login-form-panel">
-            <div class="login-heading">
-                <h1>Iniciar Sesión</h1>
-                <p>Ingresa tus credenciales para acceder al sistema.</p>
+            <div class="login-heading" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
+                <div>
+                    <h1>Iniciar Sesión</h1>
+                    <p>Ingresa tus credenciales para acceder al sistema.</p>
+                </div>
+                <!-- Botón de Alternancia de Tema -->
+                <button type="button" class="btn-tema-toggle" onclick="alternarTema()" aria-label="Cambiar tema">
+                    ☀️ <span class="tema-texto">Modo Claro</span>
+                </button>
             </div>
 
             <?php if (!empty($error)): ?>

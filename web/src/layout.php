@@ -32,6 +32,8 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
     <title><?= htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8') ?> — tytBascula</title>
     <!-- Estilos CSS Modernos y Ligeros -->
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Carga inmediata de tema para evitar parpadeos -->
+    <script src="assets/js/theme.js"></script>
 </head>
 <body>
 
@@ -54,6 +56,11 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
     </nav>
 
     <div class="nav-user">
+        <!-- Botón de Alternancia de Tema Claro / Oscuro -->
+        <button type="button" class="btn-tema-toggle" onclick="alternarTema()" aria-label="Cambiar tema">
+            ☀️ <span class="tema-texto">Modo Claro</span>
+        </button>
+
         <?php if ($usuario): ?>
             <span>👤 <?= htmlspecialchars($nombreUsuario, ENT_QUOTES, 'UTF-8') ?> <span class="user-badge">(<?= htmlspecialchars($rolUsuario, ENT_QUOTES, 'UTF-8') ?>)</span></span>
             <a href="logout.php" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">Salir</a>
