@@ -85,5 +85,18 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Reglas de activación y desactivación segura con protección CSRF.
   - Acceso optimizado para el pesaje diario: operadores pueden registrar rápidamente un nuevo cliente o proveedor sin salir de la operación de báscula.
 
+* Módulo de Catálogo — Productos y Presentaciones:
+  - Creado `web/public/productos.php` con la interfaz idéntica a la captura de pantalla de referencia del usuario (Título CATÁLOGO / Productos, subtítulo de empresa emisora, botón azul "Nuevo producto", buscador y tabla con columnas Producto, Presentaciones, Estado, Acción).
+  - Modal flotante con soporte para dar de alta y editar productos junto a sus presentaciones múltiples (sacos, granel, cisternas, etc.).
+  - Sembreados directamente en MariaDB (`t_productos` y `t_producto_presentaciones`) los productos de la imagen de referencia:
+    * `ACEITE` (Presentación: GRANEL)
+    * `CAFE CORRIENTE` (Presentación: SACOS)
+    * `CAFE GUACUCO` (Presentación: SACOS)
+    * `CAFE HÚMEDO` (Presentación: SACOS)
+    * `CAFE NATURAL` (Presentación: SACOS)
+    * `CAFE ORO SHG` (Presentación: SACOS)
+    * `CAFE RESACA` (Presentación: SACOS)
+  - Creado script de inserción `scripts/seed_productos.php`.
+
 ### 4. Siguientes Pasos
 1. Continuar con el siguiente módulo: Formulario de **Primera Pesada** (`primera_pesada.php`) con captura de peso en vivo, indicador LED, datos de operación, vehículo/motorista y pantalla de confirmación post-guardado.
