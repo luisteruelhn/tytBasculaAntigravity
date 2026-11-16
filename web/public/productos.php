@@ -149,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 
 // 3. CONSULTA DE PRODUCTOS CON CATEGORÍA Y CONTEO DE PRESENTACIONES
 $busqueda = trim((string)($_GET['q'] ?? ''));
+$filtroCat = trim((string)($_GET['categoria_id'] ?? ''));
 
 $sql = "SELECT p.id, p.categoria_id, p.nombre, p.activo, 
                COALESCE(c.nombre, 'Sin categoría') AS categoria_nombre,
@@ -163,6 +164,11 @@ $params = [':empresa_id' => $empresaId];
 if ($busqueda !== '') {
     $sql .= " AND (p.nombre LIKE :busq OR c.nombre LIKE :busq)";
     $params[':busq'] = '%' . $busqueda . '%';
+}
+
+if ($filtroCat !== '' && $filtroCat !== 'todas') {
+    $sql .= " AND p.categoria_id = :filtro_cat";
+    $params[':filtro_cat'] = (int)$filtroCat;
 }
 
 $sql .= " GROUP BY p.id, p.categoria_id, p.nombre, p.activo, c.nombre ORDER BY p.nombre ASC";
@@ -212,25 +218,44 @@ renderizarEncabezado('Productos', 'productos');
     <!-- TARJETA PRINCIPAL DEL CATÁLOGO -->
     <div class="card" style="padding: 2rem 2.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
 
-        <!-- BUSCADOR SUPERIOR -->
+        <!-- BUSCADOR SUPERIOR Y FILTRO POR CATEGORÍA -->
         <div style="margin-bottom: 2rem;">
-            <label for="buscar_producto" class="form-label" style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.45rem;">
-                Buscar producto
-            </label>
-            <form method="GET" action="productos.php" style="display: flex; gap: 0.65rem; align-items: center; max-width: 420px;">
-                <input 
-                    type="text" 
-                    id="buscar_producto" 
-                    name="q" 
-                    class="form-control" 
-                    style="border-radius: 6px; height: 40px; min-height: 40px;"
-                    value="<?= htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8') ?>"
-                >
-                <button type="submit" class="btn btn-secondary" style="height: 40px; min-height: 40px; padding: 0 1.25rem; font-weight: 600; border-radius: 6px; background: #e8f0fe; color: #1e40af; border: none;">
+            <form method="GET" action="productos.php" style="display: flex; gap: 0.85rem; align-items: flex-end; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 250px;">
+                    <label for="buscar_producto" class="form-label" style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.45rem;">
+                        Buscar producto
+                    </label>
+                    <input 
+                        type="text" 
+                        id="buscar_producto" 
+                        name="q" 
+                        class="form-control" 
+                        placeholder="Nombre del producto..."
+                        style="border-radius: 6px; height: 42px; min-height: 42px;"
+                        value="<?= htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8') ?>"
+                    >
+                </div>
+
+                <div style="width: 230px;">
+                    <label for="filtro_categoria" class="form-label" style="font-size: 0.88rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.45rem;">
+                        Categoría
+                    </label>
+                    <select id="filtro_categoria" name="categoria_id" class="form-control" style="border-radius: 6px; height: 42px; min-height: 42px;" onchange="this.form.submit()">
+                        <option value="todas">Todas las categorías</option>
+                        <?php foreach ($listaCategorias as $cat): ?>
+                            <option value="<?= (int)$cat['id'] ?>" <?= $filtroCat === (string)$cat['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($cat['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-secondary" style="height: 42px; min-height: 42px; padding: 0 1.25rem; font-weight: 600; border-radius: 6px; background: #e8f0fe; color: #1e40af; border: none;">
                     Buscar
                 </button>
-                <?php if ($busqueda !== ''): ?>
-                    <a href="productos.php" class="btn btn-secondary" style="height: 40px; min-height: 40px; padding: 0 0.85rem;" title="Limpiar búsqueda">&times;</a>
+
+                <?php if ($busqueda !== '' || ($filtroCat !== '' && $filtroCat !== 'todas')): ?>
+                    <a href="productos.php" class="btn btn-secondary" style="height: 42px; min-height: 42px; padding: 0 0.85rem; display: inline-flex; align-items: center;" title="Limpiar filtros">&times; Limpiar</a>
                 <?php endif; ?>
             </form>
         </div>
