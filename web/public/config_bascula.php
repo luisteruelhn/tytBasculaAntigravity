@@ -43,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($accion === 'guardar') {
         $puertoCom  = strtoupper(trim((string)($_POST['puerto_com'] ?? '')));
+        $geminiKey  = trim((string)($_POST['gemini_api_key'] ?? ''));
         $baudios    = (int)($_POST['baudios'] ?? 9600);
         $bitsDatos  = (int)($_POST['bits_datos'] ?? 8);
         $paridad    = trim((string)($_POST['paridad'] ?? 'N'));
@@ -62,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtUpdate = $pdo->prepare("
                 UPDATE t_configuracion_bascula SET
                     puerto_com = :puerto_com,
+                    gemini_api_key = :gemini_api_key,
                     baudios = :baudios,
                     bits_datos = :bits_datos,
                     paridad = :paridad,
@@ -80,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             $stmtUpdate->execute([
                 ':puerto_com'           => $puertoCom ?: null,
+                ':gemini_api_key'       => $geminiKey ?: null,
                 ':baudios'              => $baudios,
                 ':bits_datos'           => $bitsDatos,
                 ':paridad'              => $paridad,
@@ -325,6 +328,15 @@ renderizarEncabezado('Configuración Báscula', 'config');
                         Tamaño máximo de trama (bytes)
                     </label>
                     <input type="number" id="max_trama_bytes" name="max_trama_bytes" class="form-control" style="height: 40px; border-radius: 6px;" value="<?= (int)($config['max_trama_bytes'] ?? 512) ?>">
+                </div>
+
+                <!-- API Key de Gemini (Solo Administrador / Super) -->
+                <div style="grid-column: 1 / -1;">
+                    <label for="gemini_api_key" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                        🤖 Google Gemini API Key (Asistente IA de Báscula)
+                    </label>
+                    <input type="password" id="gemini_api_key" name="gemini_api_key" class="form-control" style="height: 40px; border-radius: 6px; font-family: monospace;" value="<?= htmlspecialchars($config['gemini_api_key'] ?? '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Pega aquí tu clave AI Studio (ej: AIzaSy...)">
+                    <small style="color: #64748b; font-size: 0.75rem;">Opcional. Activa el asistente inteligente en todo el sistema exclusivamente para Super y Administradores.</small>
                 </div>
 
             </div>

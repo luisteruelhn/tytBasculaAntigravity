@@ -311,6 +311,8 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
  */
 function renderizarPie(): void
 {
+    $usuario = obtenerUsuarioActual();
+    $esAdmin = $usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'ADMIN']);
 ?>
         </main>
 
@@ -319,6 +321,133 @@ function renderizarPie(): void
         </footer>
     </div>
 </div>
+
+<?php if ($esAdmin): ?>
+<!-- WIDGET FLOTANTE: ASISTENTE IA DE BÁSCULA (SOLO SUPER / ADMIN) -->
+<div id="aiChatWidget" style="position: fixed; bottom: 22px; right: 22px; z-index: 99999; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+    <!-- Botón Flotante -->
+    <button type="button" id="btnToggleChat" onclick="toggleChatGemini()" style="display: flex; align-items: center; gap: 0.5rem; background: #0b57d0; color: #ffffff; border: none; border-radius: 50px; padding: 0.65rem 1.25rem; font-weight: 700; font-size: 0.88rem; box-shadow: 0 4px 14px rgba(11, 87, 208, 0.4); cursor: pointer; transition: transform 0.15s ease, background 0.2s ease;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+        <span>Asistente IA</span>
+    </button>
+
+    <!-- Ventana del Chat (Oculta por defecto) -->
+    <div id="chatBoxContainer" style="display: none; width: 380px; max-width: calc(100vw - 32px); height: 500px; max-height: calc(100vh - 90px); background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18); overflow: hidden; flex-direction: column; position: absolute; bottom: 56px; right: 0;">
+        
+        <!-- Cabecera -->
+        <div style="background: #0f172a; color: #ffffff; padding: 0.85rem 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="width: 10px; height: 10px; background: #22c55e; border-radius: 50%;"></div>
+                <div>
+                    <strong style="font-size: 0.9rem; display: block; line-height: 1.1;">Asistente de Báscula</strong>
+                    <span style="font-size: 0.72rem; color: #94a3b8;">Consultas de pesadas y reportes</span>
+                </div>
+            </div>
+            <button type="button" onclick="toggleChatGemini()" style="background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; line-height: 1; padding: 0 0.35rem;">
+                &times;
+            </button>
+        </div>
+
+        <!-- Área de mensajes -->
+        <div id="chatMessages" style="flex: 1; padding: 1rem; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem;">
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 0.75rem 0.9rem; border-radius: 10px; color: #1e293b; max-width: 90%; align-self: flex-start; line-height: 1.4;">
+                👋 Hola. Soy tu Asistente Operativo de Báscula. Pregúntame sobre camiones en patio, compras, ventas o reportes.
+            </div>
+        </div>
+
+        <!-- Atajos sugeridos -->
+        <div style="padding: 0.4rem 0.75rem; background: #f1f5f9; border-top: 1px solid #e2e8f0; display: flex; gap: 0.4rem; overflow-x: auto; white-space: nowrap;">
+            <button type="button" onclick="enviarAtajoChat('¿Cuántas pesadas hay hoy?')" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.72rem; padding: 0.25rem 0.6rem; cursor: pointer; color: #334155;">
+                📊 Pesadas hoy
+            </button>
+            <button type="button" onclick="enviarAtajoChat('¿Hay camiones pendientes en patio?')" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.72rem; padding: 0.25rem 0.6rem; cursor: pointer; color: #334155;">
+                🚚 En patio
+            </button>
+            <button type="button" onclick="enviarAtajoChat('¿Cuáles son las últimas boletas cerradas?')" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 0.72rem; padding: 0.25rem 0.6rem; cursor: pointer; color: #334155;">
+                📋 Últimas boletas
+            </button>
+        </div>
+
+        <!-- Input de envío -->
+        <form id="chatForm" onsubmit="enviarMensajeChat(event)" style="display: flex; border-top: 1px solid #cbd5e1; background: #ffffff; margin: 0;">
+            <input type="text" id="chatInput" placeholder="Escribe tu consulta operativa..." style="flex: 1; border: none; padding: 0.75rem 0.9rem; font-size: 0.85rem; outline: none; background: transparent;">
+            <button type="submit" id="chatSendBtn" style="background: #0b57d0; color: #ffffff; border: none; padding: 0 1rem; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                Enviar
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleChatGemini() {
+    const box = document.getElementById('chatBoxContainer');
+    if (box.style.display === 'none' || box.style.display === '') {
+        box.style.display = 'flex';
+        document.getElementById('chatInput').focus();
+    } else {
+        box.style.display = 'none';
+    }
+}
+
+function enviarAtajoChat(texto) {
+    document.getElementById('chatInput').value = texto;
+    document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+}
+
+async function enviarMensajeChat(e) {
+    e.preventDefault();
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const cont = document.getElementById('chatMessages');
+    const sendBtn = document.getElementById('chatSendBtn');
+
+    // Mensaje de usuario
+    cont.innerHTML += `<div style="background: #0b57d0; color: #ffffff; padding: 0.75rem 0.9rem; border-radius: 10px; max-width: 90%; align-self: flex-end; line-height: 1.4;">${escapeHtml(msg)}</div>`;
+    input.value = '';
+    sendBtn.disabled = true;
+    cont.scrollTop = cont.scrollHeight;
+
+    // Indicador escribiendo
+    const idTemp = 'msg_load_' + Date.now();
+    cont.innerHTML += `<div id="${idTemp}" style="background: #ffffff; border: 1px solid #e2e8f0; padding: 0.65rem 0.9rem; border-radius: 10px; color: #64748b; max-width: 90%; align-self: flex-start; font-style: italic;">Consultando datos...</div>`;
+    cont.scrollTop = cont.scrollHeight;
+
+    try {
+        const resp = await fetch('api_chat.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensaje: msg })
+        });
+        const data = await resp.json();
+        const loadElem = document.getElementById(idTemp);
+        if (loadElem) loadElem.remove();
+
+        if (data.ok) {
+            cont.innerHTML += `<div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 0.75rem 0.9rem; border-radius: 10px; color: #1e293b; max-width: 90%; align-self: flex-start; line-height: 1.4; white-space: pre-wrap;">${escapeHtml(data.respuesta)}</div>`;
+        } else {
+            cont.innerHTML += `<div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 0.65rem 0.9rem; border-radius: 10px; max-width: 90%; align-self: flex-start;">⚠️ ${escapeHtml(data.error || 'Error al procesar la respuesta.')}</div>`;
+        }
+    } catch (err) {
+        const loadElem = document.getElementById(idTemp);
+        if (loadElem) loadElem.remove();
+        cont.innerHTML += `<div style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 0.65rem 0.9rem; border-radius: 10px; max-width: 90%; align-self: flex-start;">⚠️ Error de conexión con el servicio.</div>`;
+    } finally {
+        sendBtn.disabled = false;
+        cont.scrollTop = cont.scrollHeight;
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+</script>
+<?php endif; ?>
 
 <!-- Scripts esenciales: monitor de báscula y control del sidebar -->
 <script src="assets/js/pesaje.js"></script>
