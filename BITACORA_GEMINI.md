@@ -78,5 +78,12 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Creación de `web/public/mi_clave.php` para cambio seguro de contraseña de cualquier usuario autenticado (con verificación de contraseña actual y requisitos de seguridad).
   - Enlace rápido a "Mi Contraseña" desde el pie del menú lateral en el perfil de usuario.
 
+* Módulo Administrativo / Operativo — Clientes y Proveedores:
+  - Creado `web/public/clientes.php` conectado a `t_clie_prov` en MariaDB.
+  - Soporte de filtrado por tipo (Todos, Solo Clientes, Solo Proveedores) y buscador en tiempo real por nombre, RTN o teléfono.
+  - Modal interactivo responsivo para alta y edición de registros con categorías de pesaje dual (Cliente para despachos/ventas, Proveedor para compras/entradas).
+  - Reglas de activación y desactivación segura con protección CSRF.
+  - Acceso optimizado para el pesaje diario: operadores pueden registrar rápidamente un nuevo cliente o proveedor sin salir de la operación de báscula.
+
 ### 4. Siguientes Pasos
 1. Continuar con el siguiente módulo: Formulario de **Primera Pesada** (`primera_pesada.php`) con captura de peso en vivo, indicador LED, datos de operación, vehículo/motorista y pantalla de confirmación post-guardado.
