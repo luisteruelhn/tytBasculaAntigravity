@@ -470,6 +470,9 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                     </div>
                 </div>
 
+                <!-- ALERTA SI EL BRUTO ES MENOR O IGUAL A LA TARA -->
+                <div id="avisoPesoInvalido" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 8px; padding: 0.85rem 1rem; margin-bottom: 1rem; font-size: 0.9rem; font-weight: 600;"></div>
+
                 <!-- RESUMEN PREVIO DE LIQUIDACIÓN -->
                 <div style="background: #f1f5f9; padding: 1.25rem 1.5rem; border-radius: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; border: 1px solid #cbd5e1;">
                     <div>
@@ -682,13 +685,28 @@ function calcularTotales() {
         tara = primerPeso;
     }
 
+    const resAviso = document.getElementById('avisoPesoInvalido');
+    if (segundoPeso > 0 && bruto <= tara) {
+        if (resAviso) {
+            resAviso.style.display = 'block';
+            resAviso.innerText = (tipoPrimera === 'TARA') 
+                ? '⚠️ El peso bruto complementario (' + bruto.toLocaleString('en-US') + ' lb) debe ser mayor que la tara inicial (' + tara.toLocaleString('en-US') + ' lb).'
+                : '⚠️ La tara del vehículo (' + tara.toLocaleString('en-US') + ' lb) no puede ser mayor o igual al peso bruto (' + bruto.toLocaleString('en-US') + ' lb).';
+        }
+    } else {
+        if (resAviso) resAviso.style.display = 'none';
+    }
+
     const netoInicial = Math.max(0, bruto - tara);
     document.getElementById('resNetoInicial').innerText = netoInicial.toLocaleString('en-US') + ' lb';
 
     // Tara de sacos
     const selEmpaque = document.getElementById('idempaque');
-    const optEmpaque = selEmpaque.options[selEmpaque.selectedIndex];
-    const taraUnitaria = parseFloat(optEmpaque.getAttribute('data-peso') || '0');
+    let taraUnitaria = 0;
+    if (selEmpaque && selEmpaque.selectedIndex >= 0) {
+        const optEmpaque = selEmpaque.options[selEmpaque.selectedIndex];
+        taraUnitaria = parseFloat(optEmpaque.getAttribute('data-peso') || '0');
+    }
     const cantEmpaques = parseInt(document.getElementById('cantidad_empaques').value || '0', 10);
     const taraSacos = Math.round(taraUnitaria * cantEmpaques);
     document.getElementById('resTaraSacos').innerText = taraSacos.toLocaleString('en-US') + ' lb';
