@@ -36,9 +36,11 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - `BITACORA_GEMINI.md`: Este registro de trazabilidad.
 * Configuración de exclusiones en `.gitignore`.
 * Enlace en XAMPP: Creado Junction `C:\xampp\htdocs\bascula` hacia `K:\TYTOneBasculaAntigravity\web\public`.
-* Estructura base inicial de código limpio y modular:
-  - `api/`: Microservicio FastAPI (`main.py`, `simulator.py`, `serial_reader.py`).
-  - `web/`: Conexión MariaDB PDO (`config/db.php`), autenticación y seguridad (`src/auth.php`), layout (`src/layout.php`), pantalla principal con display LED (`public/index.php`) y estilos industriales (`public/assets/css/style.css`, `public/assets/js/pesaje.js`).
+* Módulo 1: Control de Acceso y Autenticación:
+  - Incorporado logo institucional `tytlogo.png` en `web/public/assets/img/tytlogo.png`.
+  - Construido `web/public/login.php` con protección CSRF, sanitización, consulta preparada PDO a `t_usuarios` y verificación segura de hash.
+  - Construido `web/public/logout.php` para cierre seguro de sesión y destrucción de cookies.
+  - Validada sintaxis de todos los archivos con PHP 8 en XAMPP (cero errores).
 
 ### 4. Siguientes Pasos
 1. Crear el enlace directo (`Junction`) entre `web/public` y `C:\xampp\htdocs\bascula`.
