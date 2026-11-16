@@ -44,6 +44,12 @@ function normalizarFecha(string $f): string {
 
 $fechaDesdeSql = normalizarFecha($fechaDesde);
 $fechaHastaSql = normalizarFecha($fechaHasta);
+if ($fechaDesdeSql === '') {
+    $fechaDesdeSql = '2026-11-01';
+}
+if ($fechaHastaSql === '') {
+    $fechaHastaSql = date('Y-m-d');
+}
 
 // 3. CONSULTA DE BOLETAS CERRADAS
 $sql = "
@@ -235,25 +241,26 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
 
             <!-- FILA 2: FECHA DESDE, HASTA, BOTÓN GENERAR Y ACCIONES -->
             <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; border-top: 1px solid var(--border-color); padding-top: 1.25rem;">
-                <div style="width: 170px;">
+                <div style="width: 175px;">
                     <label for="desde" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Desde
                     </label>
-                    <input type="text" id="desde" name="desde" class="form-control" placeholder="DD/MM/AAAA" style="height: 40px; border-radius: 6px;" value="<?= htmlspecialchars($fechaDesde !== '' ? (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaDesde) ? date('d/m/Y', strtotime($fechaDesde)) : $fechaDesde) : '01/11/2026', ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="date" id="desde" name="desde" class="form-control" style="height: 40px; border-radius: 6px;" value="<?= htmlspecialchars($fechaDesdeSql, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
 
-                <div style="width: 170px;">
+                <div style="width: 175px;">
                     <label for="hasta" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Hasta
                     </label>
-                    <input type="text" id="hasta" name="hasta" class="form-control" placeholder="DD/MM/AAAA" style="height: 40px; border-radius: 6px;" value="<?= htmlspecialchars($fechaHasta !== '' ? (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaHasta) ? date('d/m/Y', strtotime($fechaHasta)) : $fechaHasta) : date('d/m/Y'), ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="date" id="hasta" name="hasta" class="form-control" style="height: 40px; border-radius: 6px;" value="<?= htmlspecialchars($fechaHastaSql, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="height: 40px; padding: 0 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
                     Generar reporte
                 </button>
 
-                <div style="display: flex; gap: 0.65rem; margin-left: auto; align-items: center; flex-wrap: wrap;">
+                <!-- BLOQUE DE BOTONES SEPARADO A PARTIR DE IMPRIMIR -->
+                <div style="display: flex; gap: 0.65rem; margin-left: auto; padding-left: 2.5rem; align-items: center; flex-wrap: wrap;">
                     <button type="button" onclick="imprimirReporte()" class="btn btn-primary" style="height: 40px; background: #0b57d0; padding: 0 1.15rem; font-weight: 700; border-radius: 6px;">
                         Imprimir
                     </button>
@@ -286,7 +293,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                 REPORTE DE BOLETAS <?= ($filtroOperacion !== 'TODOS' ? '— ' . $filtroOperacion . 'S' : '') ?>
             </h3>
             <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">
-                Del <?= htmlspecialchars($fechaDesdeSql ?: '01/11/2026') ?> al <?= htmlspecialchars($fechaHastaSql ?: date('Y-m-d')) ?> &middot; Fecha de cierre
+                Del <?= date('d/m/Y', strtotime($fechaDesdeSql)) ?> al <?= date('d/m/Y', strtotime($fechaHastaSql)) ?> &middot; Fecha de cierre
             </div>
         </div>
 
