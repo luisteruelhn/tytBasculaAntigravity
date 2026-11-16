@@ -1,0 +1,26 @@
+# Datos y configuración privada de cada instalación
+.git_old/
+.runtime/
+.venv/
+__pdfs/
+dbbackup/
+web/config/local.php
+.env
+.env.*
+!.env.example
+client.cnf
+instalacion.json
+acceso-inicial.txt
+
+# Dependencias empaquetadas; se prepararán mediante el instalador
+runtime/
+
+# Archivos generados
+__pycache__/
+*.py[cod]
+*.log
+*.pid
+*.bak
+*.original
+.DS_Store
+Thumbs.db
