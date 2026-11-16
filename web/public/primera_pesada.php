@@ -263,14 +263,21 @@ renderizarEncabezado('Primera Pesada', 'primera');
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
                         <div>
-                            <label for="tipo_registro" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                                Peso a registrar
-                            </label>
-                            <select id="tipo_registro" name="tipo_registro" class="form-control" style="height: 42px; border-radius: 6px;">
-                                <option value="" disabled selected>Selecciona el peso</option>
-                                <option value="BRUTO">Peso Bruto</option>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                                <label for="tipo_registro" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin: 0;">
+                                    Peso a registrar
+                                </label>
+                                <label style="font-size: 0.75rem; color: #1e40af; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; cursor: pointer; margin: 0;" title="Permite cambiar manualmente entre Bruto y Tara">
+                                    <input type="checkbox" id="chk_habilitar_tipo_reg" onchange="alternarEdicionTipoRegistro(this.checked)" style="cursor: pointer;">
+                                    <span>Habilitar</span>
+                                </label>
+                            </div>
+                            <select id="tipo_registro" name="tipo_registro" class="form-control" style="height: 42px; border-radius: 6px; background: #f8fafc; color: #475569;" disabled>
+                                <option value="BRUTO" selected>Peso Bruto</option>
                                 <option value="TARA">Tara de Vehículo</option>
                             </select>
+                            <!-- Input oculto para garantizar el envío POST cuando el select esté deshabilitado -->
+                            <input type="hidden" id="tipo_registro_hidden" name="tipo_registro" value="BRUTO">
                         </div>
 
                         <div>
@@ -566,9 +573,11 @@ function cambiarTransaccionPrincipal(tipo) {
     // No queda fijado permanentemente; el operador puede cambiarlo manualmente si lo necesita.
     if (tipo === 'COMPRA') {
         selTipoReg.value = 'BRUTO';
+        document.getElementById('tipo_registro_hidden').value = 'BRUTO';
         inputDisplayOp.style.color = '#1e40af';
     } else {
         selTipoReg.value = 'TARA';
+        document.getElementById('tipo_registro_hidden').value = 'TARA';
         inputDisplayOp.style.color = '#047857';
     }
 
@@ -580,6 +589,30 @@ function cambiarTransaccionPrincipal(tipo) {
     // Actualizar filtro de Proveedor / Cliente
     filtrarPersonas(tipo);
 }
+
+// Permitir habilitar o bloquear manualmente el selector de peso
+function alternarEdicionTipoRegistro(habilitar) {
+    const sel = document.getElementById('tipo_registro');
+    sel.disabled = !habilitar;
+    if (habilitar) {
+        sel.style.background = '#ffffff';
+        sel.style.color = 'var(--text-main)';
+        sel.focus();
+    } else {
+        sel.style.background = '#f8fafc';
+        sel.style.color = '#475569';
+    }
+}
+
+// Sincronizar input oculto al cambiar manualmente
+document.addEventListener('DOMContentLoaded', () => {
+    const selTipoReg = document.getElementById('tipo_registro');
+    if (selTipoReg) {
+        selTipoReg.addEventListener('change', () => {
+            document.getElementById('tipo_registro_hidden').value = selTipoReg.value;
+        });
+    }
+});
 
 function alternarModoCaptura(modo) {
     const divManual = document.getElementById('campoPesoManual');
