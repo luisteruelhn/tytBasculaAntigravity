@@ -135,34 +135,9 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                 </a>
             </div>
 
-            <!-- Bloque Catálogos y Configuración (Admin / Super / Supervisor) -->
-            <?php if ($usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'SUPERVISOR'])): ?>
+            <!-- Bloque Catálogos -->
             <div>
-                <span class="nav-group-title">Administración</span>
-                <?php if (tieneRol($usuario, ['SUPER', 'ADMINISTRADOR'])): ?>
-                <a href="empresa.php" class="nav-item <?= $seccionActiva === 'empresa' ? 'active' : '' ?>" title="Datos de la Empresa">
-                    <svg class="nav-icon" viewBox="0 0 24 24">
-                        <path d="M3 21h18"></path>
-                        <path d="M5 21V7l8-4v18"></path>
-                        <path d="M19 21V11l-6-4"></path>
-                        <path d="M9 9h1"></path>
-                        <path d="M9 13h1"></path>
-                        <path d="M9 17h1"></path>
-                    </svg>
-                    <span class="nav-label">Mi Empresa</span>
-                </a>
-                <?php endif; ?>
-
-                <a href="usuarios.php" class="nav-item <?= $seccionActiva === 'usuarios' ? 'active' : '' ?>" title="Usuarios y Roles">
-                    <svg class="nav-icon" viewBox="0 0 24 24">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="8.5" cy="7" r="4"></circle>
-                        <line x1="20" y1="8" x2="20" y2="14"></line>
-                        <line x1="23" y1="11" x2="17" y2="11"></line>
-                    </svg>
-                    <span class="nav-label">Usuarios</span>
-                </a>
-
+                <span class="nav-group-title">Catálogos</span>
                 <a href="clientes.php" class="nav-item <?= $seccionActiva === 'clientes' ? 'active' : '' ?>" title="Clientes y Proveedores">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -195,7 +170,7 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                     <span class="nav-label">Productos</span>
                 </a>
 
-                <a href="presentaciones.php" class="nav-item <?= $seccionActiva === 'presentaciones' ? 'active' : '' ?>" title="Presentaciones y Empaque">
+                <a href="presentaciones.php" class="nav-item <?= $seccionActiva === 'presentaciones' ? 'active' : '' ?>" title="Taras de Empaque (Sacos)">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -204,7 +179,7 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                     <span class="nav-label">Taras de empaque</span>
                 </a>
 
-                <a href="presentaciones_tipo.php" class="nav-item <?= $seccionActiva === 'presentaciones_tipo' ? 'active' : '' ?>" title="Tipos de Empaque">
+                <a href="presentaciones_tipo.php" class="nav-item <?= $seccionActiva === 'presentaciones_tipo' ? 'active' : '' ?>" title="Tipos de Empaque (Saco / Granel)">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <!-- Ícono de camión / vehículo -->
                         <path d="M1 3h15v13H1z"></path>
@@ -213,6 +188,35 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                         <circle cx="18.5" cy="18.5" r="2.5"></circle>
                     </svg>
                     <span class="nav-label">Tipos de empaque</span>
+                </a>
+            </div>
+
+            <!-- Bloque Configuración y Sistema (Admin / Super) -->
+            <?php if ($usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'SUPERVISOR'])): ?>
+            <div>
+                <span class="nav-group-title">Sistema</span>
+                <?php if (tieneRol($usuario, ['SUPER', 'ADMINISTRADOR'])): ?>
+                <a href="empresa.php" class="nav-item <?= $seccionActiva === 'empresa' ? 'active' : '' ?>" title="Datos de la Empresa">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path d="M3 21h18"></path>
+                        <path d="M5 21V7l8-4v18"></path>
+                        <path d="M19 21V11l-6-4"></path>
+                        <path d="M9 9h1"></path>
+                        <path d="M9 13h1"></path>
+                        <path d="M9 17h1"></path>
+                    </svg>
+                    <span class="nav-label">Mi Empresa</span>
+                </a>
+                <?php endif; ?>
+
+                <a href="usuarios.php" class="nav-item <?= $seccionActiva === 'usuarios' ? 'active' : '' ?>" title="Usuarios y Roles">
+                    <svg class="nav-icon" viewBox="0 0 24 24">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <line x1="20" y1="8" x2="20" y2="14"></line>
+                        <line x1="23" y1="11" x2="17" y2="11"></line>
+                    </svg>
+                    <span class="nav-label">Usuarios</span>
                 </a>
 
                 <a href="config_bascula.php" class="nav-item <?= $seccionActiva === 'config' ? 'active' : '' ?>" title="Configuración de Báscula">
