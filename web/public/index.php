@@ -20,20 +20,15 @@ $pesadasRecientes = [];
 try {
     $pdo = obtenerDB();
     $estadoDB = true;
+    $usuario = obtenerUsuarioActual();
+    $empresaId = (int)($usuario['empresa_id'] ?? 1);
 
-    // Consultar pesadas pendientes de segunda pesada
-    $stmtPendientes = $pdo->query(
-        "SELECT COUNT(*) AS total FROM t_pesadas WHERE estado = 'PENDIENTE_SEGUNDA'"
+    // Consultar pesadas pendientes de segunda pesada (estado ABIERTA)
+    $stmtPendientes = $pdo->prepare(
+        "SELECT COUNT(*) AS total FROM t_pesadas WHERE empresa_id = :empresa_id AND estado = 'ABIERTA'"
     );
+    $stmtPendientes->execute([':empresa_id' => $empresaId]);
     $totalPendientes = (int)($stmtPendientes->fetch()['total'] ?? 0);
-
-    // Consultar las últimas 5 pesadas
-    $stmtRecientes = $pdo->query(
-        "SELECT id, numero_boleta, placa, peso_bruto_lb, peso_tara_lb, peso_neto_lb, estado, creada_at 
-         FROM t_pesadas 
-         ORDER BY id DESC LIMIT 5"
-    );
-    $pesadasRecientes = $stmtRecientes->fetchAll();
 } catch (Exception $e) {
     $errorDB = $e->getMessage();
 }

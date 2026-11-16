@@ -28,7 +28,13 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
     $totalPendientes = 0;
     try {
         $pdo = obtenerDB();
-        $stmt = $pdo->query("SELECT COUNT(*) AS total FROM t_pesadas WHERE estado = 'PENDIENTE_SEGUNDA'");
+        $empresaId = (int)($usuario['empresa_id'] ?? 0);
+        if ($empresaId > 0) {
+            $stmt = $pdo->prepare("SELECT COUNT(*) AS total FROM t_pesadas WHERE empresa_id = :empresa_id AND estado = 'ABIERTA'");
+            $stmt->execute([':empresa_id' => $empresaId]);
+        } else {
+            $stmt = $pdo->query("SELECT COUNT(*) AS total FROM t_pesadas WHERE estado = 'ABIERTA'");
+        }
         $totalPendientes = (int)($stmt->fetch()['total'] ?? 0);
     } catch (Exception $e) {
         // Si la base no está conectada o no hay sesión, continúa en 0 sin interrumpir la vista
