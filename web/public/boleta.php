@@ -96,8 +96,9 @@ $quintales = $pesoFinal / 100.0;
 
         /* TABLA DE DESGLOSE */
         .tabla-pesaje { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
-        .tabla-pesaje th { background: #f8fafc; color: #0f172a; font-weight: 800; font-size: 0.82rem; text-transform: uppercase; padding: 0.65rem 0.5rem; text-align: center; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; }
-        .tabla-pesaje td { padding: 1rem 0.5rem; text-align: center; font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid #e2e8f0; }
+        .tabla-pesaje th { background: #f8fafc; color: #475569; font-weight: 500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.3px; padding: 0.65rem 0.4rem; text-align: center; border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; }
+        .tabla-pesaje th.th-qq { background: #ffe4e6; color: #881337; font-weight: 700; font-size: 0.75rem; }
+        .tabla-pesaje td { padding: 1rem 0.4rem; text-align: center; font-size: 1.05rem; font-weight: 700; border-bottom: 1px solid #e2e8f0; }
         .td-destacado { background: #fff1f2; color: #881337; font-size: 1.6rem !important; font-weight: 900 !important; }
 
         /* NOTAS Y OBSERVACIONES */
