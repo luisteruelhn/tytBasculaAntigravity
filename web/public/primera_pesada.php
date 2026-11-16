@@ -164,17 +164,30 @@ renderizarEncabezado('Primera Pesada', 'primera');
 
 <div style="max-width: 1040px; margin: 0 auto;">
 
-    <!-- ENCABEZADO -->
-    <div style="margin-bottom: 1.5rem;">
-        <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; letter-spacing: 1.5px; text-transform: uppercase;">
-            PESAJE
-        </span>
-        <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0.2rem 0 0.2rem 0; color: var(--text-main); line-height: 1.1;">
-            Primera pesada
-        </h1>
-        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
-            <?= htmlspecialchars($empresaNombre, ENT_QUOTES, 'UTF-8') ?>
-        </span>
+    <!-- ENCABEZADO CON SELECTOR PRINCIPAL DE COMPRA / VENTA -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; letter-spacing: 1.5px; text-transform: uppercase;">
+                PESAJE
+            </span>
+            <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0.2rem 0 0.2rem 0; color: var(--text-main); line-height: 1.1;">
+                Primera pesada
+            </h1>
+            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+                <?= htmlspecialchars($empresaNombre, ENT_QUOTES, 'UTF-8') ?>
+            </span>
+        </div>
+
+        <!-- SELECTOR DESTACADO DE TIPO DE TRANSACCIÓN -->
+        <div style="background: var(--bg-surface); border: 2px solid #2563eb; padding: 0.65rem 1rem; border-radius: 10px; display: flex; align-items: center; gap: 0.85rem; box-shadow: var(--shadow-sm);">
+            <label for="selector_transaccion_superior" style="font-size: 0.88rem; font-weight: 800; color: #1e40af; text-transform: uppercase; margin: 0;">
+                Tipo de Transacción:
+            </label>
+            <select id="selector_transaccion_superior" class="form-control" style="height: 40px; font-weight: 800; font-size: 1rem; border-radius: 6px; border: 1px solid #cbd5e1; min-width: 160px; color: #1e40af; background: #eff6ff;" onchange="cambiarTransaccionPrincipal(this.value)">
+                <option value="COMPRA" selected>COMPRA</option>
+                <option value="VENTA">VENTA</option>
+            </select>
+        </div>
     </div>
 
     <?php if ($error !== ''): ?>
@@ -347,12 +360,10 @@ renderizarEncabezado('Primera Pesada', 'primera');
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;">
                 <div>
                     <label for="tipo_operacion" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                        Tipo de operación
+                        Tipo de operación (Controlado por selector superior)
                     </label>
-                    <select id="tipo_operacion" name="tipo_operacion" class="form-control" style="height: 42px; border-radius: 6px;" onchange="filtrarPersonas(this.value)">
-                        <option value="COMPRA" selected>Compra</option>
-                        <option value="VENTA">Venta</option>
-                    </select>
+                    <input type="hidden" id="tipo_operacion" name="tipo_operacion" value="COMPRA">
+                    <input type="text" id="tipo_operacion_display" class="form-control" style="height: 42px; border-radius: 6px; font-weight: 800; color: #1e40af; background: #f1f5f9; cursor: not-allowed;" value="COMPRA" readonly>
                 </div>
 
                 <div>
@@ -518,6 +529,9 @@ function conectarLecturaEnVivo() {
 document.addEventListener('DOMContentLoaded', () => {
     conectarLecturaEnVivo();
     
+    // Inicializar lógica de Compra por defecto
+    cambiarTransaccionPrincipal('COMPRA');
+
     const selTipoReg = document.getElementById('tipo_registro');
     if (selTipoReg) {
         selTipoReg.addEventListener('change', () => {
@@ -527,12 +541,45 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (selTipoReg.value !== '') {
                 btnFijar.disabled = false;
-                txtGuiaFijar.style.display = 'none';
+                if (txtGuiaFijar) txtGuiaFijar.style.display = 'none';
                 if (txtGuiaGuardar) txtGuiaGuardar.innerText = 'Fija el peso antes de guardar.';
             }
         });
     }
 });
+
+// Control maestro de Compra vs Venta y automatización de Bruto vs Tara inicial
+function cambiarTransaccionPrincipal(tipo) {
+    const selTipoReg = document.getElementById('tipo_registro');
+    const inputHiddenOp = document.getElementById('tipo_operacion');
+    const inputDisplayOp = document.getElementById('tipo_operacion_display');
+    const btnFijar = document.getElementById('btnFijarPeso');
+    const txtGuiaFijar = document.getElementById('txtGuiaFijar');
+    const txtGuiaGuardar = document.getElementById('txtGuiaGuardar');
+
+    inputHiddenOp.value = tipo;
+    inputDisplayOp.value = tipo;
+
+    // Regla de negocio:
+    // - En COMPRA: Primero viene cargado -> se pesa PESO BRUTO.
+    // - En VENTA: Primero entra vacío a cargar -> se pesa TARA DEL VEHÍCULO.
+    // No queda fijado permanentemente; el operador puede cambiarlo manualmente si lo necesita.
+    if (tipo === 'COMPRA') {
+        selTipoReg.value = 'BRUTO';
+        inputDisplayOp.style.color = '#1e40af';
+    } else {
+        selTipoReg.value = 'TARA';
+        inputDisplayOp.style.color = '#047857';
+    }
+
+    // Habilitar botón de fijar peso automáticamente al tener ya seleccionado el tipo
+    btnFijar.disabled = false;
+    if (txtGuiaFijar) txtGuiaFijar.style.display = 'none';
+    if (txtGuiaGuardar) txtGuiaGuardar.innerText = 'Fija el peso antes de guardar.';
+
+    // Actualizar filtro de Proveedor / Cliente
+    filtrarPersonas(tipo);
+}
 
 function alternarModoCaptura(modo) {
     const divManual = document.getElementById('campoPesoManual');
