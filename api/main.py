@@ -72,6 +72,7 @@ def salud():
 
 
 @app.get("/api/v1/peso")
+@app.get("/api/v1/lecturas/actual")
 def obtener_peso() -> Dict[str, Any]:
     """Retorna la lectura de peso actual en tiempo real."""
     if estado_servicio["modo"] == "real":

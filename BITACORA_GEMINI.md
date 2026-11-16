@@ -36,10 +36,12 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - `BITACORA_GEMINI.md`: Este registro de trazabilidad.
 * Configuración de exclusiones en `.gitignore`.
 * Enlace en XAMPP: Creado Junction `C:\xampp\htdocs\bascula` hacia `K:\TYTOneBasculaAntigravity\web\public`.
-* Módulo 1: Control de Acceso y Autenticación:
+* Módulo 1: Control de Acceso, Autenticación y Diseño Responsivo:
   - Incorporado logo institucional `tytlogo.png` en `web/public/assets/img/tytlogo.png`.
   - Construido `web/public/login.php` con protección CSRF, sanitización, consulta preparada PDO a `t_usuarios` y verificación segura de hash.
   - Diseño temático de báscula camionera de rastras con ilustración vectorial de cabezal chato/cuadradito (Cabover) sobre plataforma de celdas de carga y display de peso.
+  - Diseño 100% responsivo en `style.css` y `login.php`: tipografía fluida con `clamp()`, soporte de pantallas pequeñas (320px–480px), tablets y pantallas industriales, con tap-targets táctiles de mínimo 44px.
+  - Microservicio FastAPI: añadido alias `/api/v1/lecturas/actual` además de `/api/v1/peso` y reactivado en puerto 8018.
   - Construido `web/public/logout.php` para cierre seguro de sesión y destrucción de cookies.
   - Validada sintaxis de todos los archivos con PHP 8 en XAMPP (cero errores).
 

@@ -33,6 +33,10 @@ Documento de directrices y reglas obligatorias para el asistente en el proyecto 
   - PHP nativo moderno, modular, limpio y tipado (`declare(strict_types=1)`).
   - CSS nativo limpio, responsivo y estilo industrial moderno (display LED/digital de peso grande, claro y de alto contraste).
   - JavaScript nativo (Vanilla JS) sin dependencias pesadas.
+* **Diseño 100% Responsivo (Mobile & Desktop)**:
+  - Todas las pantallas y formularios deben adaptarse con total fluidez a cualquier dispositivo (teléfonos móviles, tablets, laptops y monitores táctiles industriales de cabina).
+  - Tipografía fluida (`clamp()`) en displays numéricos de peso para evitar desbordamientos en pantallas pequeñas.
+  - Botones y campos de entrada con tamaño táctil cómodo (mínimo 44px de altura).
 * **Legibilidad y Mantenibilidad Humana**:
   - Código limpio, legible, bien estructurado y profusamente comentado donde la lógica de negocio lo requiera.
   - Nombres de funciones y variables claros, intuitivos y autoexplicativos.

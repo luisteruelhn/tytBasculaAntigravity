@@ -226,7 +226,38 @@ $tokenFormulario = obtenerCsrfToken();
                 grid-template-columns: 1fr;
             }
             .login-hero {
-                padding: 2rem;
+                padding: 1.75rem 1.5rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            .login-form-panel {
+                padding: 2rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-page-container {
+                padding: 0.75rem;
+            }
+            .login-hero {
+                padding: 1.25rem 1rem;
+            }
+            .hero-title-group h2 {
+                font-size: 1.1rem;
+            }
+            .login-form-panel {
+                padding: 1.5rem 1rem;
+            }
+            .login-heading h1 {
+                font-size: 1.35rem;
+            }
+            .hero-features {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
+            }
+            .hero-features div[style*="text-align: right"] {
+                text-align: left !important;
             }
         }
     </style>
