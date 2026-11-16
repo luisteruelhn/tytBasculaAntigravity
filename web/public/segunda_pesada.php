@@ -575,7 +575,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                                     </td>
                                     <td style="padding: 1.15rem 0.5rem; text-align: right;">
                                         <a href="segunda_pesada.php?id=<?= $pend['idpesada'] ?>" class="btn btn-primary" style="padding: 0.45rem 1rem; font-size: 0.88rem; font-weight: 700; background: #0b57d0; text-decoration: none; border-radius: 5px;">
-                                            Pesar salida &rarr;
+                                            Completar &rarr;
                                         </a>
                                     </td>
                                 </tr>
