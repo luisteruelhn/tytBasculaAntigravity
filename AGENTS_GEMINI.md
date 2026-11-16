@@ -61,3 +61,15 @@ Documento de directrices y reglas obligatorias para el asistente en el proyecto 
     - `BITACORA_GEMINI.md`: Registro de intervenciones con fecha y hora.
     - `README_GEMINI.md`: Guía de arquitectura, instalación y ejecución.
     - `SEED_GEMINI.md`: Esquema de base de datos, datos iniciales y procedimientos de respaldo.
+
+---
+
+## 5. Regla Obligatoria de Catálogos de Pesaje: Presentaciones y Taras de Empaque
+* **Inclusión OBLIGATORIA (SÍ O SÍ) en MariaDB**:
+  - La tabla `t_presentaciones` (Taras de Empaque / Presentaciones) es **estrictamente obligatoria** y debe estar presente e integrada **SÍ O SÍ** en cualquier instalación, migración, respaldo o despliegue de la base de datos `dbBascula`.
+  - **Motivo de la regla**: En las versiones de prueba previas este catálogo fue omitido o dejado ambiguo, lo cual impedía que el módulo de Primera y Segunda Pesada calculara con precisión los descuentos de empaque y las agrupaciones de producto en las boletas oficiales.
+  - **Restricciones permanentes**:
+    1. **NO usar archivos JSON sueltos** para presentaciones ni tipos de empaque.
+    2. Debe residir siempre en la tabla `t_presentaciones` de MariaDB con clave única `(empresa_id, codigo)`.
+    3. Debe incluir siempre al menos los registros base iniciales: `SACOS` (código `SACOS`) y `A GRANEL` (código `GRANEL`).
+    4. Esta regla es un acuerdo vinculante y bajo ninguna circunstancia debe eliminarse ni ignorarse en futuras iteraciones.
