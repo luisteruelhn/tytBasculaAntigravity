@@ -27,9 +27,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $usuarioIngresado = trim((string)($_POST['usuario'] ?? ''));
         $claveIngresada = (string)($_POST['clave'] ?? '');
+        $ipCliente = (string)($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
 
+        // Validaciones estrictas de entrada y caracteres de control
         if ($usuarioIngresado === '' || $claveIngresada === '') {
             $error = 'Por favor ingresa tu usuario y contraseña.';
+        } elseif (mb_strlen($usuarioIngresado) > 80 || mb_strlen($claveIngresada) > 1024) {
+            $error = 'La longitud de los datos ingresados excede el límite permitido.';
+        } elseif (preg_match('/[\x00-\x1F\x7F]/', $usuarioIngresado) || str_contains($claveIngresada, "\0")) {
+            $error = 'Los datos ingresados contienen caracteres no válidos.';
+        } elseif (!verificarTasaLimite('ip:' . $ipCliente, 25, 60)) {
+            // Protección contra fuerza bruta por IP
+            http_response_code(429);
+            $error = 'Demasiados intentos desde este equipo. Por favor espera 1 minuto.';
+        } elseif (!verificarTasaLimite('usr:' . mb_strtolower($usuarioIngresado), 5, 300)) {
+            // Protección contra fuerza bruta por nombre de cuenta
+            http_response_code(429);
+            $error = 'Demasiados intentos fallidos en esta cuenta. Por seguridad, espera 5 minutos.';
         } else {
             try {
                 $pdo = obtenerDB();
@@ -45,12 +59,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([':usuario' => $usuarioIngresado]);
                 $usuario = $stmt->fetch();
 
-                if ($usuario && password_verify($claveIngresada, $usuario['clave_hash'])) {
+                // Hash señuelo para defensa contra ataques de tiempo (timing attacks)
+                $hashAComparar = $usuario 
+                    ? (string)$usuario['clave_hash'] 
+                    : '$2y$12$e8eLh4bQG4L3tFpXqZ4qjeW1F5O8bA9Q3mZ8Y6W1F5O8bA9Q3mZ8Y';
+
+                $claveCorrecta = password_verify($claveIngresada, $hashAComparar);
+
+                if ($usuario && $claveCorrecta) {
                     if (!$usuario['activo']) {
                         $error = 'Tu cuenta de usuario se encuentra desactivada.';
                     } elseif (!$usuario['empresa_activa']) {
                         $error = 'La empresa asociada se encuentra inactiva.';
                     } else {
+                        // Limpiar contador de intentos fallidos para esta cuenta
+                        limpiarTasaLimite('usr:' . mb_strtolower($usuarioIngresado));
+
                         iniciarSesionSegura();
                         session_regenerate_id(true);
 

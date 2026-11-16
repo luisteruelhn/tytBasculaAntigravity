@@ -39,7 +39,8 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
 
 <header class="navbar">
     <a href="index.php" class="brand">
-        <span>⚖️ TYTONE BÁSCULA</span>
+        <img src="assets/img/tytlogo.png" alt="TYT Systems" class="navbar-logo" style="height: 38px; width: auto; object-fit: contain;">
+        <span>TYTONE BÁSCULA</span>
         <span class="brand-badge"><?= htmlspecialchars($nombreEmpresa, ENT_QUOTES, 'UTF-8') ?></span>
     </a>
 

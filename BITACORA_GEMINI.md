@@ -45,6 +45,11 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Microservicio FastAPI: añadido alias `/api/v1/lecturas/actual` además de `/api/v1/peso` y reactivado en puerto 8018.
   - Construido `web/public/logout.php` para cierre seguro de sesión y destrucción de cookies.
   - Validada sintaxis de todos los archivos con PHP 8 en XAMPP (cero errores).
+  - Fortalecimiento de Validaciones y Logo en Navbar:
+    * Incorporado el logo institucional `tytlogo.png` en la barra de navegación superior reemplazando el icono estático.
+    * Robustecimiento de validaciones de login: límites de longitud (usuario máx 80, clave máx 1024), sanitización contra bytes nulos y caracteres de control.
+    * Protección contra ataques de fuerza bruta (Rate Limiting) por IP y por cuenta con `verificarTasaLimite()` y `limpiarTasaLimite()`.
+    * Protección contra ataques de enumeración por temporización (Timing Attacks) mediante hash señuelo en cuentas inexistentes.
 
 ### 4. Siguientes Pasos
 1. Crear el enlace directo (`Junction`) entre `web/public` y `C:\xampp\htdocs\bascula`.

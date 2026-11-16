@@ -110,6 +110,62 @@ function requerirAutenticacion(): array
 }
 
 /**
+ * Control de Tasa de Intentos (Rate Limiting) contra Ataques de Fuerza Bruta.
+ *
+ * @param string $clave Clave identificadora (ej: 'ip:127.0.0.1' o 'usr:admin').
+ * @param int $limiteIntentos Número máximo de intentos permitidos en la ventana.
+ * @param int $segundosVentana Ventana de tiempo en segundos (ej: 60s o 300s).
+ * @return bool True si el intento es permitido, False si está temporalmente bloqueado.
+ */
+function verificarTasaLimite(string $clave, int $limiteIntentos = 5, int $segundosVentana = 300): bool
+{
+    $directorio = sys_get_temp_dir() . '/bascula_intentos';
+    if (!is_dir($directorio)) {
+        @mkdir($directorio, 0700, true);
+    }
+
+    $archivo = $directorio . '/' . hash('sha256', $clave) . '.json';
+    $ahora = time();
+    $datos = ['intentos' => 0, 'primero' => $ahora];
+
+    if (is_file($archivo)) {
+        $contenido = @file_get_contents($archivo);
+        if ($contenido !== false) {
+            $decodificado = json_decode($contenido, true);
+            if (is_array($decodificado)) {
+                $datos = $decodificado;
+            }
+        }
+    }
+
+    // Si la ventana expiró, reiniciar conteo
+    if ($ahora - ($datos['primero'] ?? 0) > $segundosVentana) {
+        $datos = ['intentos' => 0, 'primero' => $ahora];
+    }
+
+    if ($datos['intentos'] >= $limiteIntentos) {
+        return false; // Bloqueado
+    }
+
+    $datos['intentos']++;
+    @file_put_contents($archivo, json_encode($datos), LOCK_EX);
+    return true;
+}
+
+/**
+ * Limpia los intentos fallidos tras un inicio de sesión exitoso.
+ *
+ * @param string $clave Clave identificadora a limpiar.
+ */
+function limpiarTasaLimite(string $clave): void
+{
+    $archivo = sys_get_temp_dir() . '/bascula_intentos/' . hash('sha256', $clave) . '.json';
+    if (is_file($archivo)) {
+        @unlink($archivo);
+    }
+}
+
+/**
  * Comprueba si el usuario tiene uno de los roles permitidos.
  *
  * @param array $usuario Datos del usuario actual.
