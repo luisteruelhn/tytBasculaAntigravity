@@ -98,5 +98,24 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
     * `CAFE RESACA` (Presentación: SACOS)
   - Creado script de inserción `scripts/seed_productos.php`.
 
+* Módulo de Catálogo — Presentaciones y Taras de Empaque (JSON Storage):
+  - Creado `web/config/presentaciones.json` almacenando las presentaciones de pesaje sin sobrecargar tablas relacionales:
+    * `SACOS` (Empaque en sacos de café/granos)
+    * `A GRANEL` (Carga suelta a granel o cisterna)
+  - Creado formulario interactivo `web/public/presentaciones.php` con listado, modal para registrar y editar `código`, `nombre`, `descripción` y estado `activo`.
+  - Integrado en el menú lateral bajo **Administración -> Taras de empaque** (`presentaciones.php`) con ícono representativo.
+
+* Módulo de Catálogo — Taras de Empaque y Presentaciones (Decisión de Arquitectura: MariaDB vs JSON):
+  - **Justificación Técnica de por qué NO se usó JSON**:
+    1. *Integridad en Boletas*: La presentación elegida (ej. "SACOS" o "A GRANEL") afecta directamente el cálculo del Peso Neto en `t_pesadas` y requiere agregaciones e informes SQL consistentes.
+    2. *Concurrencia Segura*: MariaDB maneja aislamiento transaccional (`InnoDB`) evitando bloqueos de archivos (*file lock*) que ocurren en Windows al concurrir múltiples operadores.
+    3. *Respaldos Atómicos*: Al generar un `mysqldump` unificado, las presentaciones se respaldan junto con las boletas y productos en un único archivo `.sql`, sin riesgo de perder un archivo JSON huérfano.
+  - **Implementación**:
+    * Creada tabla `t_presentaciones` con clave única `(empresa_id, codigo)`.
+    * Sembradas las presentaciones maestras iniciales: `SACOS` y `A GRANEL`.
+    * Creado script reproducible `scripts/crear_tabla_presentaciones.php`.
+    * Desarrollada vista `web/public/presentaciones.php` con listado, buscador, y modal de alta/edición conectada a MariaDB.
+    * Integrado enlace en la barra lateral bajo la sección de Administración -> "Taras de empaque".
+
 ### 4. Siguientes Pasos
 1. Continuar con el siguiente módulo: Formulario de **Primera Pesada** (`primera_pesada.php`) con captura de peso en vivo, indicador LED, datos de operación, vehículo/motorista y pantalla de confirmación post-guardado.

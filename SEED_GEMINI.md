@@ -24,7 +24,8 @@ Guía de referencia para la base de datos `dbBascula` en MariaDB (XAMPP).
 | `t_pesadas` | Transacciones de pesaje (primera y segunda pesada, bruto, tara, neto) | `id`, `empresa_id`, `numero_boleta` |
 | `t_clie_prov` | Catálogo de Clientes y Proveedores | `id`, `empresa_id` |
 | `t_productos` | Catálogo maestro de productos | `id`, `empresa_id` |
-| `t_producto_presentaciones` | Presentaciones/empaques de producto | `id`, `producto_id` |
+| `t_producto_presentaciones` | Presentaciones/empaques vinculadas por producto | `id`, `producto_id` |
+| `t_presentaciones` | Catálogo maestro de presentaciones/taras de empaque (SACOS, A GRANEL) | `id`, `empresa_id`, `codigo` |
 | `t_taras` | Taras predeterminadas por placa de vehículo | `id`, `empresa_id`, `placa` |
 | `t_pesada_anulaciones` | Registro de auditoría de boletas anuladas y motivo | `id`, `pesada_id` |
 
