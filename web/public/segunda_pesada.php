@@ -282,8 +282,8 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
             </div>
 
             <div style="display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;">
-                <a href="pesadas.php" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
-                    Ver boletas e historial
+                <a href="boleta.php?id=<?= $pesadaCerrada['idpesada'] ?>" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px;" target="_blank">
+                    🖨️ Imprimir / Ver Boleta
                 </a>
                 <a href="segunda_pesada.php" class="btn btn-secondary" style="padding: 0.75rem 1.25rem; font-weight: 600; text-decoration: none;">
                     Atender otra segunda pesada
