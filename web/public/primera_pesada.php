@@ -267,9 +267,8 @@ renderizarEncabezado('Primera Pesada', 'primera');
                                 <label for="tipo_registro" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin: 0;">
                                     Peso a registrar
                                 </label>
-                                <label style="font-size: 0.75rem; color: #1e40af; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem; cursor: pointer; margin: 0;" title="Permite cambiar manualmente entre Bruto y Tara">
-                                    <input type="checkbox" id="chk_habilitar_tipo_reg" onchange="alternarEdicionTipoRegistro(this.checked)" style="cursor: pointer;">
-                                    <span>Habilitar</span>
+                                <label style="display: inline-flex; align-items: center; cursor: pointer; margin: 0;" title="Habilitar cambio manual entre Peso Bruto y Tara">
+                                    <input type="checkbox" id="chk_habilitar_tipo_reg" onchange="alternarEdicionTipoRegistro(this.checked)" style="cursor: pointer; width: 16px; height: 16px;">
                                 </label>
                             </div>
                             <select id="tipo_registro" name="tipo_registro" class="form-control" style="height: 42px; border-radius: 6px; background: #f8fafc; color: #475569;" disabled>
