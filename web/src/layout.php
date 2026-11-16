@@ -330,7 +330,7 @@ function renderizarPie(): void
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
         </svg>
-        <span>Asistente IA</span>
+        <span>Asistente TYTOne</span>
     </button>
 
     <!-- Ventana del Chat (Oculta por defecto) -->
@@ -341,7 +341,7 @@ function renderizarPie(): void
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <div style="width: 10px; height: 10px; background: #22c55e; border-radius: 50%;"></div>
                 <div>
-                    <strong style="font-size: 0.9rem; display: block; line-height: 1.1;">Asistente de Báscula</strong>
+                    <strong style="font-size: 0.9rem; display: block; line-height: 1.1;">Asistente TYTOne</strong>
                     <span style="font-size: 0.72rem; color: #94a3b8;">Consultas de pesadas y reportes</span>
                 </div>
             </div>
@@ -353,7 +353,7 @@ function renderizarPie(): void
         <!-- Área de mensajes -->
         <div id="chatMessages" style="flex: 1; padding: 1rem; overflow-y: auto; background: #f8fafc; display: flex; flex-direction: column; gap: 0.75rem; font-size: 0.85rem;">
             <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 0.75rem 0.9rem; border-radius: 10px; color: #1e293b; max-width: 90%; align-self: flex-start; line-height: 1.4;">
-                👋 Hola. Soy tu Asistente Operativo de Báscula. Pregúntame sobre camiones en patio, compras, ventas o reportes.
+                👋 Hola. Soy tu Asistente TYTOne. Pregúntame sobre camiones en patio, compras, ventas o reportes.
             </div>
         </div>
 

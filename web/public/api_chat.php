@@ -51,7 +51,7 @@ if ($pregunta === '') {
 if ($apiKey === '') {
     echo json_encode([
         'ok' => true,
-        'respuesta' => "El Asistente Operativo está instalado y listo para responder consultas sobre boletas, camiones y reportes.\n\nPara activarlo en vivo, solo necesitas ingresar tu API Key de Gemini en **Configuración Báscula**.",
+        'respuesta' => "El Asistente TYTOne está instalado y listo para responder consultas sobre boletas, camiones y reportes.\n\nPara activarlo en vivo, solo necesitas ingresar tu API Key de Gemini en **Configuración Báscula**.",
         'necesita_key' => true
     ]);
     exit;
@@ -138,7 +138,7 @@ foreach ($recientes as $r) {
 
 $contextoTexto .= "\nCatálogo de productos activos: " . implode(', ', $productos) . "\n";
 
-$systemInstruction = "Eres el Asistente Operativo Inteligente de TYTONE Báscula Camionera. "
+$systemInstruction = "Eres el Asistente TYTOne de Báscula Camionera. "
     . "Tu única y estricta función es responder preguntas sobre el pesaje, boletas de peso (compras y ventas), pesos brutos, taras de vehículos y de empaques, pesos netos, quintales (1 QQ = 100 lb), clientes, proveedores, productos, presentaciones y camiones en patio. "
     . "REGLA MANDATORIA DE SEGURIDAD: Tienes estrictamente prohibido responder o hablar de temas ajenos a la operación de la báscula y el negocio de pesaje. Si el usuario te saluda o pregunta algo ajeno, responde amablemente pero enfócate de inmediato en cómo puedes ayudarle con las pesadas y reportes. "
     . "Responde de forma concisa, profesional, con cálculos matemáticos precisos y siempre en español latinoamericano.";
