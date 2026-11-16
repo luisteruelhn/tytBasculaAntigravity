@@ -1,0 +1,61 @@
+<?php
+/**
+ * Conexión a Base de Datos MariaDB (XAMPP)
+ * Proyecto: tytBasculaAntigravity
+ *
+ * Este archivo centraliza la configuración y la instancia PDO para
+ * interactuar con MariaDB de forma segura, usando sentencias preparadas.
+ */
+
+declare(strict_types=1);
+
+// Parámetros de conexión predeterminados para XAMPP
+define('DB_HOST', getenv('BASCULA_DB_HOST') ?: '127.0.0.1');
+define('DB_PORT', (int)(getenv('BASCULA_DB_PORT') ?: 3306));
+define('DB_NAME', getenv('BASCULA_DB_NAME') ?: 'dbBascula');
+define('DB_USER', getenv('BASCULA_DB_USER') ?: 'root');
+define('DB_PASS', getenv('BASCULA_DB_PASS') ?: '');
+
+/**
+ * Obtiene la conexión PDO singleton a la base de datos.
+ *
+ * @return PDO Instancia activa de conexión.
+ * @throws PDOException Si falla la conexión con el servidor MariaDB.
+ */
+function obtenerDB(): PDO
+{
+    static $conexion = null;
+
+    if ($conexion === null) {
+        $dsn = sprintf(
+            'mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',
+            DB_HOST,
+            DB_PORT,
+            DB_NAME
+        );
+
+        $opciones = [
+            // Lanzar excepciones en errores para manejo controlado
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            // Desactivar emulación de preparadas para máxima seguridad contra inyecciones SQL
+            PDO::ATTR_EMULATE_PREPARES   => false,
+            // Devolver registros como arreglos asociativos por defecto
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            // Tiempo de espera para la conexión (en segundos)
+            PDO::ATTR_TIMEOUT            => 3,
+        ];
+
+        try {
+            $conexion = new PDO($dsn, DB_USER, DB_PASS, $opciones);
+        } catch (PDOException $e) {
+            // Log de error interno sin exponer credenciales en pantalla
+            error_log('Error de conexión a MariaDB en XAMPP: ' . $e->getMessage());
+            throw new RuntimeException(
+                'No se pudo conectar a la base de datos en XAMPP (127.0.0.1:3306/dbBascula). ' .
+                'Por favor verifica que el servicio MySQL esté iniciado en el panel de XAMPP.'
+            );
+        }
+    }
+
+    return $conexion;
+}

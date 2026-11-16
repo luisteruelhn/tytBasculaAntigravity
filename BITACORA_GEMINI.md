@@ -30,11 +30,15 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 
 ### 3. Acciones Ejecutadas
 * Creación de los cuatro documentos de seguimiento y control:
-  - `AGENTS_GEMINI.md`: Reglas y acuerdos del usuario.
+  - `AGENTS_GEMINI.md`: Reglas y acuerdos del usuario (incluyendo legibilidad humana y commits continuos).
   - `README_GEMINI.md`: Arquitectura, componentes y guía de arranque.
   - `SEED_GEMINI.md`: Esquema de base de datos, inventario de tablas y roles.
   - `BITACORA_GEMINI.md`: Este registro de trazabilidad.
-* Configuración de exclusiones en `.gitignore` para omitir `.git_old`, `.runtime`, `.venv`, respaldos y archivos generados.
+* Configuración de exclusiones en `.gitignore`.
+* Enlace en XAMPP: Creado Junction `C:\xampp\htdocs\bascula` hacia `K:\TYTOneBasculaAntigravity\web\public`.
+* Estructura base inicial de código limpio y modular:
+  - `api/`: Microservicio FastAPI (`main.py`, `simulator.py`, `serial_reader.py`).
+  - `web/`: Conexión MariaDB PDO (`config/db.php`), autenticación y seguridad (`src/auth.php`), layout (`src/layout.php`), pantalla principal con display LED (`public/index.php`) y estilos industriales (`public/assets/css/style.css`, `public/assets/js/pesaje.js`).
 
 ### 4. Siguientes Pasos
 1. Crear el enlace directo (`Junction`) entre `web/public` y `C:\xampp\htdocs\bascula`.

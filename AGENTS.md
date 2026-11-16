@@ -1,0 +1,5 @@
+# Acuerdos del usuario
+
+La fuente predeterminada de Báscula es el indicador real. Preservar este acuerdo al modificar código, crear usuarios/empresas o ejecutar esquemas. No cambiar a simulación sin solicitud explícita.
+Antes de deshacer o revertir cualquier cambio previamente acordado, consultar al usuario y explicar la razón, el contexto completo, los efectos y las alternativas. Revisar primero la instalación activa y sus diferencias; no reemplazarla por versiones antiguas del workspace.
+El selector debe cambiar efectivamente la fuente y mostrar Real o Simulado de acuerdo con ella. Alternar fuentes conserva los parámetros reales confirmados mientras no se editen. Dejar Real seleccionado al terminar comprobaciones.

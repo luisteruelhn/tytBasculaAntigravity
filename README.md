@@ -1,0 +1,46 @@
+# TYTONEBASCULALocal
+
+Código de la aplicación local TYTOne Báscula: interfaz PHP, servicio de lecturas Python/FastAPI, esquema SQL y generadores PDF/Excel.
+
+Consultar `SEED.MD` antes de preparar cambios o intervenir una instalación. `LEEME.md` y `bitacoraCodex.md` conservan los antecedentes operativos; algunas rutas e instrucciones corresponden a equipos anteriores.
+
+Este repositorio no incluye bases operativas, respaldos, credenciales, PDF emitidos ni runtimes PHP/Python/MariaDB. La plantilla Excel de `scripts/plantillas` es parte del código distribuible.
+
+Los lanzadores, la API, los generadores PDF/Excel y las consultas seriales usan exclusivamente `runtime/python/python.exe`. El runtime se distribuye como paquete separado verificado; no requiere instalar Python en Windows ni copiar `.venv`. Consultar `PYTHON_PORTABLE.md` para prepararlo, comprobarlo e implementarlo.
+
+No ejecutar el preparador sobre una instalación existente ni importar el esquema sobre una base productiva para actualizarla. Seguir el procedimiento de respaldo y cambios documentado en `SEED.MD`.
+
+## Configurar la dirección web
+
+Abrir `Configurar Bascula.cmd`. Usa el Python privado y abre un formulario temporal exclusivamente en `127.0.0.1`, con puerto aleatorio. Detecta las IPv4 privadas y sus prefijos reales, permite seleccionar Solo esta PC o una interfaz de red, elegir puerto y ver la URL completa. Si solo detecta una IPv4 privada y no hay ajustes anteriores, la propone; con varias interfaces debe elegir el operador. Se recomienda IP estática o reserva DHCP para acceso por red, gestionada aparte por el responsable de la red.
+
+Los ajustes se guardan atómicamente en `.runtime/local/web-listen.json`, excluido de Git por `.runtime/`. Cada modificación conserva una copia `.bak` del archivo anterior. El formulario no modifica Windows, firewall, router, DNS, base ni COM. MariaDB y FastAPI continúan en loopback y la web mantiene su restricción a la subred privada elegida.
+
+`Iniciar Bascula.cmd` exige leer esos ajustes en cada inicio. `Iniciar Bascula solo PC.cmd` fuerza `127.0.0.1` usando el puerto guardado; si aún no hay archivo, usa el puerto web de la instalación. Los argumentos técnicos explícitos `--red-local`/`--puerto-web` siguen siendo compatibles y tienen prioridad para esa ejecución. Una IP o subred que ya no pertenece al equipo bloquea el arranque de red; abrir el configurador y elegir nuevamente. Un puerto ocupado se rechaza sin detener procesos. Si la app usa ese mismo puerto, detenerla con su lanzador antes de guardar, o elegir otro puerto. Los cambios se aplican al siguiente arranque, sin reinicio automático.
+
+Guardar o Cancelar cierra el servidor del configurador; cerrar solo la pestaña lo deja hasta el vencimiento de cinco minutos. También puede cerrarse con Ctrl+C en su consola. El guardado requiere token aleatorio, Host y Origin locales, y rechaza solicitudes de otro sitio. Cerrar la pestaña al terminar.
+
+Para actualizar una instalación existente y trasladar su IP/puerto, seguir los pasos de respaldo e importación de `SEED.MD` **antes de sustituir los CMD**. No ejecutar preparar ni inicializar.
+
+
+El configurador también muestra la carpeta detectada y la registrada. El apartado **Carpeta de instalación** permite corregir el campo privado `root` mediante **Guardar carpeta y cerrar**, con respaldo automático, sin cambiar IP/puerto. La ruta debe corresponder a la carpeta desde donde se abrió el configurador y contener los archivos de la app; debe estar cerrada la app para guardarla. Para una ubicación personalizada, trasladar primero la instalación manualmente con la app cerrada y abrir Configurar Bascula.cmd desde la nueva carpeta. Este ajuste no mueve archivos ni cambia datadir de MariaDB, php.ini u otras rutas: seguir además las comprobaciones de traslado de PYTHON_PORTABLE.md/SEED.MD. El guardado de carpeta funciona independientemente del puerto web ocupado y de la detección de interfaces.
+
+
+Al iniciar con cualquiera de los dos lanzadores se publica la configuración PRINCIPAL actual desde la base y la API intenta escuchar automáticamente el COM seleccionado si el modo guardado es SERIAL y los parámetros están confirmados. No se activa lectura real por seleccionar solo un número de COM: usar previamente **Usar lectura real** en Configuración de báscula. La escucha continúa sin páginas abiertas y termina al cerrar la app o cambiar a Simulado. No modifica parámetros del COM ni transmite datos. Si el puerto falla o no recibe datos válidos, la página sigue cargando y muestra Sin lectura con el motivo; no se usa peso simulado como sustitución. Hay reintento del puerto fallido cada cinco segundos. Si no puede publicarse la configuración inicial, aparece un aviso en consola y continúa el arranque web; revisar Configuración de báscula. Los requisitos normales de base y respaldo al arrancar se mantienen.
+
+
+Si vuelves a abrir cualquiera de los iniciadores mientras Báscula está abierta, el mismo CMD ofrece **C: Continuar y abrir la página** (predeterminado), **R: Reiniciar** o **S: Salir**. Continuar usa la dirección de la instancia activa, aunque hayas cambiado los ajustes o abierto el iniciador Solo PC; no altera la escucha actual ni el COM. Reiniciar solicita cierre mediante el supervisor existente, espera hasta 45 segundos y vuelve a iniciar con la configuración correspondiente al iniciador elegido. Interrumpe sesiones y lectura, por lo que debe coordinarse con los operadores. Si no termina el cierre, avisa sin forzar procesos ni crear otra instancia; la solicitud de cierre sigue pendiente. No hay otro CMD para reiniciar.
+
+El estado privado `.runtime/local/servidor-listo.json` se publica solo después de comprobar API y login y se retira al cerrar. Se exige además el bloqueo activo de esta instalación antes de ofrecer reutilizarla; un archivo de estado por sí solo no demuestra que está abierta. Si aún inicia/cierra o no responde, Continuar muestra un aviso. Una instancia iniciada con la versión anterior no publica ese archivo: puede cerrarse con su lanzador habitual o elegir R para usar el supervisor actualizado en el próximo arranque. No se ejecutó un reinicio real durante estas pruebas.
+
+
+La **fuente predeterminada es real**. Esto sustituye la exigencia anterior de pulsar Usar lectura real para salir del estado inicial simulado: al confirmar parámetros completos se intentará escuchar el indicador automáticamente. Si faltan parámetros o confirmación, se muestra Sin lectura y la página permanece disponible; no se generan pesos ficticios. No se migró ni alteró el esquema SQL: el estado SIMULADO inicial de almacenamiento se interpreta como real salvo una elección expresa de simulación. **Usar Simulado (solo pruebas)** guarda una elección privada por empresa en `.runtime/local/web/simulado-ID.json` (o el runtime web configurado), vinculada a la revisión de parámetros. Guardar/confirmar ajustes o seleccionar real retira esa elección. Una elección antigua hecha antes de este cambio debe repetirse expresamente si se necesita probar con simulador.
+
+
+La captura **Manual** puede fijar bruto o tara sin API de lectura ni comunicación con el COM. El panel de peso informa Sin lectura y recuerda que Manual sigue disponible. Un fallo de publicación/configuración serial en lectura.php se limita a ese panel y no produce el error general de servicio. La autenticación y el guardado siguen necesitando la base: si MariaDB rechaza la cuenta, el mensaje lo identifica como problema de conexión/permisos de base, que debe corregirse sin saltarse autenticación.
+
+
+**Base de datos XAMPP** en Configurar Bascula.cmd permite probar y guardar carpeta/puerto de conexión. Sugiere C:\xampp y 3306; si encuentra mysql/bin/my.ini o mysql/my.ini, lee solo port de [mysqld] y ofrece Usar sugerencia de XAMPP, sin sobrescribir los ajustes guardados. Usa siempre 127.0.0.1/dbBascula. Probar conexión verifica servicio, identidad del datadir, acceso web y nombres de tablas/columnas requeridos, sin consultar pesadas. Guardar exige app cerrada, confirmación de uso de esa base, conexión/estructura compatibles y crea respaldo privado de instalacion.json. No mueve ni copia bases ni edita my.ini, contraseñas o permisos, ni inicia/detiene MySQL/Apache. El puerto indicado debe estar ya configurado en XAMPP. La comprobación de estructura no certifica todas las migraciones ni la operación física.
+
+
+Para la estructura antigua de XAMPP identificada el 13/11/2026 se preparó el procedimiento específico `runtime\python\python.exe -B scripts\actualizar_xampp.py`: pausa solo Báscula, respalda, clona a una base temporal con nombre controlado, prueba el SQL de scripts/actualizaciones/20261113-xampp-compatibilidad.sql y dos ciclos manuales usando código real, verifica hashes de campos/registros originales y elimina la copia temporal. Sin opciones no aplica en dbBascula. `--aplicar` ejecuta además la actualización y crea la cuenta mínima tras superar esas comprobaciones. Requiere la identidad XAMPP3306 y el estado previo concreto (cuenta y tabla de configuración ausentes); no es un actualizador general ni se ejecuta al iniciar. No volver a ejecutarlo si la actualización ya se aplicó. Leer SEED.MD y coordinar pausa/respaldos antes de usarlo.

@@ -33,6 +33,11 @@ Documento de directrices y reglas obligatorias para el asistente en el proyecto 
   - PHP nativo moderno, modular, limpio y tipado (`declare(strict_types=1)`).
   - CSS nativo limpio, responsivo y estilo industrial moderno (display LED/digital de peso grande, claro y de alto contraste).
   - JavaScript nativo (Vanilla JS) sin dependencias pesadas.
+* **Legibilidad y Mantenibilidad Humana**:
+  - Código limpio, legible, bien estructurado y profusamente comentado donde la lógica de negocio lo requiera.
+  - Nombres de funciones y variables claros, intuitivos y autoexplicativos.
+  - Evitar trucos oscuros, expresiones regulares complejas sin documentar o código ofuscado.
+  - Diseñado para que cualquier desarrollador humano pueda entenderlo, modificarlo y darle mantenimiento fácilmente.
 * **Seguridad sin compromisos**:
   - Consultas SQL estrictamente preparadas con **PDO** (cero inyección SQL).
   - Protección **CSRF** en todos los formularios y endpoints de acción (POST).
@@ -43,8 +48,12 @@ Documento de directrices y reglas obligatorias para el asistente en el proyecto 
 
 ---
 
-## 4. Trazabilidad y Documentación
-Todo cambio, decisión, prueba y despliegue debe registrarse cronológicamente en:
-* `BITACORA_GEMINI.md`: Registro de intervenciones con fecha y hora.
-* `README_GEMINI.md`: Guía de arquitectura, instalación y ejecución.
-* `SEED_GEMINI.md`: Esquema de base de datos, datos iniciales y procedimientos de respaldo.
+## 4. Trazabilidad, Control de Versiones y Documentación
+* **Compromisos Git (Commits continuos)**:
+  - Crear un commit en Git inmediatamente después de cada cambio o conjunto coherente de modificaciones verificado.
+  - Mensajes de commit claros, estructurados y descriptivos del cambio realizado.
+* **Documentación permanente**:
+  - Todo cambio, decisión, prueba y despliegue debe registrarse cronológicamente en:
+    - `BITACORA_GEMINI.md`: Registro de intervenciones con fecha y hora.
+    - `README_GEMINI.md`: Guía de arquitectura, instalación y ejecución.
+    - `SEED_GEMINI.md`: Esquema de base de datos, datos iniciales y procedimientos de respaldo.
