@@ -18,19 +18,32 @@ $empresaId = (int)$usuarioActual['empresa_id'];
 $empresaNombre = $usuarioActual['empresa_nombre'] ?? 'INVERSIONES VALLECILLO, SB';
 $pdo = obtenerDB();
 
-// 1. CARGA DE LISTAS PARA LOS FILTROS
+// 1. CARGA DE EMPRESA Y LISTAS
+$empresaFiltroId = (int)($_GET['empresa_id'] ?? $empresaId);
 $stmtEmp = $pdo->query("SELECT id, razon_social, nombre_comercial FROM t_empresas WHERE activo = 1 ORDER BY razon_social ASC");
 $listaEmpresas = $stmtEmp->fetchAll(PDO::FETCH_ASSOC);
 
 $stmtPersonas = $pdo->prepare("SELECT id, nombre, es_cliente, es_proveedor FROM t_clie_prov WHERE empresa_id = :empresa_id ORDER BY nombre ASC");
-$stmtPersonas->execute([':empresa_id' => $empresaId]);
+$stmtPersonas->execute([':empresa_id' => $empresaFiltroId]);
 $listaPersonas = $stmtPersonas->fetchAll(PDO::FETCH_ASSOC);
 
 // 2. PARÁMETROS DEL FILTRO
 $tipoPersona = trim((string)($_GET['tipo_persona'] ?? 'TODOS')); // TODOS, CLIENTES, PROVEEDORES
 $personaId   = (int)($_GET['persona_id'] ?? 0);
-$fechaDesde  = trim((string)($_GET['desde'] ?? date('Y-m-01'))); // Por defecto 1er día del mes
-$fechaHasta  = trim((string)($_GET['hasta'] ?? date('Y-m-d')));
+$fechaDesde  = trim((string)($_GET['desde'] ?? ''));
+$fechaHasta  = trim((string)($_GET['hasta'] ?? ''));
+
+// Formato visual d/m/Y si viene del input de texto
+function normalizarFecha(string $f): string {
+    if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $f)) {
+        [$d, $m, $y] = explode('/', $f);
+        return "$y-$m-$d";
+    }
+    return $f;
+}
+
+$fechaDesdeSql = normalizarFecha($fechaDesde);
+$fechaHastaSql = normalizarFecha($fechaHasta);
 
 // 3. CONSULTA DE BOLETAS CERRADAS
 $sql = "
@@ -54,16 +67,16 @@ $sql = "
     LEFT JOIN t_usuarios u_cerr ON u_cerr.id = p.emitida_por
     WHERE p.empresa_id = :empresa_id AND p.estado = 'CERRADA'
 ";
-$params = [':empresa_id' => $empresaId];
+$params = [':empresa_id' => $empresaFiltroId];
 
-if ($fechaDesde !== '') {
+if ($fechaDesdeSql !== '') {
     $sql .= " AND DATE(p.segunda_pesada_at) >= :desde";
-    $params[':desde'] = $fechaDesde;
+    $params[':desde'] = $fechaDesdeSql;
 }
 
-if ($fechaHasta !== '') {
+if ($fechaHastaSql !== '') {
     $sql .= " AND DATE(p.segunda_pesada_at) <= :hasta";
-    $params[':hasta'] = $fechaHasta;
+    $params[':hasta'] = $fechaHastaSql;
 }
 
 if ($personaId > 0) {
@@ -165,9 +178,9 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                     <label for="empresa_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Empresa
                     </label>
-                    <select id="empresa_id" name="empresa_id" class="form-control" style="height: 42px; border-radius: 6px;">
+                    <select id="empresa_id" name="empresa_id" class="form-control" style="height: 42px; border-radius: 6px;" onchange="this.form.submit()">
                         <?php foreach ($listaEmpresas as $emp): ?>
-                            <option value="<?= $emp['id'] ?>" <?= $emp['id'] === $empresaId ? 'selected' : '' ?>>
+                            <option value="<?= $emp['id'] ?>" <?= $emp['id'] === $empresaFiltroId ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($emp['nombre_comercial'] ?: $emp['razon_social'], ENT_QUOTES, 'UTF-8') ?>
                             </option>
                         <?php endforeach; ?>
@@ -203,7 +216,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                     <label for="desde" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Desde
                     </label>
-                    <input type="date" id="desde" name="desde" class="form-control" style="height: 42px; border-radius: 6px;" value="<?= htmlspecialchars($fechaDesde, ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="text" id="desde" name="desde" class="form-control" placeholder="DD/MM/AAAA" style="height: 42px; border-radius: 6px;" value="<?= htmlspecialchars($fechaDesde !== '' ? (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaDesde) ? date('d/m/Y', strtotime($fechaDesde)) : $fechaDesde) : '01/11/2026', ENT_QUOTES, 'UTF-8') ?>">
                 </div>
             </div>
 
@@ -212,7 +225,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                     <label for="hasta" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Hasta
                     </label>
-                    <input type="date" id="hasta" name="hasta" class="form-control" style="height: 42px; border-radius: 6px;" value="<?= htmlspecialchars($fechaHasta, ENT_QUOTES, 'UTF-8') ?>">
+                    <input type="text" id="hasta" name="hasta" class="form-control" placeholder="DD/MM/AAAA" style="height: 42px; border-radius: 6px;" value="<?= htmlspecialchars($fechaHasta !== '' ? (preg_match('/^\d{4}-\d{2}-\d{2}$/', $fechaHasta) ? date('d/m/Y', strtotime($fechaHasta)) : $fechaHasta) : date('d/m/Y'), ENT_QUOTES, 'UTF-8') ?>">
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="height: 42px; padding: 0 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
