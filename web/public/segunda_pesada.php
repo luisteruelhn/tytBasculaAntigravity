@@ -52,25 +52,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 $capturadoPor = (int)$usuarioActual['id'];
                 $origenCaptura = ($modoCaptura === 'MANUAL') ? 'MANUAL' : 'INDICADOR';
 
-                // Determinar Bruto y Tara
+                // Determinar Bruto y Tara según tipo_primera_pesada
                 if ($nota['tipo_primera_pesada'] === 'BRUTO') {
+                    // Si en la 1ra pesada se pesó BRUTO (caso habitual en COMPRA):
+                    // En la 2da pesada OBLIGATORIAMENTE se pesa la TARA DEL VEHÍCULO VACÍO.
                     $pesoBruto = (float)$nota['peso_bruto_lb'];
                     $taraVehiculo = $pesoSegunda;
                     $origenTara = $origenCaptura;
                     $taraPor = $capturadoPor;
                     $origenBruto = $nota['origen_bruto'];
                     $brutoPor = $nota['bruto_capturado_por'];
+
+                    if ($taraVehiculo >= $pesoBruto) {
+                        throw new RuntimeException("Error de validación en COMPRA: La tara del camión (" . number_format($taraVehiculo, 0) . " lb) no puede ser mayor o igual al peso bruto inicial (" . number_format($pesoBruto, 0) . " lb).");
+                    }
                 } else {
+                    // Si en la 1ra pesada se pesó TARA (caso habitual en VENTA):
+                    // En la 2da pesada OBLIGATORIAMENTE se pesa el PESO BRUTO CON CARGA.
                     $pesoBruto = $pesoSegunda;
                     $taraVehiculo = (float)$nota['tara_vehiculo_lb'];
                     $origenBruto = $origenCaptura;
                     $brutoPor = $capturadoPor;
                     $origenTara = $nota['origen_tara'];
                     $taraPor = $nota['tara_capturada_por'];
-                }
 
-                if ($pesoBruto < $taraVehiculo) {
-                    throw new RuntimeException("El peso bruto ($pesoBruto lb) no puede ser menor que la tara del vehículo ($taraVehiculo lb).");
+                    if ($pesoBruto <= $taraVehiculo) {
+                        throw new RuntimeException("Error de validación en VENTA: El peso bruto con carga (" . number_format($pesoBruto, 0) . " lb) debe ser estrictamente mayor a la tara del camión vacío (" . number_format($taraVehiculo, 0) . " lb).");
+                    }
                 }
 
                 $pesoNetoSinDescuentos = $pesoBruto - $taraVehiculo;
@@ -348,9 +356,19 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                 <!-- PANEL IZQUIERDO: MODO Y FIJAR PESO FALTANTE -->
                 <div class="card" style="padding: 1.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0 0 1.25rem 0; color: var(--text-main);">
-                            Captura complementaria (<?= ($tipoFaltante === 'TARA' ? 'Tara de vehículo' : 'Peso bruto') ?>)
-                        </h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                            <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0; color: var(--text-main);">
+                                Captura complementaria
+                            </h3>
+                            <span style="font-size: 0.8rem; font-weight: 800; padding: 0.25rem 0.65rem; border-radius: 6px; background: <?= ($tipoFaltante === 'TARA' ? '#fef3c7; color: #92400e;' : '#dbeafe; color: #1e40af;') ?>">
+                                <?= ($tipoFaltante === 'TARA' ? '🚛 PESAJE DE TARA (SALIDA VACÍO)' : '📦 PESAJE DE BRUTO (SALIDA CARGADO)') ?>
+                            </span>
+                        </div>
+                        <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                            <?= ($tipoFaltante === 'TARA' 
+                                ? 'En esta <strong>COMPRA</strong>, el camión ya descargó y se debe capturar su peso tara vacío (debe ser menor a ' . number_format($primerPeso, 0) . ' lb).'
+                                : 'En esta <strong>VENTA</strong>, el camión ya fue cargado y se debe capturar su peso bruto total (debe ser mayor a ' . number_format($primerPeso, 0) . ' lb).') ?>
+                        </p>
 
                         <div style="margin-bottom: 1.25rem;">
                             <label for="modo_captura" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
