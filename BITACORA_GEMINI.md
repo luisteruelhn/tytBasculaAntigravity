@@ -50,6 +50,13 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
     * Robustecimiento de validaciones de login: límites de longitud (usuario máx 80, clave máx 1024), sanitización contra bytes nulos y caracteres de control.
     * Protección contra ataques de fuerza bruta (Rate Limiting) por IP y por cuenta con `verificarTasaLimite()` y `limpiarTasaLimite()`.
     * Protección contra ataques de enumeración por temporización (Timing Attacks) mediante hash señuelo en cuentas inexistentes.
+* Menú Lateral (Sidebar Moderno Tipo Cockpit):
+  - Reemplazado menú antiguo por sidebar industrial moderno con íconos vectoriales SVG tipo Feather/Lucide.
+  - Colapsable en escritorio (modo compacto con persistencia en `localStorage`).
+  - Menú drawer deslizante en tablets y móviles con backdrop blur.
+  - Badges dinámicos de camiones pendientes en patio (Segunda Pesada).
+  - Mini-tarjeta integrada al pie que replica el peso y modo de la báscula en tiempo real.
+  - Perfil de usuario con avatar por iniciales y botón de cambio de tema (Dark/Light).
 
 ### 4. Siguientes Pasos
 1. Crear el enlace directo (`Junction`) entre `web/public` y `C:\xampp\htdocs\bascula`.
