@@ -781,6 +781,9 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
 // Pasar productos a JS para reconstruir el select limpiamente en cualquier navegador
 $productosJson = json_encode($listaProductos, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 ?>
+<!-- Librería para generación directa de PDF en cliente -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <script>
 const CATALOGO_PRODUCTOS = <?= $productosJson ?>;
 
@@ -847,42 +850,40 @@ function descargarPDFDirecto() {
     btn.disabled = true;
     btn.innerHTML = 'Generando PDF...';
 
-    // Función que ejecuta la descarga con html2pdf
-    const ejecutarDescarga = () => {
-        const elemento = document.getElementById('seccionReporteImprimible');
-        const opt = {
-            margin:       [8, 8, 8, 8],
-            filename:     'Reporte_Boletas_<?= date('Ymd_His') ?>.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, logging: false },
-            jsPDF:        { unit: 'mm', format: 'letter', orientation: 'landscape' }
-        };
-        html2pdf().set(opt).from(elemento).save().then(() => {
-            btn.disabled = false;
-            btn.innerHTML = textoOriginal;
-        }).catch(err => {
-            console.error('Error generando PDF:', err);
-            // Fallback directo a diálogo de impresión si falla la librería
-            window.print();
-            btn.disabled = false;
-            btn.innerHTML = textoOriginal;
-        });
+    const elemento = document.getElementById('seccionReporteImprimible');
+    if (!elemento) {
+        alert('No se encontró el contenedor del reporte');
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+        return;
+    }
+
+    if (typeof html2pdf !== 'function') {
+        // Si no está disponible html2pdf, abrir diálogo nativo de imprimir/guardar PDF
+        window.print();
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+        return;
+    }
+
+    const opt = {
+        margin:       [6, 6, 6, 6],
+        filename:     'Reporte_Boletas_<?= date('Ymd_His') ?>.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'letter', orientation: 'landscape' },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
-    if (typeof html2pdf === 'undefined') {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-        script.onload = ejecutarDescarga;
-        script.onerror = () => {
-            // Si no hay internet o falla la carga, usa el diálogo del sistema
-            window.print();
-            btn.disabled = false;
-            btn.innerHTML = textoOriginal;
-        };
-        document.head.appendChild(script);
-    } else {
-        ejecutarDescarga();
-    }
+    html2pdf().set(opt).from(elemento).save().then(() => {
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+    }).catch(err => {
+        console.error('Error html2pdf:', err);
+        window.print();
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+    });
 }
 </script>
 
