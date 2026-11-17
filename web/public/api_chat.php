@@ -106,6 +106,22 @@ try {
     $stmtProd->execute([':empresa_id' => $empresaId]);
     $productos = $stmtProd->fetchAll(PDO::FETCH_COLUMN);
 
+    // E. Directorio de Clientes y Proveedores con datos de contacto
+    $stmtDirectorio = $pdo->prepare("
+        SELECT nombre, telefono, direccion, rtn,
+               CASE 
+                   WHEN es_cliente = 1 AND es_proveedor = 1 THEN 'Cliente y Proveedor'
+                   WHEN es_cliente = 1 THEN 'Cliente'
+                   WHEN es_proveedor = 1 THEN 'Proveedor'
+                   ELSE 'Contacto'
+               END AS tipo
+        FROM t_clie_prov 
+        WHERE empresa_id = :empresa_id AND activo = 1 
+        ORDER BY nombre ASC
+    ");
+    $stmtDirectorio->execute([':empresa_id' => $empresaId]);
+    $directorio = $stmtDirectorio->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (Exception $e) {
     echo json_encode(['ok' => false, 'error' => 'Error al consultar datos locales: ' . $e->getMessage()]);
     exit;
@@ -138,9 +154,22 @@ foreach ($recientes as $r) {
 
 $contextoTexto .= "\nCatálogo de productos activos: " . implode(', ', $productos) . "\n";
 
+$contextoTexto .= "\nDirectorio de Clientes y Proveedores (Contactos):\n";
+if (empty($directorio)) {
+    $contextoTexto .= "No hay clientes ni proveedores registrados.\n";
+} else {
+    foreach ($directorio as $d) {
+        $tel = !empty($d['telefono']) ? $d['telefono'] : 'Sin teléfono';
+        $rtn = !empty($d['rtn']) ? "RTN: {$d['rtn']}, " : '';
+        $dir = !empty($d['direccion']) ? "Dirección: {$d['direccion']}" : '';
+        $contextoTexto .= "- [{$d['tipo']}] {$d['nombre']}: Teléfono: {$tel}, {$rtn}{$dir}\n";
+    }
+}
+
 $systemInstruction = "Eres el Asistente TYTOne de Báscula Camionera. "
-    . "Tu única y estricta función es responder preguntas sobre el pesaje, boletas de peso (compras y ventas), pesos brutos, taras de vehículos y de empaques, pesos netos, quintales (1 QQ = 100 lb), clientes, proveedores, productos, presentaciones y camiones en patio. "
-    . "REGLA MANDATORIA DE SEGURIDAD: Tienes estrictamente prohibido responder o hablar de temas ajenos a la operación de la báscula y el negocio de pesaje. Si el usuario te saluda o pregunta algo ajeno, responde amablemente pero enfócate de inmediato en cómo puedes ayudarle con las pesadas y reportes. "
+    . "Tu función es asistir al administrador y operadores en la gestión operativa de la báscula: boletas de pesaje (compras y ventas), pesos brutos, taras de vehículos y de empaques, pesos netos, quintales (1 QQ = 100 lb), camiones en patio, productos, y directorio de clientes y proveedores (incluyendo sus números de teléfono, direcciones y RTN). "
+    . "Tienes pleno acceso al directorio de clientes y proveedores que se te proporciona en el contexto. Cuando el usuario te pida teléfonos, números de contacto o información de clientes o proveedores, proporciónalos de inmediato de forma clara, directa y ordenada. "
+    . "REGLA DE SEGURIDAD: Tienes prohibido hablar de temas completamente ajenos al negocio de la báscula (como recetas, política o tareas académicas). Si preguntan algo ajeno, enfócate cordialmente en la báscula y el directorio comercial. "
     . "Responde de forma concisa, profesional, con cálculos matemáticos precisos y siempre en español latinoamericano.";
 
 // 4. LLAMADA A LA API DE GEMINI VÍA CURL NATIVO
