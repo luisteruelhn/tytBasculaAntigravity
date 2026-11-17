@@ -777,7 +777,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
     </div>
 </div>
 
-<script>
+<?php
 // Pasar productos a JS para reconstruir el select limpiamente en cualquier navegador
 $productosJson = json_encode($listaProductos, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
 ?>
