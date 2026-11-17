@@ -106,11 +106,10 @@ try {
     $categorias = $stmtCat ? $stmtCat->fetchAll(PDO::FETCH_ASSOC) : [];
 
     $stmtProd = $pdo->prepare("
-        SELECT prod.nombre, cat.nombre AS categoria, pr.nombre AS presentacion, pp.tara_empaque_lb
+        SELECT prod.nombre, cat.nombre AS categoria, pp.nombre AS presentacion
         FROM t_productos prod
         LEFT JOIN t_categorias cat ON cat.id = prod.categoria_id
         LEFT JOIN t_producto_presentaciones pp ON pp.producto_id = prod.id
-        LEFT JOIN t_presentaciones pr ON pr.id = pp.presentacion_id
         WHERE prod.empresa_id = :empresa_id AND prod.activo = 1 
         ORDER BY prod.nombre ASC
     ");
@@ -213,12 +212,11 @@ if (empty($directorio)) {
     $contextoTexto .= "\n";
 }
 
-$contextoTexto .= "5. CATÁLOGO DE PRODUCTOS Y PRESENTACIONES (t_productos, t_categorias, t_presentaciones):\n";
+$contextoTexto .= "5. CATÁLOGO DE PRODUCTOS Y PRESENTACIONES (t_productos, t_categorias, t_producto_presentaciones):\n";
 foreach ($productosDetalle as $pd) {
     $cat = $pd['categoria'] ?: 'General';
-    $pres = $pd['presentacion'] ?: 'Granel';
-    $taraEmp = $pd['tara_empaque_lb'] !== null ? "Tara emp: {$pd['tara_empaque_lb']} lb" : 'Sin tara emp';
-    $contextoTexto .= "- {$pd['nombre']} (Categoría: {$cat}, Presentación: {$pres}, {$taraEmp})\n";
+    $pres = $pd['presentacion'] ?: 'Estándar';
+    $contextoTexto .= "- {$pd['nombre']} (Categoría: {$cat}, Presentación: {$pres})\n";
 }
 $contextoTexto .= "\n";
 
