@@ -4,6 +4,7 @@
 .venv/
 __pdfs/
 dbbackup/
+deploy_remoto/
 web/config/local.php
 .env
 .env.*

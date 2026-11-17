@@ -9,12 +9,17 @@
 
 declare(strict_types=1);
 
+// Cargar configuración privada del entorno (Hostinger, VPS, local) si existe
+if (file_exists(__DIR__ . '/local.php')) {
+    require_once __DIR__ . '/local.php';
+}
+
 // Parámetros de conexión predeterminados para XAMPP
-define('DB_HOST', getenv('BASCULA_DB_HOST') ?: '127.0.0.1');
-define('DB_PORT', (int)(getenv('BASCULA_DB_PORT') ?: 3306));
-define('DB_NAME', getenv('BASCULA_DB_NAME') ?: 'dbBascula');
-define('DB_USER', getenv('BASCULA_DB_USER') ?: 'root');
-define('DB_PASS', getenv('BASCULA_DB_PASS') ?: '');
+if (!defined('DB_HOST')) define('DB_HOST', getenv('BASCULA_DB_HOST') ?: '127.0.0.1');
+if (!defined('DB_PORT')) define('DB_PORT', (int)(getenv('BASCULA_DB_PORT') ?: 3306));
+if (!defined('DB_NAME')) define('DB_NAME', getenv('BASCULA_DB_NAME') ?: 'dbBascula');
+if (!defined('DB_USER')) define('DB_USER', getenv('BASCULA_DB_USER') ?: 'root');
+if (!defined('DB_PASS')) define('DB_PASS', getenv('BASCULA_DB_PASS') ?: '');
 
 /**
  * Obtiene la conexión PDO singleton a la base de datos.
