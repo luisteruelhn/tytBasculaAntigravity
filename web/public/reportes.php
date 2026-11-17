@@ -426,7 +426,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
 <div style="max-width: 1200px; margin: 0 auto;">
 
     <!-- ENCABEZADO -->
-    <div style="margin-bottom: 1.5rem;">
+    <div class="no-print" style="margin-bottom: 1.5rem;">
         <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; letter-spacing: 1.5px; text-transform: uppercase;">
             REPORTES
         </span>
@@ -439,7 +439,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
     </div>
 
     <!-- TARJETA UNIFICADA DE FILTROS -->
-    <div class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 2rem;">
+    <div class="card no-print" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 2rem;">
         <form method="GET" action="reportes.php" id="formReporte">
             
             <!-- FILA 1: FILTROS PRINCIPALES (EMPRESA, OPERACIÓN, TIPO PERSONA, CLIENTE/PROV) -->
@@ -889,10 +889,10 @@ function descargarPDFDirecto() {
 
 <style>
 @media print {
-    .app-sidebar, .mobile-topbar, .footer, #formReporte {
+    .app-sidebar, .mobile-topbar, .footer, #formReporte, .no-print, #chat-widget-btn, #chat-widget-panel, [class*="chat-"] {
         display: none !important;
     }
-    .app-main-wrapper {
+    .app-main-wrapper, .app-main, .app-content {
         margin: 0 !important;
         padding: 0 !important;
     }
@@ -900,14 +900,16 @@ function descargarPDFDirecto() {
         border: none !important;
         box-shadow: none !important;
         padding: 0 !important;
+        margin: 0 !important;
         max-width: 100% !important;
     }
     body {
         background: #ffffff !important;
+        color: #000000 !important;
     }
     @page {
         size: letter landscape;
-        margin: 1cm;
+        margin: 0.8cm;
     }
 }
 </style>
