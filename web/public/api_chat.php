@@ -101,12 +101,23 @@ try {
     $stmtPendientes->execute([':empresa_id' => $empresaId]);
     $pendientes = $stmtPendientes->fetchAll(PDO::FETCH_ASSOC);
 
-    // D. Catálogo de productos y presentaciones
-    $stmtProd = $pdo->prepare("SELECT nombre FROM t_productos WHERE empresa_id = :empresa_id AND activo = 1 ORDER BY nombre");
-    $stmtProd->execute([':empresa_id' => $empresaId]);
-    $productos = $stmtProd->fetchAll(PDO::FETCH_COLUMN);
+    // D. Catálogo de categorías, productos y presentaciones
+    $stmtCat = $pdo->query("SELECT id, nombre FROM t_categorias ORDER BY nombre ASC");
+    $categorias = $stmtCat ? $stmtCat->fetchAll(PDO::FETCH_ASSOC) : [];
 
-    // E. Directorio de Clientes y Proveedores con datos de contacto
+    $stmtProd = $pdo->prepare("
+        SELECT prod.nombre, cat.nombre AS categoria, pr.nombre AS presentacion, pp.tara_empaque_lb
+        FROM t_productos prod
+        LEFT JOIN t_categorias cat ON cat.id = prod.categoria_id
+        LEFT JOIN t_producto_presentaciones pp ON pp.producto_id = prod.id
+        LEFT JOIN t_presentaciones pr ON pr.id = pp.presentacion_id
+        WHERE prod.empresa_id = :empresa_id AND prod.activo = 1 
+        ORDER BY prod.nombre ASC
+    ");
+    $stmtProd->execute([':empresa_id' => $empresaId]);
+    $productosDetalle = $stmtProd->fetchAll(PDO::FETCH_ASSOC);
+
+    // E. Directorio completo de Clientes y Proveedores (Teléfono, Dirección, RTN)
     $stmtDirectorio = $pdo->prepare("
         SELECT nombre, telefono, direccion, rtn,
                CASE 
@@ -122,55 +133,121 @@ try {
     $stmtDirectorio->execute([':empresa_id' => $empresaId]);
     $directorio = $stmtDirectorio->fetchAll(PDO::FETCH_ASSOC);
 
+    // F. Catálogo de Taras de empaque predeterminadas
+    $stmtTaras = $pdo->prepare("SELECT nombre, tara_lb FROM t_taras WHERE empresa_id = :empresa_id AND activo = 1 ORDER BY nombre ASC");
+    $stmtTaras->execute([':empresa_id' => $empresaId]);
+    $catalogoTaras = $stmtTaras->fetchAll(PDO::FETCH_ASSOC);
+
+    // G. Resumen histórico acumulado por producto (Compras y Ventas totales)
+    $stmtAcumulados = $pdo->prepare("
+        SELECT prod.nombre AS producto, p.tipo_operacion,
+               COUNT(*) AS total_pesadas,
+               COALESCE(SUM(p.peso_final_lb), 0) AS total_lb,
+               ROUND(COALESCE(SUM(p.peso_final_lb), 0) / 100, 2) AS total_qq
+        FROM t_pesadas p
+        JOIN t_producto_presentaciones pp ON pp.id = p.presentacion_id
+        JOIN t_productos prod ON prod.id = pp.producto_id
+        WHERE p.empresa_id = :empresa_id AND p.estado = 'CERRADA'
+        GROUP BY prod.nombre, p.tipo_operacion
+        ORDER BY prod.nombre ASC, p.tipo_operacion ASC
+    ");
+    $stmtAcumulados->execute([':empresa_id' => $empresaId]);
+    $acumulados = $stmtAcumulados->fetchAll(PDO::FETCH_ASSOC);
+
+    // H. Historial de boletas anuladas recientemente
+    $stmtAnuladas = $pdo->prepare("
+        SELECT p.tipo_operacion, p.id_compra, p.id_venta, p.placa, an.motivo, an.anulada_at, u.nombre AS anulado_por
+        FROM t_pesada_anulaciones an
+        JOIN t_pesadas p ON p.idpesada = an.pesada_id
+        LEFT JOIN t_usuarios u ON u.id = an.usuario_id
+        WHERE p.empresa_id = :empresa_id
+        ORDER BY an.anulada_at DESC LIMIT 5
+    ");
+    $stmtAnuladas->execute([':empresa_id' => $empresaId]);
+    $anuladas = $stmtAnuladas ? $stmtAnuladas->fetchAll(PDO::FETCH_ASSOC) : [];
+
 } catch (Exception $e) {
     echo json_encode(['ok' => false, 'error' => 'Error al consultar datos locales: ' . $e->getMessage()]);
     exit;
 }
 
-// 3. CONSTRUCCIÓN DEL PROMPT CON REGLAS ESTRICTAS
-$contextoTexto = "=== DATOS EN VIVO DEL SISTEMA DE BÁSCULA ===\n";
-$contextoTexto .= "Empresa: " . ($usuario['empresa_nombre'] ?? 'INVERSIONES VALLECILLO, SB') . "\n";
-$contextoTexto .= "Hoy: " . date('Y-m-d H:i') . "\n";
-$contextoTexto .= "Resumen de hoy: Cerradas=" . ($resHoy['cerradas_hoy'] ?? 0) . 
-                  ", Pendientes en patio=" . count($pendientes) . 
-                  ", Compras=" . number_format((float)($resHoy['lb_compras_hoy'] ?? 0)) . " lb (" . round((float)($resHoy['lb_compras_hoy'] ?? 0)/100, 2) . " QQ)" .
-                  ", Ventas=" . number_format((float)($resHoy['lb_ventas_hoy'] ?? 0)) . " lb (" . round((float)($resHoy['lb_ventas_hoy'] ?? 0)/100, 2) . " QQ)\n\n";
+// 3. CONSTRUCCIÓN DEL PROMPT CON REGLAS Y CONTEXTO MULTI-TABLA (SOLO LECTURA)
+$contextoTexto = "=== DATOS COMPLETOS DE LA BASE DE DATOS (SOLO LECTURA) ===\n";
+$contextoTexto .= "Empresa activa: " . ($usuario['empresa_nombre'] ?? 'INVERSIONES VALLECILLO, SB') . "\n";
+$contextoTexto .= "Fecha y hora actual: " . date('Y-m-d H:i:s') . "\n\n";
 
-$contextoTexto .= "Notas actualmente abiertas en patio:\n";
+$contextoTexto .= "1. RESUMEN OPERATIVO DE HOY (" . date('d/m/Y') . "):\n";
+$contextoTexto .= "- Boletas cerradas hoy: " . ($resHoy['cerradas_hoy'] ?? 0) . "\n";
+$contextoTexto .= "- Camiones pendientes en patio: " . count($pendientes) . "\n";
+$contextoTexto .= "- Compras hoy: " . number_format((float)($resHoy['lb_compras_hoy'] ?? 0)) . " lb (" . round((float)($resHoy['lb_compras_hoy'] ?? 0)/100, 2) . " QQ)\n";
+$contextoTexto .= "- Ventas hoy: " . number_format((float)($resHoy['lb_ventas_hoy'] ?? 0)) . " lb (" . round((float)($resHoy['lb_ventas_hoy'] ?? 0)/100, 2) . " QQ)\n\n";
+
+$contextoTexto .= "2. CAMIONES EN PATIO (NOTAS ABIERTAS):\n";
 if (empty($pendientes)) {
-    $contextoTexto .= "No hay notas pendientes en patio.\n";
+    $contextoTexto .= "No hay camiones en patio en este momento.\n\n";
 } else {
     foreach ($pendientes as $p) {
         $num = ($p['tipo_operacion'] === 'COMPRA') ? '#' . sprintf('%07d', $p['id_compra']) : '#' . sprintf('%07d', $p['id_venta']);
-        $contextoTexto .= "- {$num} ({$p['tipo_operacion']}): Placa {$p['placa']}, Cliente/Prov {$p['cliente_proveedor']}, Producto {$p['producto']}, Bruto {$p['peso_bruto_lb']} lb, Entrada: {$p['primera_pesada_at']}\n";
+        $contextoTexto .= "- {$num} ({$p['tipo_operacion']}): Placa {$p['placa']}, Cliente/Prov: {$p['cliente_proveedor']}, Producto: {$p['producto']}, Peso Bruto: {$p['peso_bruto_lb']} lb, Entrada: {$p['primera_pesada_at']}\n";
     }
+    $contextoTexto .= "\n";
 }
 
-$contextoTexto .= "\nÚltimas boletas cerradas recientemente:\n";
+$contextoTexto .= "3. ÚLTIMAS BOLETAS CERRADAS:\n";
 foreach ($recientes as $r) {
     $num = ($r['tipo_operacion'] === 'COMPRA') ? '#' . sprintf('%07d', $r['id_compra']) : '#' . sprintf('%07d', $r['id_venta']);
-    $contextoTexto .= "- {$num} ({$r['tipo_operacion']}): {$r['cliente_proveedor']}, {$r['producto']}, Neto final: {$r['peso_final_lb']} lb (" . round((float)$r['peso_final_lb']/100, 2) . " QQ), Salida: {$r['segunda_pesada_at']}\n";
+    $contextoTexto .= "- {$num} ({$r['tipo_operacion']}): Placa: {$r['placa']}, Cliente/Prov: {$r['cliente_proveedor']}, Producto: {$r['producto']}, Neto final: {$r['peso_final_lb']} lb (" . round((float)$r['peso_final_lb']/100, 2) . " QQ), Cierre: {$r['segunda_pesada_at']}\n";
 }
+$contextoTexto .= "\n";
 
-$contextoTexto .= "\nCatálogo de productos activos: " . implode(', ', $productos) . "\n";
-
-$contextoTexto .= "\nDirectorio de Clientes y Proveedores (Contactos):\n";
+$contextoTexto .= "4. DIRECTORIO DE CLIENTES Y PROVEEDORES (t_clie_prov):\n";
 if (empty($directorio)) {
-    $contextoTexto .= "No hay clientes ni proveedores registrados.\n";
+    $contextoTexto .= "No hay clientes ni proveedores registrados.\n\n";
 } else {
     foreach ($directorio as $d) {
         $tel = !empty($d['telefono']) ? $d['telefono'] : 'Sin teléfono';
         $rtn = !empty($d['rtn']) ? "RTN: {$d['rtn']}, " : '';
         $dir = !empty($d['direccion']) ? "Dirección: {$d['direccion']}" : '';
-        $contextoTexto .= "- [{$d['tipo']}] {$d['nombre']}: Teléfono: {$tel}, {$rtn}{$dir}\n";
+        $contextoTexto .= "- [{$d['tipo']}] {$d['nombre']}: Tel: {$tel}, {$rtn}{$dir}\n";
     }
+    $contextoTexto .= "\n";
 }
 
-$systemInstruction = "Eres el Asistente TYTOne de Báscula Camionera. "
-    . "Tu función es asistir al administrador y operadores en la gestión operativa de la báscula: boletas de pesaje (compras y ventas), pesos brutos, taras de vehículos y de empaques, pesos netos, quintales (1 QQ = 100 lb), camiones en patio, productos, y directorio de clientes y proveedores (incluyendo sus números de teléfono, direcciones y RTN). "
-    . "Tienes pleno acceso al directorio de clientes y proveedores que se te proporciona en el contexto. Cuando el usuario te pida teléfonos, números de contacto o información de clientes o proveedores, proporciónalos de inmediato de forma clara, directa y ordenada. "
-    . "REGLA DE SEGURIDAD: Tienes prohibido hablar de temas completamente ajenos al negocio de la báscula (como recetas, política o tareas académicas). Si preguntan algo ajeno, enfócate cordialmente en la báscula y el directorio comercial. "
-    . "Responde de forma concisa, profesional, con cálculos matemáticos precisos y siempre en español latinoamericano.";
+$contextoTexto .= "5. CATÁLOGO DE PRODUCTOS Y PRESENTACIONES (t_productos, t_categorias, t_presentaciones):\n";
+foreach ($productosDetalle as $pd) {
+    $cat = $pd['categoria'] ?: 'General';
+    $pres = $pd['presentacion'] ?: 'Granel';
+    $taraEmp = $pd['tara_empaque_lb'] !== null ? "Tara emp: {$pd['tara_empaque_lb']} lb" : 'Sin tara emp';
+    $contextoTexto .= "- {$pd['nombre']} (Categoría: {$cat}, Presentación: {$pres}, {$taraEmp})\n";
+}
+$contextoTexto .= "\n";
+
+$contextoTexto .= "6. TOTALES ACUMULADOS HISTÓRICOS POR PRODUCTO:\n";
+foreach ($acumulados as $ac) {
+    $contextoTexto .= "- {$ac['producto']} ({$ac['tipo_operacion']}): {$ac['total_pesadas']} pesadas, " . number_format((float)$ac['total_lb']) . " lb ({$ac['total_qq']} QQ)\n";
+}
+$contextoTexto .= "\n";
+
+if (!empty($anuladas)) {
+    $contextoTexto .= "7. BOLETAS ANULADAS RECIENTES:\n";
+    foreach ($anuladas as $an) {
+        $num = ($an['tipo_operacion'] === 'COMPRA') ? '#' . sprintf('%07d', $an['id_compra']) : '#' . sprintf('%07d', $an['id_venta']);
+        $contextoTexto .= "- {$num} ({$an['tipo_operacion']}, Placa {$an['placa']}): Motivo: {$an['motivo']}, Anulada por: {$an['anulado_por']}, Fecha: {$an['anulada_at']}\n";
+    }
+    $contextoTexto .= "\n";
+}
+
+$systemInstruction = "Eres el Asistente TYTOne de Báscula Camionera, con acceso de SOLO LECTURA a todas las tablas del sistema de báscula de la empresa. "
+    . "Tienes visibilidad de: "
+    . "1) Boletas de pesaje y camiones en patio (t_pesadas), "
+    . "2) Directorio comercial con teléfonos, direcciones y RTN de clientes y proveedores (t_clie_prov), "
+    . "3) Catálogo de productos, categorías y presentaciones (t_productos, t_categorias, t_presentaciones, t_producto_presentaciones), "
+    . "4) Taras de empaque (t_taras), "
+    . "5) Totales y acumulados históricos en libras y quintales (1 QQ = 100 lb), "
+    . "6) Historial de boletas anuladas y motivos (t_pesada_anulaciones). "
+    . "DIRECTIVA OBLIGATORIA: Puedes y DEBES responder cualquier consulta sobre estos datos (números telefónicos, datos de contacto, totales por cliente, pesajes, placas, productos, etc.) de forma directa, útil, precisa y veraz sin negar información disponible en tus datos. "
+    . "REGLA DE SEGURIDAD ESTRICTA: Eres un asistente de SOLO CONSULTA (SELECT). Tienes estrictamente prohibido ejecutar o simular modificaciones, inserciones, anulaciones directas o eliminaciones de datos en la base de datos (NO INSERT, NO UPDATE, NO DELETE, NO DROP). "
+    . "Responde con claridad, profesionalismo, usando formato markdown limpio y siempre en español latinoamericano.";
 
 // 4. LLAMADA A LA API DE GEMINI VÍA CURL NATIVO
 $payload = [
