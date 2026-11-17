@@ -554,7 +554,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                 <a href="reportes.php?<?= http_build_query(array_merge($_GET, ['export' => 'excel'])) ?>" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center;">
                     Generar Excel
                 </a>
-                <button type="button" onclick="imprimirReporte()" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; border-radius: 6px;">
+                <button type="button" onclick="descargarPDFDirecto()" id="btnDescargarPDF" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; border-radius: 6px; display: inline-flex; align-items: center; gap: 0.35rem;">
                     Descargar PDF
                 </button>
                 <a href="https://web.whatsapp.com/" target="_blank" class="btn btn-secondary" style="height: 40px; padding: 0 1.15rem; font-weight: 600; text-decoration: none; border-radius: 6px; display: inline-flex; align-items: center;">
@@ -778,6 +778,12 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
 </div>
 
 <script>
+// Pasar productos a JS para reconstruir el select limpiamente en cualquier navegador
+$productosJson = json_encode($listaProductos, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+?>
+<script>
+const CATALOGO_PRODUCTOS = <?= $productosJson ?>;
+
 function filtrarTipoPersona(tipo) {
     const sel = document.getElementById('persona_id');
     const opts = sel.querySelectorAll('option');
@@ -801,33 +807,29 @@ function filtrarTipoPersona(tipo) {
 
 function filtrarCategoria(catId) {
     const selProd = document.getElementById('producto_id');
-    const opts = selProd.querySelectorAll('option');
+    if (!selProd) return;
 
-    catId = String(catId || '0');
+    catId = parseInt(catId || '0', 10);
+    const prodSeleccionadoPrevio = parseInt(selProd.value || '0', 10);
 
-    opts.forEach(opt => {
-        if (opt.value === '0') return;
-        const cId = String(opt.getAttribute('data-cat') || '0');
-        if (catId === '0' || cId === catId) {
-            opt.hidden = false;
-            opt.style.display = '';
-        } else {
-            opt.hidden = true;
-            opt.style.display = 'none';
+    // Vaciar y reconstruir options para que funcione en 100% de los navegadores (Chrome/Edge/Firefox)
+    selProd.innerHTML = '<option value="0">Todos los productos</option>';
+
+    CATALOGO_PRODUCTOS.forEach(p => {
+        const cId = parseInt(p.categoria_id || '0', 10);
+        if (catId === 0 || cId === catId) {
+            const opt = document.createElement('option');
+            opt.value = p.id;
+            opt.textContent = p.nombre;
+            opt.setAttribute('data-cat', cId);
+            if (parseInt(p.id, 10) === prodSeleccionadoPrevio) {
+                opt.selected = true;
+            }
+            selProd.appendChild(opt);
         }
     });
-
-    // Si la opción seleccionada ya no pertenece a la categoría, reiniciar a 0
-    const optActual = selProd.options[selProd.selectedIndex];
-    if (optActual && optActual.value !== '0' && catId !== '0') {
-        const cActual = String(optActual.getAttribute('data-cat') || '0');
-        if (cActual !== catId) {
-            selProd.value = '0';
-        }
-    }
 }
 
-// Ejecutar al cargar la página si ya viene una categoría seleccionada
 document.addEventListener('DOMContentLoaded', function() {
     const catSel = document.getElementById('categoria_id');
     if (catSel && catSel.value !== '0') {
@@ -837,6 +839,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function imprimirReporte() {
     window.print();
+}
+
+function descargarPDFDirecto() {
+    const btn = document.getElementById('btnDescargarPDF');
+    const textoOriginal = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Generando PDF...';
+
+    // Función que ejecuta la descarga con html2pdf
+    const ejecutarDescarga = () => {
+        const elemento = document.getElementById('seccionReporteImprimible');
+        const opt = {
+            margin:       [8, 8, 8, 8],
+            filename:     'Reporte_Boletas_<?= date('Ymd_His') ?>.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'letter', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(elemento).save().then(() => {
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        }).catch(err => {
+            console.error('Error generando PDF:', err);
+            // Fallback directo a diálogo de impresión si falla la librería
+            window.print();
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        });
+    };
+
+    if (typeof html2pdf === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+        script.onload = ejecutarDescarga;
+        script.onerror = () => {
+            // Si no hay internet o falla la carga, usa el diálogo del sistema
+            window.print();
+            btn.disabled = false;
+            btn.innerHTML = textoOriginal;
+        };
+        document.head.appendChild(script);
+    } else {
+        ejecutarDescarga();
+    }
 }
 </script>
 
