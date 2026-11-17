@@ -733,7 +733,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                         <span>Bruto: <?= number_format($totOpBruto, 0) ?> lb</span>
                         <span>Tara: <?= number_format($totOpTara, 0) ?> lb</span>
                         <span>Neto: <?= number_format($totOpNeto, 0) ?> lb</span>
-                        <span style="color: <?= $colorGrupo ?>;">Final: <?= number_format($totGrupo['neto'], 0) ?> lb</span>
+                        <span style="color: <?= $colorGrupo ?>;">Final: <?= number_format(max(0.0, $totOpNeto - $totOpTaraE), 0) ?> lb</span>
                     </div>
                 </div>
 
