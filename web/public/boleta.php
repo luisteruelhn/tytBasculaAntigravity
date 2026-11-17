@@ -141,15 +141,83 @@ $quintales = $pesoFinal / 100.0;
         .acciones-pantalla { max-width: 900px; margin: 0 auto 1.25rem auto; display: flex; justify-content: space-between; align-items: center; }
 
         @media print {
-            body { background: #ffffff !important; padding: 0 !important; }
-            .hoja-carta-doble { max-width: 100% !important; margin: 0 !important; }
-            .boleta-contenedor { box-shadow: none !important; border: 1px solid #e2e8f0 !important; padding: 1.25rem 1.75rem !important; }
-            .acciones-pantalla { display: none !important; }
-            .separador-corte { margin: 1rem 0 !important; }
-            .separador-corte .tijera-icono { background: #ffffff !important; }
+            html, body {
+                background: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+            .hoja-carta-doble {
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                height: 100% !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            .boleta-contenedor {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                padding: 0.85rem 1.25rem !important;
+                margin: 0 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            .boleta-header {
+                padding-bottom: 0.4rem !important;
+                margin-bottom: 0.4rem !important;
+            }
+            .empresa-logo {
+                max-height: 44px !important;
+                max-width: 100px !important;
+            }
+            .op-tag {
+                font-size: 1.6rem !important;
+            }
+            .datos-grid {
+                gap: 0.15rem 1.5rem !important;
+                margin-bottom: 0.45rem !important;
+                font-size: 0.76rem !important;
+            }
+            .tabla-pesaje {
+                margin-bottom: 0.45rem !important;
+            }
+            .tabla-pesaje th {
+                padding: 0.25rem 0.2rem !important;
+                font-size: 0.65rem !important;
+            }
+            .tabla-pesaje td {
+                padding: 0.35rem 0.2rem !important;
+                font-size: 0.85rem !important;
+            }
+            .td-destacado {
+                font-size: 1.15rem !important;
+            }
+            .boleta-notas {
+                font-size: 0.7rem !important;
+                line-height: 1.3 !important;
+                margin-bottom: 0.85rem !important;
+            }
+            .firmas-grid {
+                gap: 2.5rem !important;
+                font-size: 0.74rem !important;
+            }
+            .acciones-pantalla {
+                display: none !important;
+            }
+            .separador-corte {
+                margin: 0.4rem 0 !important;
+            }
+            .separador-corte .tijera-icono {
+                font-size: 1.1rem !important;
+            }
             @page {
                 size: letter portrait;
-                margin: 0.8cm 0.6cm;
+                margin: 0.4cm 0.5cm;
             }
         }
     </style>
