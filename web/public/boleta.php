@@ -239,6 +239,9 @@ $quintales = $pesoFinal / 100.0;
         <a href="pesadas.php" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.9rem; text-decoration: none; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #0f172a; font-weight: 600;">
             Historial de Boletas
         </a>
+        <button type="button" onclick="descargarBoletaPDF()" id="btnDescargarBoletaPDF" style="padding: 0.5rem 1.25rem; font-size: 0.95rem; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
+            📄 Descargar PDF
+        </button>
         <button onclick="window.print()" style="padding: 0.5rem 1.5rem; font-size: 0.95rem; background: #0b57d0; color: #fff; border: none; border-radius: 6px; font-weight: 700; cursor: pointer;">
             🖨️ Imprimir Boletas (2 por hoja)
         </button>
@@ -425,8 +428,43 @@ $renderizarBoleta('COPIA');
 
 </div>
 
-</body>
-</html>
+<!-- Librería para descarga directa de PDF en cliente -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script>
+function descargarBoletaPDF() {
+    const btn = document.getElementById('btnDescargarBoletaPDF');
+    const textoOriginal = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = 'Generando PDF...';
+
+    const elemento = document.querySelector('.hoja-carta-doble');
+    if (!elemento || typeof html2pdf !== 'function') {
+        window.print();
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+        return;
+    }
+
+    const opt = {
+        margin:       [4, 5, 4, 5],
+        filename:     'Boleta_<?= $tipoOp ?>_<?= sprintf("%07d", $correlativo) ?>.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(elemento).save().then(() => {
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+    }).catch(err => {
+        console.error('Error html2pdf boleta:', err);
+        window.print();
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+    });
+}
+</script>
 
 </body>
 </html>
