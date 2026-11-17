@@ -117,34 +117,24 @@ $quintales = $pesoFinal / 100.0;
         .firmas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; text-align: center; font-size: 0.8rem; font-weight: 600; color: #334155; }
         .firma-linea { border-top: 1px solid #0f172a; padding-top: 0.35rem; }
 
-        /* LÍNEA DE CORTE CON TIJERITA */
+        /* LÍNEA DE CORTE DIBUJADA Y RESPONSIVE CON TIJERA AL PRINCIPIO */
         .separador-corte {
             display: flex;
             align-items: center;
-            justify-content: center;
             margin: 1.25rem 0;
-            position: relative;
-        }
-        .separador-corte::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            border-top: 2px dashed #94a3b8;
-            z-index: 1;
+            width: 100%;
+            gap: 0.5rem;
+            color: #64748b;
         }
         .separador-corte .tijera-icono {
-            position: relative;
-            z-index: 2;
-            background: #ffffff;
-            padding: 0 0.75rem;
-            color: #64748b;
-            font-size: 1.2rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            font-weight: 600;
+            font-size: 1.25rem;
+            line-height: 1;
+            user-select: none;
+        }
+        .separador-corte .linea-punteada {
+            flex: 1;
+            border-bottom: 2px dashed #94a3b8;
+            height: 0;
         }
 
         /* BOTONES DE PANTALLA (OCULTOS EN IMPRESIÓN) */
@@ -347,9 +337,10 @@ $renderizarBoleta = function(string $etiquetaCopia) use ($empresa, $tipoOp, $cor
 $renderizarBoleta('ORIGINAL');
 ?>
 
-<!-- LÍNEA PUNTEADA CON TIJERITA PARA EL CORTE -->
+<!-- LÍNEA DE CORTE DIBUJADA Y RESPONSIVE CON TIJERA AL PRINCIPIO -->
 <div class="separador-corte">
-    <span class="tijera-icono">✂ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ✂</span>
+    <span class="tijera-icono">✂</span>
+    <div class="linea-punteada"></div>
 </div>
 
 <?php 
