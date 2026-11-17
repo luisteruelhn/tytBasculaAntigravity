@@ -139,26 +139,28 @@ $quintales = $pesoFinal / 100.0;
 
     <!-- 1. ENCABEZADO CON DATOS DE LA EMPRESA A LA IZQUIERDA Y OPERACIÓN A LA DERECHA -->
     <div class="boleta-header">
-        <div class="empresa-info">
+        <div class="empresa-info" style="display: flex; align-items: center; gap: 1.25rem;">
             <?php if (!empty($empresa['logo']) && file_exists(__DIR__ . '/' . $empresa['logo'])): ?>
-                <img src="<?= htmlspecialchars($empresa['logo'], ENT_QUOTES, 'UTF-8') ?>" alt="Logo" class="empresa-logo"><br>
+                <img src="<?= htmlspecialchars($empresa['logo'], ENT_QUOTES, 'UTF-8') ?>" alt="Logo" class="empresa-logo" style="max-height: 85px; max-width: 140px; object-fit: contain; margin-bottom: 0;">
             <?php endif; ?>
-            <div class="empresa-nombre">
-                <?= htmlspecialchars($empresa['nombre_comercial'] ?: $empresa['razon_social'], ENT_QUOTES, 'UTF-8') ?>
-            </div>
-            <div class="empresa-detalle">
-                <?php if (!empty($empresa['rtn'])): ?>
-                    <strong>RTN:</strong> <?= htmlspecialchars($empresa['rtn'], ENT_QUOTES, 'UTF-8') ?><br>
-                <?php endif; ?>
-                <?php if (!empty($empresa['direccion'])): ?>
-                    <?= htmlspecialchars($empresa['direccion'], ENT_QUOTES, 'UTF-8') ?><br>
-                <?php endif; ?>
-                <?php if (!empty($empresa['telefono'])): ?>
-                    <strong>Tel:</strong> <?= htmlspecialchars($empresa['telefono'], ENT_QUOTES, 'UTF-8') ?>
-                <?php endif; ?>
-                <?php if (!empty($empresa['email'])): ?>
-                    &middot; <?= htmlspecialchars($empresa['email'], ENT_QUOTES, 'UTF-8') ?>
-                <?php endif; ?>
+            <div>
+                <div class="empresa-nombre">
+                    <?= htmlspecialchars($empresa['nombre_comercial'] ?: $empresa['razon_social'], ENT_QUOTES, 'UTF-8') ?>
+                </div>
+                <div class="empresa-detalle">
+                    <?php if (!empty($empresa['rtn'])): ?>
+                        <strong>RTN:</strong> <?= htmlspecialchars($empresa['rtn'], ENT_QUOTES, 'UTF-8') ?><br>
+                    <?php endif; ?>
+                    <?php if (!empty($empresa['direccion'])): ?>
+                        <?= htmlspecialchars($empresa['direccion'], ENT_QUOTES, 'UTF-8') ?><br>
+                    <?php endif; ?>
+                    <?php if (!empty($empresa['telefono'])): ?>
+                        <strong>Tel:</strong> <?= htmlspecialchars($empresa['telefono'], ENT_QUOTES, 'UTF-8') ?>
+                    <?php endif; ?>
+                    <?php if (!empty($empresa['email'])): ?>
+                        &middot; <?= htmlspecialchars($empresa['email'], ENT_QUOTES, 'UTF-8') ?>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 

@@ -20,8 +20,20 @@ $pdo = obtenerDB();
 
 // 1. CARGA DE EMPRESA Y LISTAS
 $empresaFiltroId = (int)($_GET['empresa_id'] ?? $empresaId);
-$stmtEmp = $pdo->query("SELECT id, razon_social, nombre_comercial FROM t_empresas WHERE activo = 1 ORDER BY razon_social ASC");
+$stmtEmp = $pdo->query("SELECT id, razon_social, nombre_comercial, logo, rtn, direccion, telefono, email FROM t_empresas WHERE activo = 1 ORDER BY razon_social ASC");
 $listaEmpresas = $stmtEmp->fetchAll(PDO::FETCH_ASSOC);
+
+// Datos de la empresa seleccionada para el reporte
+$empresaInfo = null;
+foreach ($listaEmpresas as $empItem) {
+    if ((int)$empItem['id'] === $empresaFiltroId) {
+        $empresaInfo = $empItem;
+        break;
+    }
+}
+if (!$empresaInfo && !empty($listaEmpresas)) {
+    $empresaInfo = $listaEmpresas[0];
+}
 
 $stmtPersonas = $pdo->prepare("SELECT id, nombre, es_cliente, es_proveedor FROM t_clie_prov WHERE empresa_id = :empresa_id ORDER BY nombre ASC");
 $stmtPersonas->execute([':empresa_id' => $empresaFiltroId]);
@@ -571,15 +583,36 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
     <!-- TARJETA DEL REPORTE IMPRIMIBLE -->
     <div id="seccionReporteImprimible" class="card" style="padding: 2.5rem 2.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
         
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <h2 style="font-size: 1.5rem; font-weight: 800; margin: 0 0 0.35rem 0; color: var(--text-main); text-transform: uppercase;">
-                <?= htmlspecialchars($empresaNombre, ENT_QUOTES, 'UTF-8') ?>
-            </h2>
-            <h3 style="font-size: 1.25rem; font-weight: 900; letter-spacing: 0.5px; margin: 0 0 0.35rem 0; color: #0f233a;">
-                REPORTE DE BOLETAS <?= ($filtroOperacion !== 'TODOS' ? '— ' . $filtroOperacion . 'S' : '') ?>
-            </h3>
-            <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">
-                Del <?= date('d/m/Y', strtotime($fechaDesdeSql)) ?> al <?= date('d/m/Y', strtotime($fechaHastaSql)) ?> &middot; Fecha de cierre
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #0f233a; padding-bottom: 1.25rem; margin-bottom: 2rem; gap: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 1.25rem;">
+                <?php if (!empty($empresaInfo['logo']) && file_exists(__DIR__ . '/' . $empresaInfo['logo'])): ?>
+                    <img src="<?= htmlspecialchars($empresaInfo['logo'], ENT_QUOTES, 'UTF-8') ?>" alt="Logo" style="max-height: 80px; max-width: 130px; object-fit: contain;">
+                <?php endif; ?>
+                <div>
+                    <h2 style="font-size: 1.45rem; font-weight: 800; margin: 0 0 0.2rem 0; color: var(--text-main); text-transform: uppercase; line-height: 1.15;">
+                        <?= htmlspecialchars($empresaInfo['nombre_comercial'] ?: ($empresaInfo['razon_social'] ?? $empresaNombre), ENT_QUOTES, 'UTF-8') ?>
+                    </h2>
+                    <div style="font-size: 0.82rem; color: #64748b; line-height: 1.4;">
+                        <?php if (!empty($empresaInfo['direccion'])): ?>
+                            <?= htmlspecialchars($empresaInfo['direccion'], ENT_QUOTES, 'UTF-8') ?><br>
+                        <?php endif; ?>
+                        <?php if (!empty($empresaInfo['telefono'])): ?>
+                            <strong>Tel:</strong> <?= htmlspecialchars($empresaInfo['telefono'], ENT_QUOTES, 'UTF-8') ?>
+                        <?php endif; ?>
+                        <?php if (!empty($empresaInfo['email'])): ?>
+                            &middot; <?= htmlspecialchars($empresaInfo['email'], ENT_QUOTES, 'UTF-8') ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="text-align: right;">
+                <h3 style="font-size: 1.35rem; font-weight: 900; letter-spacing: 0.5px; margin: 0 0 0.25rem 0; color: #0f233a; line-height: 1.1;">
+                    REPORTE DE BOLETAS <?= ($filtroOperacion !== 'TODOS' ? '— ' . $filtroOperacion . 'S' : '') ?>
+                </h3>
+                <div style="font-size: 0.85rem; color: #64748b; font-weight: 600;">
+                    Del <?= date('d/m/Y', strtotime($fechaDesdeSql)) ?> al <?= date('d/m/Y', strtotime($fechaHastaSql)) ?> &middot; Cierre
+                </div>
             </div>
         </div>
 
