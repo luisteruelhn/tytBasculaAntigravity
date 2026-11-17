@@ -133,9 +133,8 @@ try {
     $directorio = $stmtDirectorio->fetchAll(PDO::FETCH_ASSOC);
 
     // F. Catálogo de Taras de empaque predeterminadas
-    $stmtTaras = $pdo->prepare("SELECT nombre, tara_lb FROM t_taras WHERE empresa_id = :empresa_id AND activo = 1 ORDER BY nombre ASC");
-    $stmtTaras->execute([':empresa_id' => $empresaId]);
-    $catalogoTaras = $stmtTaras->fetchAll(PDO::FETCH_ASSOC);
+    $stmtTaras = $pdo->query("SELECT nombre, taralbs FROM t_taras ORDER BY nombre ASC");
+    $catalogoTaras = $stmtTaras ? $stmtTaras->fetchAll(PDO::FETCH_ASSOC) : [];
 
     // G. Resumen histórico acumulado por producto (Compras y Ventas totales)
     $stmtAcumulados = $pdo->prepare("
@@ -155,12 +154,12 @@ try {
 
     // H. Historial de boletas anuladas recientemente
     $stmtAnuladas = $pdo->prepare("
-        SELECT p.tipo_operacion, p.id_compra, p.id_venta, p.placa, an.motivo, an.anulada_at, u.nombre AS anulado_por
+        SELECT p.tipo_operacion, p.id_compra, p.id_venta, p.placa, an.motivo, an.anulado_at, u.nombre AS anulado_por
         FROM t_pesada_anulaciones an
-        JOIN t_pesadas p ON p.idpesada = an.pesada_id
-        LEFT JOIN t_usuarios u ON u.id = an.usuario_id
+        JOIN t_pesadas p ON p.idpesada = an.idpesada
+        LEFT JOIN t_usuarios u ON u.id = an.anulado_por
         WHERE p.empresa_id = :empresa_id
-        ORDER BY an.anulada_at DESC LIMIT 5
+        ORDER BY an.anulado_at DESC LIMIT 5
     ");
     $stmtAnuladas->execute([':empresa_id' => $empresaId]);
     $anuladas = $stmtAnuladas ? $stmtAnuladas->fetchAll(PDO::FETCH_ASSOC) : [];
@@ -230,7 +229,7 @@ if (!empty($anuladas)) {
     $contextoTexto .= "7. BOLETAS ANULADAS RECIENTES:\n";
     foreach ($anuladas as $an) {
         $num = ($an['tipo_operacion'] === 'COMPRA') ? '#' . sprintf('%07d', $an['id_compra']) : '#' . sprintf('%07d', $an['id_venta']);
-        $contextoTexto .= "- {$num} ({$an['tipo_operacion']}, Placa {$an['placa']}): Motivo: {$an['motivo']}, Anulada por: {$an['anulado_por']}, Fecha: {$an['anulada_at']}\n";
+        $contextoTexto .= "- {$num} ({$an['tipo_operacion']}, Placa {$an['placa']}): Motivo: {$an['motivo']}, Anulada por: {$an['anulado_por']}, Fecha: {$an['anulado_at']}\n";
     }
     $contextoTexto .= "\n";
 }
