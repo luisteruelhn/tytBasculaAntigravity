@@ -438,7 +438,8 @@ function descargarBoletaPDF() {
     btn.disabled = true;
     btn.innerHTML = 'Generando PDF...';
 
-    const elemento = document.querySelector('.hoja-carta-doble');
+    // Capturar únicamente la primera boleta (la original) para que sea un PDF limpio de 1 sola página
+    const elemento = document.querySelector('.boleta-contenedor');
     if (!elemento || typeof html2pdf !== 'function') {
         window.print();
         btn.disabled = false;
@@ -447,7 +448,7 @@ function descargarBoletaPDF() {
     }
 
     const opt = {
-        margin:       [4, 5, 4, 5],
+        margin:       [10, 12, 10, 12],
         filename:     'Boleta_<?= $tipoOp ?>_<?= sprintf("%07d", $correlativo) ?>.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, logging: false },
