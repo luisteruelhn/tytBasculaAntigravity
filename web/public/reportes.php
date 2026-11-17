@@ -27,10 +27,19 @@ $stmtPersonas = $pdo->prepare("SELECT id, nombre, es_cliente, es_proveedor FROM 
 $stmtPersonas->execute([':empresa_id' => $empresaFiltroId]);
 $listaPersonas = $stmtPersonas->fetchAll(PDO::FETCH_ASSOC);
 
+// Cargar categorías y productos para los filtros
+$stmtCategorias = $pdo->query("SELECT id, nombre FROM t_categorias ORDER BY nombre ASC");
+$listaCategorias = $stmtCategorias ? $stmtCategorias->fetchAll(PDO::FETCH_ASSOC) : [];
+
+$stmtProductos = $pdo->query("SELECT id, nombre, categoria_id FROM t_productos WHERE activo = 1 ORDER BY nombre ASC");
+$listaProductos = $stmtProductos ? $stmtProductos->fetchAll(PDO::FETCH_ASSOC) : [];
+
 // 2. PARÁMETROS DEL FILTRO
 $filtroOperacion = trim((string)($_GET['operacion'] ?? 'TODOS')); // TODOS, COMPRA, VENTA
 $tipoPersona     = trim((string)($_GET['tipo_persona'] ?? 'TODOS')); // TODOS, CLIENTES, PROVEEDORES
 $personaId       = (int)($_GET['persona_id'] ?? 0);
+$categoriaId     = (int)($_GET['categoria_id'] ?? 0);
+$productoId      = (int)($_GET['producto_id'] ?? 0);
 $fechaDesde      = trim((string)($_GET['desde'] ?? ''));
 $fechaHasta      = trim((string)($_GET['hasta'] ?? ''));
 
@@ -99,6 +108,16 @@ if ($personaId > 0) {
     $sql .= " AND cp.es_cliente = 1";
 } elseif ($tipoPersona === 'PROVEEDORES') {
     $sql .= " AND cp.es_proveedor = 1";
+}
+
+if ($categoriaId > 0) {
+    $sql .= " AND prod.categoria_id = :categoria_id";
+    $params[':categoria_id'] = $categoriaId;
+}
+
+if ($productoId > 0) {
+    $sql .= " AND prod.id = :producto_id";
+    $params[':producto_id'] = $productoId;
 }
 
 $sql .= " ORDER BY p.tipo_operacion ASC, p.segunda_pesada_at ASC";
@@ -473,6 +492,34 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                         <?php endforeach; ?>
                     </select>
                 </div>
+
+                <div>
+                    <label for="categoria_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                        Categoría
+                    </label>
+                    <select id="categoria_id" name="categoria_id" class="form-control" style="height: 40px; border-radius: 6px;" onchange="filtrarCategoria(this.value)">
+                        <option value="0">Todas las categorías</option>
+                        <?php foreach ($listaCategorias as $cat): ?>
+                            <option value="<?= $cat['id'] ?>" <?= $cat['id'] === $categoriaId ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($cat['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="producto_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                        Producto
+                    </label>
+                    <select id="producto_id" name="producto_id" class="form-control" style="height: 40px; border-radius: 6px;">
+                        <option value="0">Todos los productos</option>
+                        <?php foreach ($listaProductos as $prod): ?>
+                            <option value="<?= $prod['id'] ?>" data-cat="<?= $prod['categoria_id'] ?? 0 ?>" <?= $prod['id'] === $productoId ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($prod['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             </div>
 
             <!-- FILA 2: FECHA DESDE, HASTA, BOTÓN GENERAR Y ACCIONES -->
@@ -747,6 +794,27 @@ function filtrarTipoPersona(tipo) {
     });
 
     sel.value = '0';
+}
+
+function filtrarCategoria(catId) {
+    const selProd = document.getElementById('producto_id');
+    const opts = selProd.querySelectorAll('option');
+
+    opts.forEach(opt => {
+        if (opt.value === '0') return;
+        const cId = opt.getAttribute('data-cat');
+        if (!catId || catId === '0' || cId === catId) {
+            opt.style.display = 'block';
+        } else {
+            opt.style.display = 'none';
+        }
+    });
+
+    // Si la opción seleccionada ya no pertenece a la categoría, reiniciar a 0
+    const optActual = selProd.options[selProd.selectedIndex];
+    if (optActual && optActual.value !== '0' && catId !== '0' && optActual.getAttribute('data-cat') !== catId) {
+        selProd.value = '0';
+    }
 }
 
 function imprimirReporte() {
