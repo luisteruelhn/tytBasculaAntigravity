@@ -513,8 +513,11 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                     </label>
                     <select id="producto_id" name="producto_id" class="form-control" style="height: 40px; border-radius: 6px;">
                         <option value="0">Todos los productos</option>
-                        <?php foreach ($listaProductos as $prod): ?>
-                            <option value="<?= $prod['id'] ?>" data-cat="<?= $prod['categoria_id'] ?? 0 ?>" <?= $prod['id'] === $productoId ? 'selected' : '' ?>>
+                        <?php foreach ($listaProductos as $prod): 
+                            $prodCatId = (int)($prod['categoria_id'] ?? 0);
+                            $oculto = ($categoriaId > 0 && $prodCatId !== $categoriaId);
+                        ?>
+                            <option value="<?= $prod['id'] ?>" data-cat="<?= $prodCatId ?>" <?= $prod['id'] === $productoId ? 'selected' : '' ?> style="<?= $oculto ? 'display:none;' : '' ?>">
                                 <?= htmlspecialchars($prod['nombre'], ENT_QUOTES, 'UTF-8') ?>
                             </option>
                         <?php endforeach; ?>
@@ -800,22 +803,37 @@ function filtrarCategoria(catId) {
     const selProd = document.getElementById('producto_id');
     const opts = selProd.querySelectorAll('option');
 
+    catId = String(catId || '0');
+
     opts.forEach(opt => {
         if (opt.value === '0') return;
-        const cId = opt.getAttribute('data-cat');
-        if (!catId || catId === '0' || cId === catId) {
-            opt.style.display = 'block';
+        const cId = String(opt.getAttribute('data-cat') || '0');
+        if (catId === '0' || cId === catId) {
+            opt.hidden = false;
+            opt.style.display = '';
         } else {
+            opt.hidden = true;
             opt.style.display = 'none';
         }
     });
 
     // Si la opción seleccionada ya no pertenece a la categoría, reiniciar a 0
     const optActual = selProd.options[selProd.selectedIndex];
-    if (optActual && optActual.value !== '0' && catId !== '0' && optActual.getAttribute('data-cat') !== catId) {
-        selProd.value = '0';
+    if (optActual && optActual.value !== '0' && catId !== '0') {
+        const cActual = String(optActual.getAttribute('data-cat') || '0');
+        if (cActual !== catId) {
+            selProd.value = '0';
+        }
     }
 }
+
+// Ejecutar al cargar la página si ya viene una categoría seleccionada
+document.addEventListener('DOMContentLoaded', function() {
+    const catSel = document.getElementById('categoria_id');
+    if (catSel && catSel.value !== '0') {
+        filtrarCategoria(catSel.value);
+    }
+});
 
 function imprimirReporte() {
     window.print();
