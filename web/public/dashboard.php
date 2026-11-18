@@ -38,14 +38,16 @@ function normalizarFecha(string $f): string {
     return $f;
 }
 
-$fechaDesde = trim((string)($_GET['desde'] ?? '2026-11-01'));
-$fechaHasta = trim((string)($_GET['hasta'] ?? '2026-11-16'));
+date_default_timezone_set('America/Tegucigalpa');
+
+$fechaDesde = trim((string)($_GET['desde'] ?? date('Y-m-01')));
+$fechaHasta = trim((string)($_GET['hasta'] ?? date('Y-m-d')));
 
 $fechaDesdeSql = normalizarFecha($fechaDesde);
 $fechaHastaSql = normalizarFecha($fechaHasta);
 
 if ($fechaDesdeSql === '') {
-    $fechaDesdeSql = '2026-11-01';
+    $fechaDesdeSql = date('Y-m-01');
 }
 if ($fechaHastaSql === '') {
     $fechaHastaSql = date('Y-m-d');
