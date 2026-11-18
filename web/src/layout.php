@@ -325,7 +325,7 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
 function renderizarPie(): void
 {
     $usuario = obtenerUsuarioActual();
-    $esAdmin = $usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'ADMIN']);
+    $esAdmin = $usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'ADMIN', 'REMOTO']);
 ?>
         </main>
 

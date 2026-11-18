@@ -20,8 +20,8 @@ if (!$usuario) {
     exit;
 }
 
-// Control estricto de roles: Solo SUPER y ADMINISTRADORES
-if (!tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'ADMIN'])) {
+// Control estricto de roles: Solo SUPER, ADMINISTRADORES y REMOTO (solo lectura)
+if (!tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'ADMIN', 'REMOTO'])) {
     http_response_code(403);
     echo json_encode(['ok' => false, 'error' => 'Acceso denegado. Solo administradores y superusuarios pueden consultar el asistente.']);
     exit;

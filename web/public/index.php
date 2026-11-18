@@ -21,6 +21,7 @@ try {
     $pdo = obtenerDB();
     $estadoDB = true;
     $usuario = obtenerUsuarioActual();
+    $esRemoto = $usuario && tieneRol($usuario, ['REMOTO']);
     $empresaId = (int)($usuario['empresa_id'] ?? 1);
 
     // Consultar pesadas pendientes de segunda pesada (estado ABIERTA)
@@ -61,8 +62,32 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
 </div>
 
 <!-- =======================================================================
-     ACCIONES RÁPIDAS DE PESAJE
+     ACCIONES RÁPIDAS DE PESAJE (O CONSULTA PARA REMOTO)
      ======================================================================= -->
+<?php if (!empty($esRemoto)): ?>
+<div class="grid-2" style="margin-bottom: 2rem;">
+    <div class="card" style="border-left: 4px solid var(--primary);">
+        <h3 class="card-title">📊 Dashboard y Boletas</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.25rem; font-size: 0.95rem;">
+            Consulta los totales acumulados del día, boletas cerradas, camiones en patio y Guías de Remisión.
+        </p>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="dashboard.php" class="btn btn-primary" style="flex: 1;">Ver Dashboard</a>
+            <a href="pesadas.php" class="btn btn-secondary" style="flex: 1;">Boletas e Historial (<?= $totalPendientes ?> en patio)</a>
+        </div>
+    </div>
+
+    <div class="card" style="border-left: 4px solid var(--success);">
+        <h3 class="card-title">📈 Reportes y Catálogos</h3>
+        <p style="color: var(--text-muted); margin-bottom: 1.25rem; font-size: 0.95rem;">
+            Genera reportes por rango de fechas, categoría o producto para imprimir, PDF o Excel.
+        </p>
+        <a href="reportes.php" class="btn btn-success btn-lg" style="width: 100%;">
+            Abrir Reportes
+        </a>
+    </div>
+</div>
+<?php else: ?>
 <div class="grid-2" style="margin-bottom: 2rem;">
     <div class="card" style="border-left: 4px solid var(--primary);">
         <h3 class="card-title">🚛 Primera Pesada (Entrada)</h3>
@@ -89,6 +114,7 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
         </a>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- =======================================================================
      ESTADO DEL SISTEMA Y BASE DE DATOS
@@ -122,6 +148,7 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
         <?php endif; ?>
     </div>
 
+    <?php if (empty($esRemoto)): ?>
     <!-- Controles de Prueba para el Simulador (Dev) -->
     <div class="card">
         <h3 class="card-title">🧪 Controles de Simulación (Dev)</h3>
@@ -137,6 +164,7 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
             </button>
         </div>
     </div>
+    <?php endif; ?>
 </div>
 
 <script>
