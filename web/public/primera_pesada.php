@@ -415,7 +415,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
         <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; align-items: stretch;">
             
             <!-- PANEL IZQUIERDO: SELECCIÓN Y FIJAR PESO -->
-            <div class="card" style="padding: 1.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="card" style="padding: 1.75rem; margin-bottom: 0; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                     <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0 0 1.25rem 0; color: var(--text-main);">
                         Captura del peso
