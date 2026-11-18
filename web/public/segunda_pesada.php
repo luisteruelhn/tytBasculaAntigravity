@@ -35,6 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
         $pctHumedad     = (float)($_POST['ajuste_humedad_pct'] ?? 0);
         $pctDefectos    = (float)($_POST['descuento_calidad_pct'] ?? 0);
         $obsSegunda     = trim((string)($_POST['observaciones_segunda'] ?? ''));
+        $guiaRemision   = trim((string)($_POST['guia_remision'] ?? ''));
+        $motivoTraslado = trim((string)($_POST['motivo_traslado'] ?? ''));
+        $motivoOtro     = trim((string)($_POST['motivo_traslado_otro'] ?? ''));
+        $transpRtn      = trim((string)($_POST['transportista_rtn'] ?? ''));
+        $marcaVehiculo  = trim((string)($_POST['marca_vehiculo'] ?? ''));
 
         // Cargar datos de la primera pesada
         $stmtP = $pdo->prepare("SELECT * FROM t_pesadas WHERE idpesada = :id AND empresa_id = :empresa_id AND estado = 'ABIERTA' LIMIT 1");
@@ -129,30 +134,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                             descuento_defectos_lb = :desc_defectos_lb,
                             peso_final_lb = :peso_final_lb,
                             calculo_libras_enteras = 1,
-                            observaciones_segunda = :obs_segunda
+                            observaciones_segunda = :obs_segunda,
+                            guia_remision = :guia_remision,
+                            motivo_traslado = :motivo_traslado,
+                            motivo_traslado_otro = :motivo_traslado_otro,
+                            transportista_rtn = :transportista_rtn,
+                            marca_vehiculo = :marca_vehiculo
                            WHERE idpesada = :id AND empresa_id = :empresa_id";
 
                 $stmtUpd = $pdo->prepare($sqlUpd);
                 $stmtUpd->execute([
-                    ':emitida_por'        => $capturadoPor,
-                    ':peso_bruto'         => $pesoBruto,
-                    ':bruto_por'          => $brutoPor,
-                    ':origen_bruto'       => $origenBruto,
-                    ':tara_vehiculo'      => $taraVehiculo,
-                    ':tara_por'           => $taraPor,
-                    ':origen_tara'        => $origenTara,
-                    ':idempaque'          => ($idEmpaque > 0 ? $idEmpaque : null),
-                    ':cant_empaques'      => $cantEmpaques,
-                    ':tara_unitaria'      => ($taraUnitaria > 0 ? $taraUnitaria : null),
-                    ':base_descuentos'    => $baseDescuentos,
-                    ':pct_humedad'        => $pctHumedad,
-                    ':desc_humedad_lb'    => $descHumedadLb,
-                    ':pct_calidad'        => $pctDefectos,
-                    ':desc_defectos_lb'   => $descDefectosLb,
-                    ':peso_final_lb'      => $pesoFinalLb,
-                    ':obs_segunda'        => ($obsSegunda !== '' ? $obsSegunda : null),
-                    ':id'                 => $idPesada,
-                    ':empresa_id'         => $empresaId
+                    ':emitida_por'          => $capturadoPor,
+                    ':peso_bruto'           => $pesoBruto,
+                    ':bruto_por'            => $brutoPor,
+                    ':origen_bruto'         => $origenBruto,
+                    ':tara_vehiculo'        => $taraVehiculo,
+                    ':tara_por'             => $taraPor,
+                    ':origen_tara'          => $origenTara,
+                    ':idempaque'            => ($idEmpaque > 0 ? $idEmpaque : null),
+                    ':cant_empaques'        => $cantEmpaques,
+                    ':tara_unitaria'        => ($taraUnitaria > 0 ? $taraUnitaria : null),
+                    ':base_descuentos'      => $baseDescuentos,
+                    ':pct_humedad'          => $pctHumedad,
+                    ':desc_humedad_lb'      => $descHumedadLb,
+                    ':pct_calidad'          => $pctDefectos,
+                    ':desc_defectos_lb'     => $descDefectosLb,
+                    ':peso_final_lb'        => $pesoFinalLb,
+                    ':obs_segunda'          => ($obsSegunda !== '' ? $obsSegunda : null),
+                    ':guia_remision'        => ($guiaRemision !== '' ? $guiaRemision : null),
+                    ':motivo_traslado'      => ($motivoTraslado !== '' ? $motivoTraslado : null),
+                    ':motivo_traslado_otro' => ($motivoOtro !== '' ? $motivoOtro : null),
+                    ':transportista_rtn'    => ($transpRtn !== '' ? $transpRtn : null),
+                    ':marca_vehiculo'       => ($marcaVehiculo !== '' ? $marcaVehiculo : null),
+                    ':id'                   => $idPesada,
+                    ':empresa_id'           => $empresaId
                 ]);
 
                 $pdo->commit();
@@ -519,6 +534,63 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                     </div>
                 </div>
             </div>
+
+            <?php if (($notaSeleccionada['tipo_operacion'] ?? '') === 'VENTA'): ?>
+            <!-- GUÍA DE REMISIÓN (SOLO VENTAS) -->
+            <div class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.5rem;">
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.05rem; font-weight: 800; color: #047857;">
+                    Guía de Remisión (Venta)
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem;">
+                    <div>
+                        <label for="guia_remision" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                            N° Guía de Remisión
+                        </label>
+                        <input type="text" id="guia_remision" name="guia_remision" class="form-control" maxlength="30" placeholder="Ej. 002861">
+                    </div>
+                    <div>
+                        <label for="motivo_traslado" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                            Motivo de Traslado
+                        </label>
+                        <select id="motivo_traslado" name="motivo_traslado" class="form-control" onchange="document.getElementById('boxMotivoOtro').style.display = (this.value === 'Otros (especificar)') ? 'block' : 'none';">
+                            <option value="Venta" selected>Venta</option>
+                            <option value="Compra">Compra</option>
+                            <option value="Consignación">Consignación</option>
+                            <option value="Venta con entrega a terceros">Venta con entrega a terceros</option>
+                            <option value="Venta sujeta a confirmación por el comprador">Venta sujeta a confirmación por el comprador</option>
+                            <option value="Traslado entre establecimientos de la misma Empresa">Traslado entre establecimientos de la misma Empresa</option>
+                            <option value="Devolución">Devolución</option>
+                            <option value="Otros (especificar)">Otros (especificar)</option>
+                            <option value="Recojo de bienes">Recojo de bienes</option>
+                            <option value="Importación">Importación</option>
+                            <option value="Exportación">Exportación</option>
+                            <option value="Traslado zona primaria">Traslado zona primaria</option>
+                            <option value="Traslado por emisor itinerante de comprobantes de pago">Traslado por emisor itinerante de comprobantes de pago</option>
+                            <option value="Traslado de bienes para transformación">Traslado de bienes para transformación</option>
+                            <option value="Transformación">Transformación</option>
+                        </select>
+                    </div>
+                    <div id="boxMotivoOtro" style="display: none;">
+                        <label for="motivo_traslado_otro" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                            Especificar otro motivo
+                        </label>
+                        <input type="text" id="motivo_traslado_otro" name="motivo_traslado_otro" class="form-control" maxlength="120" placeholder="Detalle del motivo">
+                    </div>
+                    <div>
+                        <label for="marca_vehiculo" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                            Marca del Vehículo
+                        </label>
+                        <input type="text" id="marca_vehiculo" name="marca_vehiculo" class="form-control" maxlength="60" placeholder="Ej. Freightliner">
+                    </div>
+                    <div>
+                        <label for="transportista_rtn" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                            R.T.N. Transportista
+                        </label>
+                        <input type="text" id="transportista_rtn" name="transportista_rtn" class="form-control" maxlength="20" placeholder="Opcional">
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- OBSERVACIONES -->
             <div class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 2rem;">

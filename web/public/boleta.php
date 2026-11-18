@@ -239,6 +239,11 @@ $quintales = $pesoFinal / 100.0;
         <a href="pesadas.php" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.9rem; text-decoration: none; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #0f172a; font-weight: 600;">
             Historial de Boletas
         </a>
+        <?php if ($tipoOp === 'VENTA'): ?>
+        <a href="guia_remision.php?id=<?= $idPesada ?>" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.9rem; text-decoration: none; border: 1px solid #047857; background: #ecfdf5; border-radius: 6px; color: #047857; font-weight: 700;">
+            🚚 Guía de Remisión
+        </a>
+        <?php endif; ?>
         <button type="button" onclick="descargarBoletaPDF()" id="btnDescargarBoletaPDF" style="padding: 0.5rem 1.25rem; font-size: 0.95rem; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem;">
             📄 Descargar PDF
         </button>
