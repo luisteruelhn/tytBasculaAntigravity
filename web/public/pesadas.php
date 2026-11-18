@@ -205,11 +205,18 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                                         </span>
                                     <?php endif; ?>
                                 </td>
-                                <td style="padding: 1rem 0.5rem; text-align: right;">
+                                <td style="padding: 1rem 0.5rem; text-align: right; white-space: nowrap;">
                                     <?php if ($esCerrada): ?>
-                                        <a href="boleta.php?id=<?= $b['idpesada'] ?>" target="_blank" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.85rem; font-weight: 700; color: #1e40af; border: 1px solid #bfdbfe; background: #eff6ff; text-decoration: none; border-radius: 5px;" title="Ver e imprimir boleta">
-                                            🖨️ Ver / Imprimir
-                                        </a>
+                                        <div style="display: inline-flex; gap: 0.45rem; align-items: center;">
+                                            <a href="boleta.php?id=<?= (int)$b['idpesada'] ?>" target="_blank" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.82rem; font-weight: 700; color: #1e40af; border: 1px solid #bfdbfe; background: #eff6ff; text-decoration: none; border-radius: 5px;" title="Ver e imprimir boleta">
+                                                🖨️ Boleta
+                                            </a>
+                                            <?php if ($b['tipo_operacion'] === 'VENTA'): ?>
+                                                <a href="guia_remision.php?id=<?= (int)$b['idpesada'] ?>" target="_blank" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.82rem; font-weight: 700; color: #047857; border: 1px solid #a7f3d0; background: #ecfdf5; text-decoration: none; border-radius: 5px;" title="Imprimir Guía de Remisión">
+                                                    🚚 Guía Remisión
+                                                </a>
+                                            <?php endif; ?>
+                                        </div>
                                     <?php else: ?>
                                         <a href="segunda_pesada.php?id=<?= $b['idpesada'] ?>" class="btn btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.85rem; font-weight: 700; background: #0b57d0; text-decoration: none; border-radius: 5px;">
                                             Completar &rarr;

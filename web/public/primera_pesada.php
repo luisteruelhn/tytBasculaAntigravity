@@ -461,9 +461,9 @@ renderizarEncabezado('Primera Pesada', 'primera');
                     <label for="origen" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Origen / Punto de partida
                     </label>
-                    <input type="text" id="origen" name="origen" list="listaOrigenSugerido" class="form-control" style="height: 42px; border-radius: 6px;" placeholder="CEIBITA SUR">
+                    <input type="text" id="origen" name="origen" list="listaOrigenSugerido" class="form-control" style="height: 42px; border-radius: 6px;" placeholder="CEIBITA SUR, SANTA BARBARA">
                     <datalist id="listaOrigenSugerido">
-                        <option value="CEIBITA SUR">
+                        <option value="CEIBITA SUR, SANTA BARBARA">
                         <option value="CEIBITA SUR, SB">
                     </datalist>
                 </div>

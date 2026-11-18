@@ -98,17 +98,18 @@ Ejecutar en orden antes de dar por terminada la implementación:
 1. **Acceso:** Abrir `http://localhost/bascula/login.php` e iniciar sesión.
 2. **Monitor en vivo:** Confirmar en `index.php` que el peso en vivo responde desde el indicador real.
 3. **Primera Pesada (`primera_pesada.php`):**
-   - Seleccionar `VENTA`, cliente, producto y confirmar que **Origen / Punto de partida** sugiere `CEIBITA SUR`.
+   - Seleccionar `VENTA`, cliente, producto y confirmar que **Origen / Punto de partida** sugiere `CEIBITA SUR, SANTA BARBARA`.
 4. **Segunda Pesada (`segunda_pesada.php`):**
    - Seleccionar la venta abierta y verificar que aparece el bloque **Guía de Remisión** (`guia_remision`, listbox `motivo_traslado` con los 15 ítems, `marca_vehiculo`, `transportista_rtn`).
    - Cerrar la nota.
-5. **Boleta (`boleta.php`):**
+5. **Boleta (`boleta.php`) e Historial (`pesadas.php`):**
    - Verificar logo a la izquierda de la empresa.
+   - En `pesadas.php`, verificar que en las ventas cerradas aparezca el botón **🚚 Guía Remisión**.
    - **Imprimir Boletas:** debe salir en **1 sola hoja Carta** con 2 copias y línea de corte con tijera al centro.
    - **Descargar PDF:** debe descargar **1 sola boleta limpia** en PDF.
 6. **Guía de Remisión (`guia_remision.php`):**
-   - Entrar desde el botón **🚚 Guía de Remisión** en la boleta de venta.
-   - Verificar casilla `[✓]` en el motivo seleccionado, datos del bien en QQ, peso en letras y botones **Imprimir** / **Descargar PDF**.
+   - Entrar desde el botón **🚚 Guía de Remisión** en la boleta o historial de venta.
+   - Verificar casilla `[✓]` en el motivo seleccionado, datos del bien en QQ, peso en letras, **2 copias en 1 sola hoja Carta** con línea de corte al imprimir y **1 copia limpia** en PDF.
 7. **Reportes (`reportes.php`):**
    - Probar filtros de **Categoría** → **Producto** (solo muestra productos de la categoría elegida).
    - Probar **Imprimir**, **Descargar PDF** y **Generar Excel**.

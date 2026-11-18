@@ -57,7 +57,7 @@ $mesesEs = [
 $ts = strtotime((string)$fechaRaw);
 $fechaTraslado = date('d', $ts) . ' / ' . ($mesesEs[(int)date('n', $ts)] ?? date('m', $ts)) . ' / ' . date('Y', $ts);
 
-$puntoPartida = trim((string)($pesada['origen'] ?? '')) ?: 'CEIBITA SUR, SB';
+$puntoPartida = trim((string)($pesada['origen'] ?? '')) ?: 'CEIBITA SUR, SANTA BARBARA';
 $puntoLlegada = trim((string)($pesada['destino'] ?? '')) ?: '—';
 $marcaPlaca   = trim((string)($pesada['marca_vehiculo'] ?? '') . ' ' . (string)($pesada['placa'] ?? ''));
 
@@ -131,55 +131,79 @@ $columnasMotivos = [
     <title>Guía de Remisión N° <?= htmlspecialchars($numGuia, ENT_QUOTES, 'UTF-8') ?></title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; }
-        body { background: #f1f5f9; color: #0f172a; padding: 1.5rem 1rem; }
+        body { background: #f1f5f9; color: #0f172a; padding: 1.25rem 1rem; }
         .acciones { max-width: 920px; margin: 0 auto 1rem auto; display: flex; justify-content: space-between; align-items: center; }
         .btn { padding: 0.5rem 1.15rem; border-radius: 6px; font-weight: 700; font-size: 0.9rem; cursor: pointer; text-decoration: none; border: 1px solid #cbd5e1; background: #fff; color: #0f172a; }
         .btn-primary { background: #0b57d0; color: #fff; border-color: #0b57d0; }
 
-        .guia-hoja { max-width: 920px; margin: 0 auto; background: #fff; padding: 1.75rem 2rem; border: 1px solid #cbd5e1; border-radius: 6px; }
-        .guia-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 1rem; }
-        .empresa-bloque { display: flex; align-items: center; gap: 1rem; }
-        .empresa-logo { max-height: 70px; max-width: 110px; object-fit: contain; }
-        .empresa-titulo { font-size: 1.55rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; }
-        .empresa-sub { font-size: 0.78rem; color: #334155; line-height: 1.35; margin-top: 0.15rem; }
+        .hoja-carta-doble { max-width: 920px; margin: 0 auto; }
+        .guia-hoja { background: #fff; padding: 1.15rem 1.5rem; border: 1px solid #cbd5e1; border-radius: 6px; }
+        .guia-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 0.65rem; }
+        .empresa-bloque { display: flex; align-items: center; gap: 0.85rem; }
+        .empresa-logo { max-height: 50px; max-width: 95px; object-fit: contain; }
+        .empresa-titulo { font-size: 1.25rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px; line-height: 1.1; }
+        .empresa-sub { font-size: 0.72rem; color: #334155; line-height: 1.25; margin-top: 0.1rem; }
 
-        .recuadro-guia { border: 2px solid #0f172a; border-radius: 10px; padding: 0.65rem 1.25rem; text-align: center; min-width: 240px; }
-        .recuadro-guia-titulo { font-size: 1rem; font-weight: 900; border-bottom: 1px solid #0f172a; padding-bottom: 0.3rem; margin-bottom: 0.45rem; font-style: italic; }
-        .recuadro-guia-num { font-size: 1.25rem; font-weight: 900; color: #b91c1c; font-family: monospace; letter-spacing: 1px; }
+        .recuadro-guia { border: 2px solid #0f172a; border-radius: 8px; padding: 0.4rem 1rem; text-align: center; min-width: 210px; }
+        .recuadro-guia-titulo { font-size: 0.88rem; font-weight: 900; border-bottom: 1px solid #0f172a; padding-bottom: 0.2rem; margin-bottom: 0.25rem; font-style: italic; }
+        .recuadro-guia-num { font-size: 1.05rem; font-weight: 900; color: #b91c1c; font-family: monospace; letter-spacing: 1px; }
 
-        .datos-traslado { display: grid; grid-template-columns: 1.15fr 1fr; gap: 0.35rem 1.5rem; font-size: 0.82rem; margin-bottom: 0.85rem; }
-        .campo-linea { display: flex; gap: 0.4rem; align-items: baseline; }
+        .datos-traslado { display: grid; grid-template-columns: 1.15fr 1fr; gap: 0.25rem 1.25rem; font-size: 0.75rem; margin-bottom: 0.55rem; }
+        .campo-linea { display: flex; gap: 0.35rem; align-items: baseline; }
         .campo-linea strong { white-space: nowrap; }
-        .campo-linea span { flex: 1; border-bottom: 1px solid #475569; padding: 0 0.25rem; font-weight: 600; min-height: 1.1rem; }
+        .campo-linea span { flex: 1; border-bottom: 1px solid #475569; padding: 0 0.2rem; font-weight: 600; min-height: 1rem; }
 
-        .motivos-box { border: 1.5px solid #0f172a; border-radius: 8px; padding: 0.55rem 0.75rem; margin-bottom: 0.85rem; }
-        .motivos-titulo { font-size: 0.78rem; font-weight: 800; margin-bottom: 0.35rem; }
-        .motivos-grid { display: grid; grid-template-columns: 1fr 1.25fr 0.9fr 1.35fr; gap: 0.25rem 0.65rem; font-size: 0.72rem; }
-        .motivo-item { display: flex; justify-content: space-between; align-items: center; gap: 0.3rem; line-height: 1.15; }
-        .check-box { width: 14px; height: 14px; border: 1px solid #0f172a; display: inline-flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 900; flex-shrink: 0; }
+        .motivos-box { border: 1.5px solid #0f172a; border-radius: 6px; padding: 0.4rem 0.6rem; margin-bottom: 0.55rem; }
+        .motivos-titulo { font-size: 0.72rem; font-weight: 800; margin-bottom: 0.25rem; }
+        .motivos-grid { display: grid; grid-template-columns: 1fr 1.25fr 0.9fr 1.35fr; gap: 0.2rem 0.55rem; font-size: 0.66rem; }
+        .motivo-item { display: flex; justify-content: space-between; align-items: center; gap: 0.25rem; line-height: 1.1; }
+        .check-box { width: 12px; height: 12px; border: 1px solid #0f172a; display: inline-flex; align-items: center; justify-content: center; font-size: 0.68rem; font-weight: 900; flex-shrink: 0; }
 
-        .tabla-bienes { width: 100%; border-collapse: collapse; margin-bottom: 0.75rem; font-size: 0.85rem; }
-        .tabla-bienes th, .tabla-bienes td { border: 1px solid #0f172a; padding: 0.45rem 0.5rem; }
-        .tabla-bienes th { background: #f1f5f9; font-size: 0.74rem; text-transform: uppercase; text-align: center; }
+        .tabla-bienes { width: 100%; border-collapse: collapse; margin-bottom: 0.5rem; font-size: 0.78rem; }
+        .tabla-bienes th, .tabla-bienes td { border: 1px solid #0f172a; padding: 0.3rem 0.4rem; }
+        .tabla-bienes th { background: #f1f5f9; font-size: 0.68rem; text-transform: uppercase; text-align: center; }
         .tabla-bienes td { vertical-align: middle; }
 
-        .pie-transporte { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0.75rem; font-size: 0.78rem; }
-        .caja-borde { border: 1px solid #0f172a; border-radius: 6px; padding: 0.45rem 0.65rem; }
-        .caja-titulo { font-weight: 800; font-size: 0.74rem; margin-bottom: 0.3rem; }
-        .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-        .sub-campo { border-top: 1px solid #cbd5e1; padding-top: 0.2rem; }
-        .sub-campo small { display: block; font-size: 0.65rem; color: #475569; }
-        .sub-campo div { font-weight: 700; margin-top: 0.1rem; }
+        .pie-transporte { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.45rem; font-size: 0.72rem; }
+        .caja-borde { border: 1px solid #0f172a; border-radius: 6px; padding: 0.35rem 0.55rem; }
+        .caja-titulo { font-weight: 800; font-size: 0.68rem; margin-bottom: 0.2rem; }
+        .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; }
+        .sub-campo { border-top: 1px solid #cbd5e1; padding-top: 0.15rem; }
+        .sub-campo small { display: block; font-size: 0.6rem; color: #475569; }
+        .sub-campo div { font-weight: 700; margin-top: 0.05rem; }
 
-        .peso-letras { font-size: 0.85rem; font-weight: 700; margin-bottom: 2.2rem; border-bottom: 1px solid #475569; padding-bottom: 0.2rem; }
-        .firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; text-align: center; font-size: 0.82rem; font-weight: 700; }
-        .firma-linea { border-top: 1px solid #0f172a; padding-top: 0.3rem; }
+        .peso-letras { font-size: 0.78rem; font-weight: 700; margin-bottom: 1.35rem; border-bottom: 1px solid #475569; padding-bottom: 0.15rem; }
+        .firmas { display: grid; grid-template-columns: 1fr 1fr; gap: 3.5rem; text-align: center; font-size: 0.76rem; font-weight: 700; }
+        .firma-linea { border-top: 1px solid #0f172a; padding-top: 0.25rem; }
+
+        /* LÍNEA DE CORTE DIBUJADA Y RESPONSIVE CON TIJERA AL PRINCIPIO */
+        .separador-corte { display: flex; align-items: center; margin: 0.85rem 0; width: 100%; gap: 0.5rem; color: #64748b; }
+        .separador-corte .tijera-icono { font-size: 1.15rem; line-height: 1; user-select: none; }
+        .separador-corte .linea-punteada { flex: 1; border-bottom: 2px dashed #94a3b8; height: 0; }
 
         @media print {
-            body { background: #fff; padding: 0; }
+            html, body { background: #fff !important; padding: 0 !important; margin: 0 !important; height: 100% !important; }
             .acciones { display: none !important; }
-            .guia-hoja { border: none; padding: 0; max-width: 100%; }
-            @page { size: letter portrait; margin: 0.8cm; }
+            .hoja-carta-doble { max-width: 100% !important; margin: 0 !important; display: flex !important; flex-direction: column !important; height: 100% !important; }
+            .guia-hoja { border: 1px solid #94a3b8 !important; padding: 0.75rem 1.15rem !important; flex: 1 !important; display: flex !important; flex-direction: column !important; justify-content: space-between !important; page-break-inside: avoid !important; break-inside: avoid !important; }
+            .guia-header { margin-bottom: 0.35rem !important; }
+            .empresa-logo { max-height: 40px !important; max-width: 80px !important; }
+            .empresa-titulo { font-size: 1.1rem !important; }
+            .empresa-sub { font-size: 0.66rem !important; }
+            .recuadro-guia { padding: 0.25rem 0.75rem !important; min-width: 185px !important; }
+            .recuadro-guia-titulo { font-size: 0.8rem !important; margin-bottom: 0.15rem !important; }
+            .recuadro-guia-num { font-size: 0.95rem !important; }
+            .datos-traslado { font-size: 0.7rem !important; gap: 0.15rem 1rem !important; margin-bottom: 0.35rem !important; }
+            .motivos-box { padding: 0.3rem 0.5rem !important; margin-bottom: 0.35rem !important; }
+            .motivos-grid { font-size: 0.6rem !important; gap: 0.12rem 0.45rem !important; }
+            .check-box { width: 10px !important; height: 10px !important; font-size: 0.6rem !important; }
+            .tabla-bienes { font-size: 0.72rem !important; margin-bottom: 0.35rem !important; }
+            .tabla-bienes th, .tabla-bienes td { padding: 0.2rem 0.35rem !important; }
+            .pie-transporte { font-size: 0.66rem !important; margin-bottom: 0.3rem !important; }
+            .peso-letras { font-size: 0.72rem !important; margin-bottom: 0.95rem !important; }
+            .firmas { font-size: 0.7rem !important; }
+            .separador-corte { margin: 0.45rem 0 !important; }
+            @page { size: letter portrait; margin: 0.5cm 0.6cm; }
         }
     </style>
 </head>
@@ -189,11 +213,15 @@ $columnasMotivos = [
     <a href="boleta.php?id=<?= $idPesada ?>" class="btn">&larr; Volver a Boleta</a>
     <div style="display: flex; gap: 0.75rem;">
         <button type="button" onclick="descargarGuiaPDF()" id="btnGuiaPDF" class="btn">📄 Descargar PDF</button>
-        <button type="button" onclick="window.print()" class="btn btn-primary">🖨️ Imprimir Guía</button>
+        <button type="button" onclick="window.print()" class="btn btn-primary">🖨️ Imprimir Guías (2 por hoja)</button>
     </div>
 </div>
 
-<div class="guia-hoja" id="guiaImprimible">
+<div class="hoja-carta-doble">
+<?php
+$renderizarGuia = function () use ($empresa, $numGuia, $fechaTraslado, $puntoPartida, $pesada, $puntoLlegada, $correlativo, $columnasMotivos, $motivoSeleccionado, $motivoOtroTexto, $quintales, $marcaPlaca, $pesoEnLetras) {
+?>
+<div class="guia-hoja">
     <div class="guia-header">
         <div class="empresa-bloque">
             <?php if (!empty($empresa['logo']) && file_exists(__DIR__ . '/' . $empresa['logo'])): ?>
@@ -227,7 +255,7 @@ $columnasMotivos = [
         <div class="motivos-titulo">Motivo de Traslado:</div>
         <div class="motivos-grid">
             <?php foreach ($columnasMotivos as $col): ?>
-                <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+                <div style="display: flex; flex-direction: column; gap: 0.15rem;">
                     <?php foreach ($col as $item):
                         $marcado = ($motivoSeleccionado === $item);
                         $textoItem = $item;
@@ -261,7 +289,7 @@ $columnasMotivos = [
                 <td>
                     <strong><?= htmlspecialchars($pesada['producto_nombre'], ENT_QUOTES, 'UTF-8') ?></strong>
                     (<?= htmlspecialchars($pesada['presentacion_nombre'], ENT_QUOTES, 'UTF-8') ?>)
-                    <br><small style="color: #475569;">V. <?= htmlspecialchars($correlativo, ENT_QUOTES, 'UTF-8') ?></small>
+                    &middot; <small style="color: #475569;">V. <?= htmlspecialchars($correlativo, ENT_QUOTES, 'UTF-8') ?></small>
                 </td>
                 <td align="center"><strong>QQ</strong></td>
                 <td align="center"><strong><?= (int)$pesada['cantidad_empaques'] ?></strong></td>
@@ -269,7 +297,7 @@ $columnasMotivos = [
             </tr>
             <tr>
                 <td colspan="4" align="right" style="font-weight: 800;">TOTAL QQ:</td>
-                <td align="right" style="font-weight: 900; font-size: 0.95rem;"><?= number_format($quintales, 2) ?></td>
+                <td align="right" style="font-weight: 900;"><?= number_format($quintales, 2) ?></td>
             </tr>
         </tbody>
     </table>
@@ -298,6 +326,19 @@ $columnasMotivos = [
         <div class="firma-linea">Recibí Conforme</div>
     </div>
 </div>
+<?php
+};
+
+$renderizarGuia();
+?>
+<div class="separador-corte">
+    <span class="tijera-icono">✂</span>
+    <div class="linea-punteada"></div>
+</div>
+<?php
+$renderizarGuia();
+?>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
@@ -306,15 +347,15 @@ function descargarGuiaPDF() {
     const txt = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = 'Generando...';
-    const el = document.getElementById('guiaImprimible');
-    if (typeof html2pdf !== 'function') {
+    const el = document.querySelector('.guia-hoja');
+    if (!el || typeof html2pdf !== 'function') {
         window.print();
         btn.disabled = false;
         btn.innerHTML = txt;
         return;
     }
     html2pdf().set({
-        margin: [6, 6, 6, 6],
+        margin: [10, 10, 10, 10],
         filename: 'Guia_Remision_<?= htmlspecialchars($numGuia, ENT_QUOTES, 'UTF-8') ?>.pdf',
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, logging: false },
