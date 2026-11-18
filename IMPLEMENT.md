@@ -99,6 +99,7 @@ Ejecutar en orden antes de dar por terminada la implementación:
 2. **Monitor en vivo:** Confirmar en `index.php` que el peso en vivo responde desde el indicador real.
 3. **Primera Pesada (`primera_pesada.php`):**
    - Seleccionar `VENTA`, cliente, producto y confirmar que **Origen / Punto de partida** sugiere `CEIBITA SUR, SANTA BARBARA`.
+   - Probar el modo **⚡ Pesada Única**: verificar que al seleccionar **ACEITE** se active automáticamente como sugerencia (pudiendo desmarcarse si aplica segunda pesada), permitiendo liquidar y cerrar en un solo paso.
 4. **Segunda Pesada (`segunda_pesada.php`):**
    - Seleccionar la venta abierta y verificar que aparece el bloque **Guía de Remisión** (`guia_remision`, listbox `motivo_traslado` con los 15 ítems, `marca_vehiculo`, `transportista_rtn`).
    - Cerrar la nota.

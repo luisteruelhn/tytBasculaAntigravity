@@ -41,6 +41,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
         $destino        = trim((string)($_POST['destino'] ?? ''));
         $observaciones  = trim((string)($_POST['observaciones'] ?? ''));
 
+        // Parámetros de Pesada Única (cierre directo en un solo paso)
+        $esPesadaUnica  = isset($_POST['pesada_unica']) && $_POST['pesada_unica'] === '1';
+        $pesoCompUnica  = (float)($_POST['peso_comp_unica'] ?? 0);
+        $idEmpaque      = (int)($_POST['idempaque'] ?? 0);
+        $cantEmpaques   = max(0, (int)($_POST['cantidad_empaques'] ?? 0));
+        $pctHumedad     = max(0.0, (float)($_POST['ajuste_humedad_pct'] ?? 0));
+        $pctDefectos    = max(0.0, (float)($_POST['descuento_calidad_pct'] ?? 0));
+        $guiaRemision   = trim((string)($_POST['guia_remision'] ?? ''));
+        $motivoTraslado = trim((string)($_POST['motivo_traslado'] ?? ''));
+        $motivoOtro     = trim((string)($_POST['motivo_traslado_otro'] ?? ''));
+        $transpRtn      = trim((string)($_POST['transportista_rtn'] ?? ''));
+        $marcaVehiculo  = trim((string)($_POST['marca_vehiculo'] ?? ''));
+
         // Validaciones mínimas
         if ($pesoFijado <= 0) {
             $error = 'Debes fijar un peso mayor a cero antes de guardar.';
@@ -50,6 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
             $error = 'Selecciona el producto y la presentación.';
         } elseif ($placa === '') {
             $error = 'La placa del vehículo es obligatoria.';
+        } elseif ($esPesadaUnica && $pesoCompUnica < 0) {
+            $error = 'El peso complementario en pesada única no puede ser negativo.';
         } else {
             try {
                 $pdo->beginTransaction();
@@ -60,52 +75,156 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 $stmtCorr->execute([':empresa_id' => $empresaId]);
                 $correlativo = (int)$stmtCorr->fetch(PDO::FETCH_ASSOC)['sig'];
 
-                // Definir pesos según tipo_registro
-                $pesoBruto = ($tipoRegistro === 'BRUTO') ? $pesoFijado : null;
-                $taraVehiculo = ($tipoRegistro === 'TARA') ? $pesoFijado : null;
-                $origenBruto = ($tipoRegistro === 'BRUTO') ? ($modoCaptura === 'MANUAL' ? 'MANUAL' : 'INDICADOR') : null;
-                $origenTara = ($tipoRegistro === 'TARA') ? ($modoCaptura === 'MANUAL' ? 'MANUAL' : 'INDICADOR') : null;
                 $capturadoPor = (int)$usuarioActual['id'];
+                $modoCapturaVal = ($modoCaptura === 'MANUAL' ? 'MANUAL' : 'INDICADOR');
 
-                $sql = "INSERT INTO t_pesadas (
-                            empresa_id, tipo_operacion, $colCorrelativo, estado,
-                            clie_prov_id, presentacion_id, placa, motorista, licencia,
-                            origen, destino, observaciones, abierto_por, responsable_id,
-                            tipo_primera_pesada, primera_pesada_at, entrada_camion_at,
-                            peso_bruto_lb, bruto_capturado_por, origen_bruto,
-                            tara_vehiculo_lb, tara_capturada_por, origen_tara
-                        ) VALUES (
-                            :empresa_id, :tipo_operacion, :correlativo, 'ABIERTA',
-                            :clie_prov_id, :presentacion_id, :placa, :motorista, :licencia,
-                            :origen, :destino, :observaciones, :abierto_por, :responsable_id,
-                            :tipo_primera, NOW(), NOW(),
-                            :peso_bruto, :bruto_por, :origen_bruto,
-                            :tara_vehiculo, :tara_por, :origen_tara
-                        )";
+                if ($esPesadaUnica) {
+                    // Cierre en un solo paso
+                    if ($tipoRegistro === 'BRUTO') {
+                        $pesoBruto = $pesoFijado;
+                        $taraVehiculo = $pesoCompUnica;
+                        $origenBruto = $modoCapturaVal;
+                        $origenTara = ($pesoCompUnica > 0 ? 'MANUAL' : $modoCapturaVal);
+                    } else {
+                        $taraVehiculo = $pesoFijado;
+                        $pesoBruto = $pesoCompUnica;
+                        $origenTara = $modoCapturaVal;
+                        $origenBruto = 'MANUAL';
+                    }
 
-                $stmt = $pdo->prepare($sql);
-                $stmt->execute([
-                    ':empresa_id'     => $empresaId,
-                    ':tipo_operacion' => $tipoOperacion,
-                    ':correlativo'    => $correlativo,
-                    ':clie_prov_id'   => $clieProvId,
-                    ':presentacion_id'=> $presentacionId,
-                    ':placa'          => $placa,
-                    ':motorista'      => ($motorista !== '' ? $motorista : null),
-                    ':licencia'       => ($licencia !== '' ? $licencia : null),
-                    ':origen'         => ($origen !== '' ? $origen : null),
-                    ':destino'        => ($destino !== '' ? $destino : null),
-                    ':observaciones'  => ($observaciones !== '' ? $observaciones : null),
-                    ':abierto_por'    => $capturadoPor,
-                    ':responsable_id' => $responsableId,
-                    ':tipo_primera'   => $tipoRegistro,
-                    ':peso_bruto'     => $pesoBruto,
-                    ':bruto_por'      => ($pesoBruto !== null ? $capturadoPor : null),
-                    ':origen_bruto'   => $origenBruto,
-                    ':tara_vehiculo'  => $taraVehiculo,
-                    ':tara_por'       => ($taraVehiculo !== null ? $capturadoPor : null),
-                    ':origen_tara'    => $origenTara
-                ]);
+                    if ($pesoBruto <= $taraVehiculo) {
+                        throw new RuntimeException('En Pesada Única el peso bruto (' . number_format($pesoBruto, 0) . ' lb) debe ser mayor a la tara (' . number_format($taraVehiculo, 0) . ' lb).');
+                    }
+
+                    $pesoNetoSinDesc = $pesoBruto - $taraVehiculo;
+                    $taraUnitaria = 0.0;
+                    $taraTotalEmp = 0.0;
+                    if ($idEmpaque > 0 && $cantEmpaques > 0) {
+                        $stmtTara = $pdo->prepare("SELECT taralbs FROM t_taras WHERE idempaque = :id LIMIT 1");
+                        $stmtTara->execute([':id' => $idEmpaque]);
+                        $rowTara = $stmtTara->fetch(PDO::FETCH_ASSOC);
+                        if ($rowTara) {
+                            $taraUnitaria = (float)$rowTara['taralbs'];
+                            $taraTotalEmp = round($taraUnitaria * $cantEmpaques);
+                        }
+                    }
+
+                    $baseDescuentos = max(0.0, $pesoNetoSinDesc - $taraTotalEmp);
+                    $descHumedadLb  = round($baseDescuentos * ($pctHumedad / 100.0));
+                    $descDefectosLb = round($baseDescuentos * ($pctDefectos / 100.0));
+                    $pesoFinalLb    = max(0.0, $baseDescuentos - $descHumedadLb - $descDefectosLb);
+
+                    $sql = "INSERT INTO t_pesadas (
+                                empresa_id, tipo_operacion, $colCorrelativo, estado,
+                                clie_prov_id, presentacion_id, placa, motorista, licencia,
+                                origen, destino, observaciones, abierto_por, responsable_id,
+                                tipo_primera_pesada, primera_pesada_at, segunda_pesada_at, entrada_camion_at, salida_camion_at,
+                                emitida_at, emitida_por,
+                                peso_bruto_lb, bruto_capturado_por, origen_bruto,
+                                tara_vehiculo_lb, tara_capturada_por, origen_tara,
+                                idempaque, cantidad_empaques, tara_unitaria_aplicada_lb,
+                                base_descuentos_lb, ajuste_humedad_pct, descuento_humedad_lb,
+                                descuento_calidad_pct, descuento_defectos_lb, peso_final_lb, calculo_libras_enteras,
+                                guia_remision, motivo_traslado, motivo_traslado_otro, transportista_rtn, marca_vehiculo
+                            ) VALUES (
+                                :empresa_id, :tipo_operacion, :correlativo, 'CERRADA',
+                                :clie_prov_id, :presentacion_id, :placa, :motorista, :licencia,
+                                :origen, :destino, :observaciones, :abierto_por, :responsable_id,
+                                :tipo_primera, NOW(), NOW(), NOW(), NOW(),
+                                NOW(), :emitida_por,
+                                :peso_bruto, :bruto_por, :origen_bruto,
+                                :tara_vehiculo, :tara_por, :origen_tara,
+                                :idempaque, :cant_empaques, :tara_unitaria,
+                                :base_descuentos, :pct_humedad, :desc_humedad_lb,
+                                :pct_calidad, :desc_defectos_lb, :peso_final_lb, 1,
+                                :guia_remision, :motivo_traslado, :motivo_traslado_otro, :transportista_rtn, :marca_vehiculo
+                            )";
+
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([
+                        ':empresa_id'           => $empresaId,
+                        ':tipo_operacion'       => $tipoOperacion,
+                        ':correlativo'          => $correlativo,
+                        ':clie_prov_id'         => $clieProvId,
+                        ':presentacion_id'      => $presentacionId,
+                        ':placa'                => $placa,
+                        ':motorista'            => ($motorista !== '' ? $motorista : null),
+                        ':licencia'             => ($licencia !== '' ? $licencia : null),
+                        ':origen'               => ($origen !== '' ? $origen : null),
+                        ':destino'              => ($destino !== '' ? $destino : null),
+                        ':observaciones'        => ($observaciones !== '' ? $observaciones : null),
+                        ':abierto_por'          => $capturadoPor,
+                        ':responsable_id'       => $responsableId,
+                        ':tipo_primera'         => $tipoRegistro,
+                        ':emitida_por'          => $capturadoPor,
+                        ':peso_bruto'           => $pesoBruto,
+                        ':bruto_por'            => $capturadoPor,
+                        ':origen_bruto'         => $origenBruto,
+                        ':tara_vehiculo'        => $taraVehiculo,
+                        ':tara_por'             => $capturadoPor,
+                        ':origen_tara'          => $origenTara,
+                        ':idempaque'            => ($idEmpaque > 0 ? $idEmpaque : null),
+                        ':cant_empaques'        => $cantEmpaques,
+                        ':tara_unitaria'        => ($taraUnitaria > 0 ? $taraUnitaria : null),
+                        ':base_descuentos'      => $baseDescuentos,
+                        ':pct_humedad'          => $pctHumedad,
+                        ':desc_humedad_lb'      => $descHumedadLb,
+                        ':pct_calidad'          => $pctDefectos,
+                        ':desc_defectos_lb'     => $descDefectosLb,
+                        ':peso_final_lb'        => $pesoFinalLb,
+                        ':guia_remision'        => ($tipoOperacion === 'VENTA' && $guiaRemision !== '' ? $guiaRemision : null),
+                        ':motivo_traslado'      => ($tipoOperacion === 'VENTA' && $motivoTraslado !== '' ? $motivoTraslado : null),
+                        ':motivo_traslado_otro' => ($tipoOperacion === 'VENTA' && $motivoOtro !== '' ? $motivoOtro : null),
+                        ':transportista_rtn'    => ($tipoOperacion === 'VENTA' && $transpRtn !== '' ? $transpRtn : null),
+                        ':marca_vehiculo'       => ($tipoOperacion === 'VENTA' && $marcaVehiculo !== '' ? $marcaVehiculo : null),
+                    ]);
+                } else {
+                    // Primera pesada estándar (ABIERTA en patio)
+                    $pesoBruto = ($tipoRegistro === 'BRUTO') ? $pesoFijado : null;
+                    $taraVehiculo = ($tipoRegistro === 'TARA') ? $pesoFijado : null;
+                    $origenBruto = ($tipoRegistro === 'BRUTO') ? $modoCapturaVal : null;
+                    $origenTara = ($tipoRegistro === 'TARA') ? $modoCapturaVal : null;
+
+                    $sql = "INSERT INTO t_pesadas (
+                                empresa_id, tipo_operacion, $colCorrelativo, estado,
+                                clie_prov_id, presentacion_id, placa, motorista, licencia,
+                                origen, destino, observaciones, abierto_por, responsable_id,
+                                tipo_primera_pesada, primera_pesada_at, entrada_camion_at,
+                                peso_bruto_lb, bruto_capturado_por, origen_bruto,
+                                tara_vehiculo_lb, tara_capturada_por, origen_tara
+                            ) VALUES (
+                                :empresa_id, :tipo_operacion, :correlativo, 'ABIERTA',
+                                :clie_prov_id, :presentacion_id, :placa, :motorista, :licencia,
+                                :origen, :destino, :observaciones, :abierto_por, :responsable_id,
+                                :tipo_primera, NOW(), NOW(),
+                                :peso_bruto, :bruto_por, :origen_bruto,
+                                :tara_vehiculo, :tara_por, :origen_tara
+                            )";
+
+                    $stmt = $pdo->prepare($sql);
+                    $stmt->execute([
+                        ':empresa_id'     => $empresaId,
+                        ':tipo_operacion' => $tipoOperacion,
+                        ':correlativo'    => $correlativo,
+                        ':clie_prov_id'   => $clieProvId,
+                        ':presentacion_id'=> $presentacionId,
+                        ':placa'          => $placa,
+                        ':motorista'      => ($motorista !== '' ? $motorista : null),
+                        ':licencia'       => ($licencia !== '' ? $licencia : null),
+                        ':origen'         => ($origen !== '' ? $origen : null),
+                        ':destino'        => ($destino !== '' ? $destino : null),
+                        ':observaciones'  => ($observaciones !== '' ? $observaciones : null),
+                        ':abierto_por'    => $capturadoPor,
+                        ':responsable_id' => $responsableId,
+                        ':tipo_primera'   => $tipoRegistro,
+                        ':peso_bruto'     => $pesoBruto,
+                        ':bruto_por'      => ($pesoBruto !== null ? $capturadoPor : null),
+                        ':origen_bruto'   => $origenBruto,
+                        ':tara_vehiculo'  => $taraVehiculo,
+                        ':tara_por'       => ($taraVehiculo !== null ? $capturadoPor : null),
+                        ':origen_tara'    => $origenTara
+                    ]);
+                }
 
                 $idPesada = (int)$pdo->lastInsertId();
                 $pdo->commit();
@@ -158,6 +277,8 @@ $usuarios = $pdo->prepare("SELECT id, nombre, rol FROM t_usuarios WHERE empresa_
 $usuarios->execute([':empresa_id' => $empresaId]);
 $listaUsuarios = $usuarios->fetchAll(PDO::FETCH_ASSOC);
 
+$listaEmpaques = $pdo->query("SELECT idempaque, nombre, taralbs FROM t_taras ORDER BY taralbs ASC")->fetchAll(PDO::FETCH_ASSOC);
+
 $tokenCsrf = obtenerCsrfToken();
 renderizarEncabezado('Primera Pesada', 'primera');
 ?>
@@ -199,12 +320,20 @@ renderizarEncabezado('Primera Pesada', 'primera');
     <!-- =======================================================================
          PANTALLA 2: CONFIRMACIÓN POST-GUARDADO (FIEL A IMAGEN 2)
          ======================================================================= -->
-    <?php if ($pesadaGuardada): ?>
+    <?php if ($pesadaGuardada): 
+        $fueCerrada = (($pesadaGuardada['estado'] ?? '') === 'CERRADA');
+    ?>
         <div class="card" style="padding: 2.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
             
-            <div style="background: #e8f0fe; color: #1e40af; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 1.75rem; font-weight: 500; font-size: 0.95rem;">
-                Primera pesada guardada.
-            </div>
+            <?php if ($fueCerrada): ?>
+                <div style="background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 1.75rem; font-weight: 700; font-size: 0.95rem;">
+                    ✅ Pesada única guardada y boleta cerrada en un solo paso.
+                </div>
+            <?php else: ?>
+                <div style="background: #e8f0fe; color: #1e40af; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 1.75rem; font-weight: 500; font-size: 0.95rem;">
+                    Primera pesada guardada.
+                </div>
+            <?php endif; ?>
 
             <div style="margin-bottom: 1.5rem;">
                 <h2 style="font-size: 1.6rem; font-weight: 800; margin: 0 0 0.5rem 0; color: var(--text-main);">
@@ -215,23 +344,43 @@ renderizarEncabezado('Primera Pesada', 'primera');
                     <?= htmlspecialchars($pesadaGuardada['producto_nombre'], ENT_QUOTES, 'UTF-8') ?> &middot; 
                     <?= htmlspecialchars($pesadaGuardada['presentacion_nombre'], ENT_QUOTES, 'UTF-8') ?>
                 </div>
-                <div style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.4rem;">
-                    <?= ($pesadaGuardada['tipo_primera_pesada'] === 'BRUTO' ? 'Peso bruto' : 'Tara de vehículo') ?>: 
-                    <strong style="font-weight: 800;"><?= number_format((float)($pesadaGuardada['peso_bruto_lb'] ?? $pesadaGuardada['tara_vehiculo_lb']), 0) ?> lb</strong>
-                </div>
+                <?php if ($fueCerrada): ?>
+                    <div style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.4rem;">
+                        Peso final neto: <strong style="font-weight: 800;"><?= number_format((float)$pesadaGuardada['peso_final_lb'], 0) ?> lb</strong>
+                        (<strong><?= number_format((float)$pesadaGuardada['peso_final_lb'] / 100.0, 2) ?> QQ</strong>)
+                    </div>
+                <?php else: ?>
+                    <div style="font-size: 1.05rem; color: var(--text-main); margin-bottom: 0.4rem;">
+                        <?= ($pesadaGuardada['tipo_primera_pesada'] === 'BRUTO' ? 'Peso bruto' : 'Tara de vehículo') ?>: 
+                        <strong style="font-weight: 800;"><?= number_format((float)($pesadaGuardada['peso_bruto_lb'] ?? $pesadaGuardada['tara_vehiculo_lb']), 0) ?> lb</strong>
+                    </div>
+                <?php endif; ?>
                 <div style="font-size: 0.95rem; color: var(--text-muted);">
                     Placa <?= htmlspecialchars($pesadaGuardada['placa'], ENT_QUOTES, 'UTF-8') ?> &middot; Responsable <?= htmlspecialchars($pesadaGuardada['responsable_nombre'], ENT_QUOTES, 'UTF-8') ?>
                 </div>
             </div>
 
-            <div style="background: #f1f5f9; color: #475569; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 2rem; font-size: 0.92rem;">
-                Nota pendiente de segunda pesada.
-            </div>
+            <?php if (!$fueCerrada): ?>
+                <div style="background: #f1f5f9; color: #475569; border-radius: 8px; padding: 0.85rem 1.25rem; margin-bottom: 2rem; font-size: 0.92rem;">
+                    Nota pendiente de segunda pesada.
+                </div>
+            <?php endif; ?>
 
             <div style="display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;">
-                <a href="segunda_pesada.php?id=<?= $pesadaGuardada['idpesada'] ?>" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
-                    Completar segunda pesada
-                </a>
+                <?php if ($fueCerrada): ?>
+                    <a href="boleta.php?id=<?= (int)$pesadaGuardada['idpesada'] ?>" target="_blank" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px; text-decoration: none;">
+                        🖨️ Ver / Imprimir Boleta
+                    </a>
+                    <?php if ($pesadaGuardada['tipo_operacion'] === 'VENTA'): ?>
+                        <a href="guia_remision.php?id=<?= (int)$pesadaGuardada['idpesada'] ?>" target="_blank" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; font-weight: 700; color: #047857; border: 1px solid #047857; background: #ecfdf5; border-radius: 6px; text-decoration: none;">
+                            🚚 Guía de Remisión
+                        </a>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <a href="segunda_pesada.php?id=<?= $pesadaGuardada['idpesada'] ?>" class="btn btn-primary" style="padding: 0.75rem 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
+                        Completar segunda pesada
+                    </a>
+                <?php endif; ?>
                 <a href="primera_pesada.php" class="btn btn-secondary" style="padding: 0.75rem 1.25rem; font-weight: 600; text-decoration: none;">
                     Registrar otra pesada
                 </a>
@@ -304,6 +453,17 @@ renderizarEncabezado('Primera Pesada', 'primera');
                             Ingresar peso manual (lb)
                         </label>
                         <input type="number" id="input_manual" class="form-control" style="height: 42px; border-radius: 6px;" placeholder="0" min="1" step="1">
+                    </div>
+
+                    <!-- TOGGLE PESADA ÚNICA (CIERRE EN UN SOLO PASO) -->
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+                        <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; margin: 0; font-weight: 700; font-size: 0.88rem; color: #0f172a;">
+                            <input type="checkbox" id="chkPesadaUnica" name="pesada_unica" value="1" onchange="alternarPesadaUnica(this.checked, true)" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span>⚡ Pesada Única (cerrar boleta en un solo paso)</span>
+                        </label>
+                        <div id="avisoSugerenciaAceite" style="display: none; margin-top: 0.35rem; font-size: 0.78rem; color: #047857; font-weight: 600;">
+                            💡 Sugerido automáticamente para ACEITE (puedes desmarcarlo si irá a segunda pesada).
+                        </div>
                     </div>
                 </div>
 
@@ -484,6 +644,112 @@ renderizarEncabezado('Primera Pesada', 'primera');
             </div>
         </div>
 
+        <!-- BLOQUE DE CIERRE DIRECTO (VISIBLE SOLO EN PESADA ÚNICA) -->
+        <div id="bloquePesadaUnica" class="card" style="display: none; padding: 1.75rem 2rem; border-radius: 12px; border: 2px solid #0b57d0; background: var(--bg-surface); margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: #0b57d0;">
+                    ⚡ Liquidación y Cierre Directo (Pesada Única)
+                </h3>
+                <span style="font-size: 0.8rem; font-weight: 700; color: #475569;">1 QQ = 100 lb</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+                <div>
+                    <label for="peso_comp_unica" id="lblPesoCompUnica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
+                        Tara vehículo / recipiente (lb)
+                    </label>
+                    <input type="number" id="peso_comp_unica" name="peso_comp_unica" class="form-control" value="0" min="0" step="1" oninput="recalcularPesadaUnica()">
+                </div>
+                <div>
+                    <label for="idempaque_unica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
+                        Tipo de empaque
+                    </label>
+                    <select id="idempaque_unica" name="idempaque" class="form-control" onchange="recalcularPesadaUnica()">
+                        <option value="0" data-tara="0">Sin empaque (0 lb)</option>
+                        <?php foreach ($listaEmpaques as $emp): ?>
+                            <option value="<?= (int)$emp['idempaque'] ?>" data-tara="<?= (float)$emp['taralbs'] ?>">
+                                <?= htmlspecialchars($emp['nombre'], ENT_QUOTES, 'UTF-8') ?> (<?= number_format((float)$emp['taralbs'], 3) ?> lb)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div>
+                    <label for="cantidad_empaques_unica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
+                        Cantidad de empaques
+                    </label>
+                    <input type="number" id="cantidad_empaques_unica" name="cantidad_empaques" class="form-control" value="0" min="0" step="1" oninput="recalcularPesadaUnica()">
+                </div>
+                <div>
+                    <label for="ajuste_humedad_unica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
+                        % Humedad
+                    </label>
+                    <input type="number" id="ajuste_humedad_unica" name="ajuste_humedad_pct" class="form-control" value="0" min="0" max="100" step="0.01" oninput="recalcularPesadaUnica()">
+                </div>
+                <div>
+                    <label for="descuento_calidad_unica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
+                        % Defectos
+                    </label>
+                    <input type="number" id="descuento_calidad_unica" name="descuento_calidad_pct" class="form-control" value="0" min="0" max="100" step="0.01" oninput="recalcularPesadaUnica()">
+                </div>
+            </div>
+
+            <!-- RESUMEN EN VIVO DE PESADA ÚNICA -->
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                <div id="resUnicaDetalle" style="font-size: 0.85rem; color: #334155;">
+                    Fija el peso para ver la liquidación final.
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 0.78rem; color: #64748b; display: block;">TOTAL FINAL</span>
+                    <strong id="resUnicaTotal" style="font-size: 1.35rem; color: #881337;">0 lb &middot; 0.00 QQ</strong>
+                </div>
+            </div>
+
+            <!-- GUÍA DE REMISIÓN EN PESADA ÚNICA (SOLO SI ES VENTA) -->
+            <div id="subBloqueGuiaUnica" style="display: none; border-top: 1px dashed #cbd5e1; padding-top: 1rem; margin-top: 0.5rem;">
+                <h4 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; font-weight: 800; color: #047857;">
+                    Guía de Remisión (Venta)
+                </h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div>
+                        <label for="guia_remision_unica" class="form-label" style="font-size: 0.8rem;">N° Guía de Remisión</label>
+                        <input type="text" id="guia_remision_unica" name="guia_remision" class="form-control" maxlength="30" placeholder="Ej. 002861">
+                    </div>
+                    <div>
+                        <label for="motivo_traslado_unica" class="form-label" style="font-size: 0.8rem;">Motivo de Traslado</label>
+                        <select id="motivo_traslado_unica" name="motivo_traslado" class="form-control" onchange="document.getElementById('boxMotivoOtroUnica').style.display = (this.value === 'Otros (especificar)') ? 'block' : 'none';">
+                            <option value="Venta" selected>Venta</option>
+                            <option value="Compra">Compra</option>
+                            <option value="Consignación">Consignación</option>
+                            <option value="Venta con entrega a terceros">Venta con entrega a terceros</option>
+                            <option value="Venta sujeta a confirmación por el comprador">Venta sujeta a confirmación por el comprador</option>
+                            <option value="Traslado entre establecimientos de la misma Empresa">Traslado entre establecimientos de la misma Empresa</option>
+                            <option value="Devolución">Devolución</option>
+                            <option value="Otros (especificar)">Otros (especificar)</option>
+                            <option value="Recojo de bienes">Recojo de bienes</option>
+                            <option value="Importación">Importación</option>
+                            <option value="Exportación">Exportación</option>
+                            <option value="Traslado zona primaria">Traslado zona primaria</option>
+                            <option value="Traslado por emisor itinerante de comprobantes de pago">Traslado por emisor itinerante de comprobantes de pago</option>
+                            <option value="Traslado de bienes para transformación">Traslado de bienes para transformación</option>
+                            <option value="Transformación">Transformación</option>
+                        </select>
+                    </div>
+                    <div id="boxMotivoOtroUnica" style="display: none;">
+                        <label for="motivo_traslado_otro_unica" class="form-label" style="font-size: 0.8rem;">Especificar otro motivo</label>
+                        <input type="text" id="motivo_traslado_otro_unica" name="motivo_traslado_otro" class="form-control" maxlength="120">
+                    </div>
+                    <div>
+                        <label for="marca_vehiculo_unica" class="form-label" style="font-size: 0.8rem;">Marca del Vehículo</label>
+                        <input type="text" id="marca_vehiculo_unica" name="marca_vehiculo" class="form-control" maxlength="60">
+                    </div>
+                    <div>
+                        <label for="transportista_rtn_unica" class="form-label" style="font-size: 0.8rem;">R.T.N. Transportista</label>
+                        <input type="text" id="transportista_rtn_unica" name="transportista_rtn" class="form-control" maxlength="20">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ACCIONES INFERIORES -->
         <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 3rem;">
             <button type="submit" id="btnGuardarPesada" class="btn btn-primary" style="background: #2563eb; padding: 0.75rem 1.75rem; font-weight: 700; border-radius: 6px;" disabled>
@@ -589,8 +855,18 @@ function cambiarTransaccionPrincipal(tipo) {
     if (txtGuiaFijar) txtGuiaFijar.style.display = 'none';
     if (txtGuiaGuardar) txtGuiaGuardar.innerText = 'Fija el peso antes de guardar.';
 
-    // Actualizar filtro de Proveedor / Cliente
+    // Actualizar filtro de Proveedor / Cliente y sub-bloque Guía de Remisión
     filtrarPersonas(tipo);
+    const subGuia = document.getElementById('subBloqueGuiaUnica');
+    if (subGuia) {
+        subGuia.style.display = (tipo === 'VENTA') ? 'block' : 'none';
+    }
+    const chkUnica = document.getElementById('chkPesadaUnica');
+    if (chkUnica && chkUnica.checked) {
+        selTipoReg.value = 'BRUTO';
+        document.getElementById('tipo_registro_hidden').value = 'BRUTO';
+        recalcularPesadaUnica();
+    }
 }
 
 // Permitir habilitar o bloquear manualmente el selector de peso
@@ -613,9 +889,85 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selTipoReg) {
         selTipoReg.addEventListener('change', () => {
             document.getElementById('tipo_registro_hidden').value = selTipoReg.value;
+            recalcularPesadaUnica();
         });
     }
 });
+
+let pesadaUnicaAutoActivada = false;
+
+function alternarPesadaUnica(activa, cambioManual) {
+    if (cambioManual) {
+        pesadaUnicaAutoActivada = false;
+        const aviso = document.getElementById('avisoSugerenciaAceite');
+        if (aviso && !activa) aviso.style.display = 'none';
+    }
+
+    const bloque = document.getElementById('bloquePesadaUnica');
+    const btnGuardar = document.getElementById('btnGuardarPesada');
+    const tipoOp = document.getElementById('tipo_operacion').value;
+    const subGuia = document.getElementById('subBloqueGuiaUnica');
+    const selTipoReg = document.getElementById('tipo_registro');
+
+    if (bloque) bloque.style.display = activa ? 'block' : 'none';
+    if (subGuia) subGuia.style.display = (activa && tipoOp === 'VENTA') ? 'block' : 'none';
+
+    if (btnGuardar) {
+        btnGuardar.innerText = activa ? '⚡ Guardar y cerrar pesada única' : 'Guardar primera pesada';
+        btnGuardar.style.background = activa ? '#047857' : '#2563eb';
+    }
+
+    if (activa) {
+        selTipoReg.value = 'BRUTO';
+        document.getElementById('tipo_registro_hidden').value = 'BRUTO';
+        recalcularPesadaUnica();
+    } else {
+        // Restaurar sugerencia normal por operación si se desactiva
+        selTipoReg.value = (tipoOp === 'COMPRA') ? 'BRUTO' : 'TARA';
+        document.getElementById('tipo_registro_hidden').value = selTipoReg.value;
+    }
+}
+
+function recalcularPesadaUnica() {
+    const chk = document.getElementById('chkPesadaUnica');
+    if (!chk || !chk.checked) return;
+
+    const pesoFijado = parseFloat(document.getElementById('inputPesoFijado').value || '0');
+    const tipoReg = document.getElementById('tipo_registro_hidden').value;
+    const pesoComp = parseFloat(document.getElementById('peso_comp_unica').value || '0');
+
+    const lblComp = document.getElementById('lblPesoCompUnica');
+    if (lblComp) {
+        lblComp.innerText = (tipoReg === 'BRUTO') ? 'Tara vehículo / recipiente (lb)' : 'Peso Bruto con carga (lb)';
+    }
+
+    const bruto = (tipoReg === 'BRUTO') ? pesoFijado : pesoComp;
+    const taraV = (tipoReg === 'BRUTO') ? pesoComp : pesoFijado;
+    const netoVeh = Math.max(0, bruto - taraV);
+
+    const selEmp = document.getElementById('idempaque_unica');
+    const optEmp = selEmp.options[selEmp.selectedIndex];
+    const taraUnit = optEmp ? parseFloat(optEmp.getAttribute('data-tara') || '0') : 0;
+    const cantEmp = parseInt(document.getElementById('cantidad_empaques_unica').value || '0', 10);
+    const taraEmp = Math.round(taraUnit * Math.max(0, cantEmp));
+
+    const base = Math.max(0, netoVeh - taraEmp);
+    const pctH = Math.max(0, parseFloat(document.getElementById('ajuste_humedad_unica').value || '0'));
+    const pctD = Math.max(0, parseFloat(document.getElementById('descuento_calidad_unica').value || '0'));
+    const descH = Math.round(base * (pctH / 100));
+    const descD = Math.round(base * (pctD / 100));
+    const finalLb = Math.max(0, base - descH - descD);
+    const qq = finalLb / 100;
+
+    const elDetalle = document.getElementById('resUnicaDetalle');
+    const elTotal = document.getElementById('resUnicaTotal');
+    if (elDetalle) {
+        elDetalle.innerText = `Bruto: ${bruto.toLocaleString('en-US')} lb · Tara: ${taraV.toLocaleString('en-US')} lb · Neto: ${netoVeh.toLocaleString('en-US')} lb · Tara emp: ${taraEmp.toLocaleString('en-US')} lb · Base: ${base.toLocaleString('en-US')} lb`;
+    }
+    if (elTotal) {
+        elTotal.innerText = `${finalLb.toLocaleString('en-US')} lb · ${qq.toFixed(2)} QQ`;
+    }
+}
 
 function alternarModoCaptura(modo) {
     const divManual = document.getElementById('campoPesoManual');
@@ -650,6 +1002,7 @@ function fijarPeso() {
         btnGuardar.disabled = false;
         if (txtGuiaGuardar) txtGuiaGuardar.style.display = 'none';
     }
+    recalcularPesadaUnica();
 }
 
 function filtrarPersonas(tipoOp) {
@@ -688,6 +1041,30 @@ function filtrarPresentaciones(productoId) {
 
     if (filtradas.length === 1) {
         selPres.value = filtradas[0].id;
+    }
+
+    // Sugerir Pesada Única automáticamente cuando el producto seleccionado sea ACEITE
+    const selProd = document.getElementById('producto_id');
+    const nombreProd = (selProd && selProd.selectedIndex >= 0) ? selProd.options[selProd.selectedIndex].text.toUpperCase() : '';
+    const chkUnica = document.getElementById('chkPesadaUnica');
+    const avisoAceite = document.getElementById('avisoSugerenciaAceite');
+
+    if (chkUnica) {
+        if (nombreProd.includes('ACEITE')) {
+            if (!chkUnica.checked) {
+                chkUnica.checked = true;
+                pesadaUnicaAutoActivada = true;
+                alternarPesadaUnica(true, false);
+            }
+            if (avisoAceite) avisoAceite.style.display = 'block';
+        } else {
+            if (avisoAceite) avisoAceite.style.display = 'none';
+            if (pesadaUnicaAutoActivada) {
+                chkUnica.checked = false;
+                pesadaUnicaAutoActivada = false;
+                alternarPesadaUnica(false, false);
+            }
+        }
     }
 }
 
