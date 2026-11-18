@@ -26,13 +26,16 @@ $stmtCats = $pdo->prepare("SELECT id, codigo, nombre FROM t_categorias WHERE emp
 $stmtCats->execute([':empresa_id' => $empresaId]);
 $listaCategorias = $stmtCats->fetchAll();
 
+$esSoloLectura = ($rolActual === 'REMOTO');
 $mensajeExito = '';
 $error = '';
 $erroresCampos = [];
 
 // 1. PROCESAR CREAR O EDITAR PRODUCTO
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array($_POST['accion'], ['crear', 'editar'], true)) {
-    if (!validarCsrfToken($_POST['csrf_token'] ?? null)) {
+    if ($esSoloLectura) {
+        $error = 'Acceso de solo consulta: el perfil REMOTO no puede modificar productos.';
+    } elseif (!validarCsrfToken($_POST['csrf_token'] ?? null)) {
         $error = 'La sesión del formulario venció. Por favor recarga e intenta de nuevo.';
     } else {
         $prodId = (int)($_POST['id_producto'] ?? 0);
@@ -125,7 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
 
 // 2. PROCESAR ALTERNAR ESTADO (ACTIVO / INACTIVO)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'alternar_estado') {
-    if (!validarCsrfToken($_POST['csrf_token'] ?? null)) {
+    if ($esSoloLectura) {
+        $error = 'Acceso de solo consulta: el perfil REMOTO no puede modificar productos.';
+    } elseif (!validarCsrfToken($_POST['csrf_token'] ?? null)) {
         $error = 'Token de seguridad inválido.';
     } else {
         $idCambiar = (int)($_POST['id_producto'] ?? 0);
@@ -197,9 +202,11 @@ renderizarEncabezado('Productos', 'productos');
             </span>
         </div>
 
+        <?php if (!$esSoloLectura): ?>
         <button type="button" class="btn btn-primary" onclick="abrirModalNuevo()" style="font-size: 0.95rem; font-weight: 600; padding: 0.65rem 1.35rem; border-radius: var(--radius-sm); background: #0b57d0; box-shadow: none;">
             Nuevo producto
         </button>
+        <?php endif; ?>
     </div>
 
     <!-- ALERTAS -->
@@ -309,6 +316,9 @@ renderizarEncabezado('Productos', 'productos');
                                     <?= $p['activo'] ? 'Activo' : 'Inactivo' ?>
                                 </td>
                                 <td style="padding: 1.15rem 0.5rem;">
+                                    <?php if ($esSoloLectura): ?>
+                                        <span style="color: var(--text-muted); font-size: 0.88rem;">Lectura</span>
+                                    <?php else: ?>
                                     <button 
                                         type="button" 
                                         style="background: none; border: none; padding: 0; color: #1e40af; font-size: 0.95rem; font-weight: 500; cursor: pointer; text-decoration: underline; text-underline-offset: 3px;"
@@ -316,6 +326,7 @@ renderizarEncabezado('Productos', 'productos');
                                     >
                                         Editar
                                     </button>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

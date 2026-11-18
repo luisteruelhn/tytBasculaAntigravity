@@ -13,6 +13,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/src/layout.php';
 
 $usuarioActual = requerirAutenticacion();
+$esRemoto = tieneRol($usuarioActual, ['REMOTO']);
 $empresaId = (int)$usuarioActual['empresa_id'];
 $empresaNombre = $usuarioActual['empresa_nombre'] ?? 'BÁSCULA INDUSTRIAL';
 $pdo = obtenerDB();
@@ -217,6 +218,8 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                                                 </a>
                                             <?php endif; ?>
                                         </div>
+                                    <?php elseif ($esRemoto): ?>
+                                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">En patio (solo consulta)</span>
                                     <?php else: ?>
                                         <a href="segunda_pesada.php?id=<?= $b['idpesada'] ?>" class="btn btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.85rem; font-weight: 700; background: #0b57d0; text-decoration: none; border-radius: 5px;">
                                             Completar &rarr;

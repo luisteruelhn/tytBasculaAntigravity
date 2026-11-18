@@ -15,6 +15,10 @@ require_once dirname(__DIR__) . '/src/layout.php';
 
 $usuarioActual = requerirAutenticacion();
 $rolActual = $usuarioActual['rol'] ?? 'OPERADOR';
+if ($rolActual === 'REMOTO') {
+    http_response_code(403);
+    die('Acceso denegado: el usuario REMOTO es de solo consulta.');
+}
 $pdo = obtenerDB();
 $empresaId = (int)$usuarioActual['empresa_id'];
 $esAdminOSuper = in_array($rolActual, ['SUPER', 'ADMINISTRADOR'], true);
@@ -33,12 +37,14 @@ if ($esAdminOSuper) {
         'OPERADOR'      => 'Operador (Pesaje y Emisión de Boletas)',
         'SUPERVISOR'    => 'Supervisor (Autorizaciones Especiales y Reportes)',
         'ADMINISTRADOR' => 'Administrador (Control Total de Empresa)',
+        'REMOTO'        => 'Remoto (Solo Consulta Web / Nube)',
     ];
 } elseif ($esSupervisor) {
-    // Supervisor solo puede crear Operadores o nuevos Supervisores
+    // Supervisor solo puede crear Operadores, Supervisores o Remotos
     $rolesDisponibles = [
         'OPERADOR'      => 'Operador (Pesaje y Emisión de Boletas)',
         'SUPERVISOR'    => 'Supervisor (Autorizaciones Especiales y Reportes)',
+        'REMOTO'        => 'Remoto (Solo Consulta Web / Nube)',
     ];
 }
 

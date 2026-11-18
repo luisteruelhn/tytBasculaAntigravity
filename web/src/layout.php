@@ -93,6 +93,7 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                     <span class="nav-label">Inicio / Monitor</span>
                 </a>
 
+                <?php if (!$usuario || !tieneRol($usuario, ['REMOTO'])): ?>
                 <a href="primera_pesada.php" class="nav-item <?= $seccionActiva === 'primera' ? 'active' : '' ?>" title="Primera Pesada (Entrada)">
                     <svg class="nav-icon" viewBox="0 0 24 24">
                         <path d="M1 3h15v13H1z"></path>
@@ -115,6 +116,7 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
                         </span>
                     <?php endif; ?>
                 </a>
+                <?php endif; ?>
             </div>
 
             <!-- Bloque Gestión y Consultas -->

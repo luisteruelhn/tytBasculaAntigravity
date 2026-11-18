@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS t_usuarios (
     usuario VARCHAR(80) NOT NULL,
     email VARCHAR(254) NOT NULL,
     clave_hash VARCHAR(255) NOT NULL,
-    rol ENUM('SUPER', 'ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR') NOT NULL,
+    rol ENUM('SUPER', 'ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR', 'REMOTO') NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     UNIQUE KEY uq_usuarios_usuario (usuario),
     UNIQUE KEY uq_usuarios_email (empresa_id, email),

@@ -25,12 +25,15 @@ $mensajeExito = '';
 $error = '';
 $erroresCampos = [];
 
-// Permisos: Todos los roles autenticados pueden registrar y consultar clientes/proveedores.
+// Permisos: REMOTO es solo lectura; los demás perfiles pueden gestionar según rol.
+$esSoloLectura = ($rolActual === 'REMOTO');
 $puedeDesactivar = in_array($rolActual, ['SUPER', 'ADMINISTRADOR', 'SUPERVISOR'], true);
 
 // 1. PROCESAR GUARDAR (CREAR O ACTUALIZAR)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array($_POST['accion'], ['crear', 'editar'], true)) {
-    if (!validarCsrfToken($_POST['csrf_token'] ?? null)) {
+    if ($esSoloLectura) {
+        $error = 'Acceso de solo consulta: el perfil REMOTO no puede modificar el catálogo.';
+    } elseif (!validarCsrfToken($_POST['csrf_token'] ?? null)) {
         $error = 'La sesión del formulario venció. Por favor recarga e intenta de nuevo.';
     } else {
         $accionId     = (int)($_POST['id_clie_prov'] ?? 0);
@@ -195,6 +198,7 @@ renderizarEncabezado('Clientes y Proveedores', 'clientes');
                 <span style="font-size: 0.85rem; color: var(--text-muted);">Directorio unificado de personas naturales o jurídicas asociadas a las pesadas</span>
             </div>
         </div>
+        <?php if (!$esSoloLectura): ?>
         <button type="button" class="btn btn-primary" onclick="abrirModalNuevo()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -202,6 +206,7 @@ renderizarEncabezado('Clientes y Proveedores', 'clientes');
             </svg>
             Nuevo Registro
         </button>
+        <?php endif; ?>
     </div>
 
     <!-- ALERTAS -->
@@ -337,6 +342,9 @@ renderizarEncabezado('Clientes y Proveedores', 'clientes');
                                     <?php endif; ?>
                                 </td>
                                 <td style="text-align: right;">
+                                    <?php if ($esSoloLectura): ?>
+                                        <span style="color: var(--text-muted); font-size: 0.88rem;">Lectura</span>
+                                    <?php else: ?>
                                     <div style="display: inline-flex; gap: 0.4rem; align-items: center;">
                                         <!-- Botón Editar -->
                                         <button 
@@ -367,6 +375,7 @@ renderizarEncabezado('Clientes y Proveedores', 'clientes');
                                             </form>
                                         <?php endif; ?>
                                     </div>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -14,6 +14,10 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/src/layout.php';
 
 $usuarioActual = requerirAutenticacion();
+if (tieneRol($usuarioActual, ['REMOTO'])) {
+    http_response_code(403);
+    die('Acceso de solo consulta: el usuario REMOTO no puede cerrar pesajes.');
+}
 $empresaId = (int)$usuarioActual['empresa_id'];
 $empresaNombre = $usuarioActual['empresa_nombre'] ?? 'BÁSCULA INDUSTRIAL';
 $pdo = obtenerDB();

@@ -12,6 +12,10 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/src/layout.php';
 
 $usuarioActual = requerirAutenticacion();
+if (tieneRol($usuarioActual, ['REMOTO'])) {
+    http_response_code(403);
+    die('Acceso denegado: el usuario REMOTO es de solo consulta.');
+}
 $empresaId = (int)$usuarioActual['empresa_id'];
 $empresaNombre = $usuarioActual['empresa_nombre'] ?? 'INVERSIONES VALLECILLO, SB';
 $pdo = obtenerDB();
