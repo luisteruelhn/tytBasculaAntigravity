@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS t_configuracion_bascula (
     control_flujo ENUM('NINGUNO', 'RTS_CTS', 'XON_XOFF', 'DSR_DTR'),
     protocolo VARCHAR(80),
     unidad_indicador ENUM('lb', 'kg'),
+    gemini_api_key VARCHAR(255) DEFAULT NULL,
     timeout_lectura_ms INT UNSIGNED NOT NULL DEFAULT 1000,
     intervalo_lectura_ms INT UNSIGNED NOT NULL DEFAULT 500,
     max_trama_bytes SMALLINT UNSIGNED NOT NULL DEFAULT 512,
@@ -113,12 +114,36 @@ CREATE TABLE IF NOT EXISTS t_Clie_prov (
     )
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS t_categorias (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    empresa_id INT UNSIGNED NOT NULL,
+    codigo VARCHAR(20) NOT NULL,
+    nombre VARCHAR(80) NOT NULL,
+    descripcion VARCHAR(150) DEFAULT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    UNIQUE KEY uk_empresa_codigo (empresa_id, codigo),
+    KEY idx_empresa (empresa_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS t_presentaciones (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    empresa_id INT UNSIGNED NOT NULL,
+    codigo VARCHAR(20) NOT NULL,
+    nombre VARCHAR(80) NOT NULL,
+    descripcion VARCHAR(150) DEFAULT NULL,
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    UNIQUE KEY uk_empresa_codigo (empresa_id, codigo),
+    KEY idx_empresa (empresa_id)
+) ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS t_productos (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     empresa_id INT UNSIGNED NOT NULL,
+    categoria_id INT UNSIGNED DEFAULT NULL,
     nombre VARCHAR(100) NOT NULL,
     activo BOOLEAN NOT NULL DEFAULT TRUE,
     UNIQUE KEY uq_productos_nombre (empresa_id, nombre),
+    KEY idx_categoria (categoria_id),
     FOREIGN KEY (empresa_id) REFERENCES t_empresas (id)
 ) ENGINE=InnoDB;
 

@@ -61,17 +61,14 @@ Verificar que **no** estén comentadas (sin `;` al inicio):
 1. Crear la base de datos `dbBascula` (`utf8mb4_unicode_ci`).
 2. Importar el esquema completo desde `scripts/dbBascula.sql`.
 
-### 3.2. Actualización sobre una base de datos existente
-Ejecutar en phpMyAdmin o consola MySQL para asegurar que existan las columnas recientes (Guía de Remisión y Asistente IA):
-```sql
-ALTER TABLE t_pesadas
-    ADD COLUMN IF NOT EXISTS guia_remision VARCHAR(30) NULL AFTER observaciones_segunda,
-    ADD COLUMN IF NOT EXISTS motivo_traslado VARCHAR(80) NULL AFTER guia_remision,
-    ADD COLUMN IF NOT EXISTS motivo_traslado_otro VARCHAR(120) NULL AFTER motivo_traslado,
-    ADD COLUMN IF NOT EXISTS transportista_rtn VARCHAR(20) NULL AFTER motivo_traslado_otro,
-    ADD COLUMN IF NOT EXISTS marca_vehiculo VARCHAR(60) NULL AFTER transportista_rtn;
-```
-Y verificar en `t_configuracion_bascula` la columna `gemini_api_key` si se usará el Asistente TYTOne.
+### 3.2. Actualización sobre una base de datos existente (PC de báscula en pruebas)
+Ejecutar en phpMyAdmin o consola MariaDB el script idempotente **[scripts/actualizar_bd_pc_bascula.sql](scripts/actualizar_bd_pc_bascula.sql)**.  
+Este script **NO borra datos ni altera el puerto COM / Indicador Real configurado**, y actualiza automáticamente:
+- Tablas `t_categorias` (con categorías base) y `t_presentaciones`.
+- Columna `categoria_id` en `t_productos`.
+- Columna `gemini_api_key` en `t_configuracion_bascula`.
+- Columnas de **Guía de Remisión** en `t_pesadas` (`guia_remision`, `motivo_traslado`, `motivo_traslado_otro`, `transportista_rtn`, `marca_vehiculo`).
+- Rol `'REMOTO'` en `t_usuarios` y alta del usuario `maria.jose` (solo consulta).
 
 ---
 
@@ -116,3 +113,14 @@ Ejecutar en orden antes de dar por terminada la implementación:
    - Probar **Imprimir**, **Descargar PDF** y **Generar Excel**.
 8. **Asistente TYTOne (si aplica):**
    - Visible solo para `SUPER` / `ADMINISTRADOR`; probar consulta de pesadas y teléfonos de clientes.
+9. **Usuario Remoto (`maria.jose` / rol `REMOTO`):**
+   - Probar login con `maria.jose` y verificar que solo tenga acceso a **Inicio**, **Consultas** y **Catálogos en modo lectura** (sin botones de pesaje ni edición/creación).
+
+---
+
+## 7. Pendientes de Implementación en PC con Báscula Física
+Lista operativa para ejecutar en la máquina de producción en planta:
+- [ ] Actualizar archivos en `Z:\TYTOneBasculaAntigravity` y verificar enlace/copia en `C:\xampp\htdocs\bascula`.
+- [ ] Ejecutar **[scripts/actualizar_bd_pc_bascula.sql](scripts/actualizar_bd_pc_bascula.sql)** en la base de datos local de esa PC (conserva pesadas, clientes y parámetros COM reales).
+- [ ] Verificar que la fuente activa en **Configuración Báscula** continúe en **Indicador Real** (`SERIAL`).
+- [ ] Ejecutar la lista de verificación del Paso 6 (Pesada Única en ACEITE, Guía de Remisión en Venta, impresión 2 por hoja y usuario `maria.jose`).
