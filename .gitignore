@@ -25,3 +25,6 @@ __pycache__/
 *.original
 .DS_Store
 Thumbs.db
+cookies.txt
+logo inversiones.png
+web/public/assets/img/logos/

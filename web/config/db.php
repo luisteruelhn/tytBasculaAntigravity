@@ -9,6 +9,11 @@
 
 declare(strict_types=1);
 
+// Fijar zona horaria oficial del proyecto para evitar desfase UTC en hostings remotos
+if (date_default_timezone_get() !== 'America/Tegucigalpa') {
+    date_default_timezone_set('America/Tegucigalpa');
+}
+
 // Cargar configuración privada del entorno (Hostinger, VPS, local) si existe
 if (file_exists(__DIR__ . '/local.php')) {
     require_once __DIR__ . '/local.php';

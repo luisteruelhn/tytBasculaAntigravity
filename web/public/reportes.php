@@ -65,8 +65,9 @@ function normalizarFecha(string $f): string {
 
 $fechaDesdeSql = normalizarFecha($fechaDesde);
 $fechaHastaSql = normalizarFecha($fechaHasta);
+// Usar el primer día del mes en curso y el día actual (en zona America/Tegucigalpa) por defecto
 if ($fechaDesdeSql === '') {
-    $fechaDesdeSql = '2026-11-01';
+    $fechaDesdeSql = date('Y-m-01');
 }
 if ($fechaHastaSql === '') {
     $fechaHastaSql = date('Y-m-d');

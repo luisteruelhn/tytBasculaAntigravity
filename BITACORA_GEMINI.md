@@ -130,3 +130,40 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 
 ### 4. Siguientes Pasos
 1. Continuar con el siguiente módulo: Formulario de **Primera Pesada** (`primera_pesada.php`) con captura de peso en vivo, indicador LED, datos de operación, vehículo/motorista y pantalla de confirmación post-guardado.
+
+
+---
+
+## 2026-11-17 — Sesión 02: Reportes, Boleta Doble, Guía de Remisión, Pesada Única, Rol REMOTO y Despliegue
+
+### 1. Reportes, Boletas y Guía de Remisión
+* **Reportes (`web/public/reportes.php`)**:
+  - Jerarquía completa **Operación (`COMPRA` / `VENTA`) → Categoría → Producto** con conteo de pesadas, subtotales intermedios, consolidado general por producto y gran total.
+  - Filtros dinámicos de **Categoría** y **Producto** (reconstrucción JS limpia para compatibilidad entre navegadores).
+  - Tríada obligatoria (**Imprimir**, **Descargar PDF** directo vía `html2pdf.js` y **Generar Excel** `.xls` XML nativo), ocultando encabezados web, filtros y widget de chat en `@media print`.
+  - Rango inicial dinámico del mes en curso (`date('Y-m-01')` a `date('Y-m-d')`).
+* **Boleta (`web/public/boleta.php`)**:
+  - Logo de empresa posicionado a la izquierda.
+  - Vista de impresión física con **2 boletas por hoja Carta** separadas por línea punteada responsiva con tijera (`✂`), y botón **Descargar PDF** generando **1 sola boleta individual limpia**.
+* **Guía de Remisión para Ventas (`web/public/guia_remision.php`)**:
+  - Agregadas columnas `guia_remision`, `motivo_traslado`, `motivo_traslado_otro`, `transportista_rtn` y `marca_vehiculo` en `t_pesadas` (`scripts/dbBascula.sql`).
+  - Integrado bloque en `segunda_pesada.php` con los **15 motivos de traslado** cuando la operación es `VENTA` y sugerencia `CEIBITA SUR, SANTA BARBARA` en `primera_pesada.php`.
+  - Reporte fiel con formato Carta doble en impresión y 1 copia limpia en PDF, accesible desde `boleta.php` y `pesadas.php`.
+
+### 2. Pesada Única (Cierre en un solo paso)
+* Integrado toggle **`⚡ Pesada Única`** en `primera_pesada.php` con liquidación directa (tara vehículo `0` por defecto, empaques, % humedad, % defectos y Guía de Remisión si es venta).
+* Activación automática sugerida al seleccionar el producto **`ACEITE`**.
+
+### 3. Seguridad, Roles y Asistente IA
+* **Rol `REMOTO` (Solo Consulta) y usuario `maria.jose`**:
+  - Agregado `'REMOTO'` al `ENUM` de `t_usuarios.rol` (`scripts/sql_remoto_usuarios.sql` y `scripts/actualizar_bd_pc_bascula.sql`).
+  - Bloqueado acceso de escritura/pesaje en UI y backend (`primera_pesada.php`, `segunda_pesada.php`, `usuarios.php`, `config_bascula.php`, `clientes.php`, `categorias.php`, `productos.php` y botón `+ Nueva Primera Pesada` en `pesadas.php`).
+  - En entorno remoto o rol `REMOTO`, el monitor en `index.php` y `layout.php` muestra el **peso de la última pesada registrada** y oculta diagnósticos del microservicio local (`FastAPI :8018`).
+* **Asistente TYTOne (`web/public/api_chat.php`)**:
+  - Acceso de solo lectura multi-tabla (incluyendo directorio con teléfonos de clientes/proveedores) habilitado para `SUPER`, `ADMINISTRADOR` y `REMOTO`.
+
+### 4. Despliegue, Zona Horaria y Documentación
+* Centralizada zona horaria oficial `America/Tegucigalpa` en `web/config/db.php` y corregido rango por defecto en `dashboard.php`.
+* Creado módulo **`Despliegue / Nube`** (`web/public/despliegue.php` exclusivo `SUPER`) + soporte `web/config/local.php` (`local.example.php`) protegido en `.gitignore`.
+* Creada rama **`produccion`** en Git y documentación operativa para planta en `IMPLEMENT.md` + script idempotente `scripts/actualizar_bd_pc_bascula.sql`.
+* Limpieza de archivos temporales (`cookies.txt`) y exclusión de logos privados en `.gitignore`.

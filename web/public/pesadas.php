@@ -83,11 +83,13 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
             </span>
         </div>
 
+        <?php if (!$esRemoto): ?>
         <div style="display: flex; gap: 0.75rem;">
             <a href="primera_pesada.php" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-weight: 700; background: #0b57d0; text-decoration: none; border-radius: 6px;">
                 + Nueva Primera Pesada
             </a>
         </div>
+        <?php endif; ?>
     </div>
 
     <!-- TARJETA PRINCIPAL -->
