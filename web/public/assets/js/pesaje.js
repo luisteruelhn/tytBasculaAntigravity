@@ -103,9 +103,10 @@ class MonitorBascula {
     }
 }
 
-// Iniciar automáticamente al cargar la página si existen los elementos
+// Iniciar automáticamente al cargar la página si existen los elementos y no es vista remota/solo consulta
 document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('displayPesoValor')) {
+    const elDisplay = document.getElementById('displayPesoValor');
+    if (elDisplay && elDisplay.dataset.modoRemoto !== '1') {
         window.monitorBascula = new MonitorBascula();
     }
 });

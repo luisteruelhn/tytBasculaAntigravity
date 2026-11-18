@@ -26,6 +26,10 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
 
     // Consultar pesadas pendientes de segunda pesada para el badge dinámico
     $totalPendientes = 0;
+    $hostActual = strtolower((string)($_SERVER['SERVER_NAME'] ?? ''));
+    $esModoUltimoPeso = ($rolUsuario === 'REMOTO') || ($hostActual !== '' && !in_array($hostActual, ['localhost', '127.0.0.1', '::1'], true));
+    $ultimoPesoSidebar = 0.0;
+
     try {
         $pdo = obtenerDB();
         $empresaId = (int)($usuario['empresa_id'] ?? 0);
@@ -36,6 +40,18 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
             $stmt = $pdo->query("SELECT COUNT(*) AS total FROM t_pesadas WHERE estado = 'ABIERTA'");
         }
         $totalPendientes = (int)($stmt->fetch()['total'] ?? 0);
+
+        if ($esModoUltimoPeso && $empresaId > 0) {
+            $stmtUlt = $pdo->prepare("
+                SELECT COALESCE(peso_final_lb, peso_bruto_lb, tara_vehiculo_lb, 0) AS peso
+                FROM t_pesadas
+                WHERE empresa_id = :empresa_id AND estado <> 'ANULADA'
+                ORDER BY COALESCE(segunda_pesada_at, primera_pesada_at, fecha_at) DESC, idpesada DESC
+                LIMIT 1
+            ");
+            $stmtUlt->execute([':empresa_id' => $empresaId]);
+            $ultimoPesoSidebar = (float)($stmtUlt->fetchColumn() ?: 0);
+        }
     } catch (Exception $e) {
         // Si la base no está conectada o no hay sesión, continúa en 0 sin interrumpir la vista
         $totalPendientes = 0;
@@ -262,8 +278,8 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
         <div class="sidebar-bascula-card">
             <div id="sidebarStatusDot" class="bascula-status-dot dot-estable"></div>
             <div class="bascula-info">
-                <span class="bascula-label" id="sidebarModoLabel">BÁSCULA</span>
-                <span class="bascula-weight" id="sidebarPesoLabel">0 LB</span>
+                <span class="bascula-label" id="sidebarModoLabel"><?= $esModoUltimoPeso ? 'ÚLTIMA PESADA' : 'BÁSCULA' ?></span>
+                <span class="bascula-weight" id="sidebarPesoLabel"><?= number_format($ultimoPesoSidebar, 0) ?> LB</span>
             </div>
         </div>
 
