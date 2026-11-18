@@ -289,34 +289,17 @@ renderizarEncabezado('Primera Pesada', 'primera');
 
 <div style="max-width: 1040px; margin: 0 auto;">
 
-    <!-- ENCABEZADO CON SELECTOR PRINCIPAL DE COMPRA / VENTA -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
-        <div>
-            <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; letter-spacing: 1.5px; text-transform: uppercase;">
-                PESAJE
-            </span>
-            <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0.2rem 0 0.2rem 0; color: var(--text-main); line-height: 1.1;">
-                Primera pesada
-            </h1>
-            <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
-                <?= htmlspecialchars($empresaNombre, ENT_QUOTES, 'UTF-8') ?>
-            </span>
-        </div>
-
-        <!-- SWITCH SEGMENTADO DE TIPO DE TRANSACCIÓN (COMPRA / VENTA EN 1 CLIC) -->
-        <div>
-            <div style="display: inline-flex; background: #e2e8f0; padding: 4px; border-radius: 10px; gap: 4px;">
-                <button type="button" id="btnTxCompra" onclick="cambiarTransaccionPrincipal('COMPRA')" style="padding: 0.6rem 1.4rem; border-radius: 8px; font-weight: 800; font-size: 0.95rem; border: none; cursor: pointer; background: #1e40af; color: #ffffff; transition: all 0.15s ease;">
-                    📥 COMPRA
-                </button>
-                <button type="button" id="btnTxVenta" onclick="cambiarTransaccionPrincipal('VENTA')" style="padding: 0.6rem 1.4rem; border-radius: 8px; font-weight: 800; font-size: 0.95rem; border: none; cursor: pointer; background: transparent; color: #475569; transition: all 0.15s ease;">
-                    📤 VENTA
-                </button>
-            </div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); text-align: right; margin-top: 0.25rem; font-weight: 600;">
-                1 clic para cambiar entre Compra (Bruto) y Venta (Tara)
-            </div>
-        </div>
+    <!-- ENCABEZADO -->
+    <div style="margin-bottom: 1.25rem;">
+        <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; letter-spacing: 1.5px; text-transform: uppercase;">
+            PESAJE
+        </span>
+        <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0.2rem 0 0.2rem 0; color: var(--text-main); line-height: 1.1;">
+            Primera pesada
+        </h1>
+        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+            <?= htmlspecialchars($empresaNombre, ENT_QUOTES, 'UTF-8') ?>
+        </span>
     </div>
 
     <?php if ($error !== ''): ?>
@@ -407,6 +390,26 @@ renderizarEncabezado('Primera Pesada', 'primera');
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="accion" value="guardar_primera">
         <input type="hidden" name="peso_fijado" id="inputPesoFijado" value="0">
+
+        <!-- SWITCH SEGMENTADO DE TIPO DE TRANSACCIÓN (ANTES DE CAPTURA DE PESO) -->
+        <div class="card" style="padding: 0.9rem 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px;">
+                    Tipo de Transacción:
+                </span>
+                <div style="display: inline-flex; background: #e2e8f0; padding: 4px; border-radius: 10px; gap: 4px;">
+                    <button type="button" id="btnTxCompra" onclick="cambiarTransaccionPrincipal('COMPRA')" style="padding: 0.55rem 1.35rem; border-radius: 8px; font-weight: 800; font-size: 0.92rem; border: none; cursor: pointer; background: #1e40af; color: #ffffff; transition: all 0.15s ease;">
+                        📥 COMPRA
+                    </button>
+                    <button type="button" id="btnTxVenta" onclick="cambiarTransaccionPrincipal('VENTA')" style="padding: 0.55rem 1.35rem; border-radius: 8px; font-weight: 800; font-size: 0.92rem; border: none; cursor: pointer; background: transparent; color: #475569; transition: all 0.15s ease;">
+                        📤 VENTA
+                    </button>
+                </div>
+            </div>
+            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">
+                1 clic para cambiar entre Compra (Bruto) y Venta (Tara)
+            </span>
+        </div>
 
         <!-- BLOQUE SUPERIOR: CAPTURA DEL PESO + INDICADOR LED -->
         <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; align-items: stretch;">
