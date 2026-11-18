@@ -303,15 +303,19 @@ renderizarEncabezado('Primera Pesada', 'primera');
             </span>
         </div>
 
-        <!-- SELECTOR DESTACADO DE TIPO DE TRANSACCIÓN -->
-        <div style="background: var(--bg-surface); border: 2px solid #2563eb; padding: 0.65rem 1rem; border-radius: 10px; display: flex; align-items: center; gap: 0.85rem; box-shadow: var(--shadow-sm);">
-            <label for="selector_transaccion_superior" style="font-size: 0.88rem; font-weight: 800; color: #1e40af; text-transform: uppercase; margin: 0;">
-                Tipo de Transacción:
-            </label>
-            <select id="selector_transaccion_superior" class="form-control" style="height: 40px; font-weight: 800; font-size: 1rem; border-radius: 6px; border: 1px solid #cbd5e1; min-width: 160px; color: #1e40af; background: #eff6ff;" onchange="cambiarTransaccionPrincipal(this.value)">
-                <option value="COMPRA" selected>COMPRA</option>
-                <option value="VENTA">VENTA</option>
-            </select>
+        <!-- SWITCH SEGMENTADO DE TIPO DE TRANSACCIÓN (COMPRA / VENTA EN 1 CLIC) -->
+        <div>
+            <div style="display: inline-flex; background: #e2e8f0; padding: 4px; border-radius: 10px; gap: 4px;">
+                <button type="button" id="btnTxCompra" onclick="cambiarTransaccionPrincipal('COMPRA')" style="padding: 0.6rem 1.4rem; border-radius: 8px; font-weight: 800; font-size: 0.95rem; border: none; cursor: pointer; background: #1e40af; color: #ffffff; transition: all 0.15s ease;">
+                    📥 COMPRA
+                </button>
+                <button type="button" id="btnTxVenta" onclick="cambiarTransaccionPrincipal('VENTA')" style="padding: 0.6rem 1.4rem; border-radius: 8px; font-weight: 800; font-size: 0.95rem; border: none; cursor: pointer; background: transparent; color: #475569; transition: all 0.15s ease;">
+                    📤 VENTA
+                </button>
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-muted); text-align: right; margin-top: 0.25rem; font-weight: 600;">
+                1 clic para cambiar entre Compra (Bruto) y Venta (Tara)
+            </div>
         </div>
     </div>
 
@@ -521,21 +525,19 @@ renderizarEncabezado('Primera Pesada', 'primera');
             </div>
         </div>
 
-        <!-- BLOQUE OPERACIÓN -->
+        <!-- BLOQUE OPERACIÓN (GRID SIMÉTRICO 2x2) -->
         <div class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.5rem;">
-            <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 1.25rem 0; color: var(--text-main);">
-                Operación
-            </h3>
+            <input type="hidden" id="tipo_operacion" name="tipo_operacion" value="COMPRA">
+            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem;">
+                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-main);">
+                    Operación
+                </h3>
+                <span id="badgeOpOperacion" style="font-size: 0.78rem; font-weight: 800; background: #dbeafe; color: #1e40af; padding: 0.2rem 0.7rem; border-radius: 999px;">
+                    COMPRA
+                </span>
+            </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;">
-                <div>
-                    <label for="tipo_operacion" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                        Tipo de operación (Controlado por selector superior)
-                    </label>
-                    <input type="hidden" id="tipo_operacion" name="tipo_operacion" value="COMPRA">
-                    <input type="text" id="tipo_operacion_display" class="form-control" style="height: 42px; border-radius: 6px; font-weight: 800; color: #1e40af; background: #f1f5f9; cursor: not-allowed;" value="COMPRA" readonly>
-                </div>
-
                 <div>
                     <label for="clie_prov_id" id="lblPersona" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Proveedor
@@ -549,9 +551,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
                         <?php endforeach; ?>
                     </select>
                 </div>
-            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;">
                 <div>
                     <label for="producto_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Producto
@@ -565,7 +565,9 @@ renderizarEncabezado('Primera Pesada', 'primera');
                         <?php endforeach; ?>
                     </select>
                 </div>
+            </div>
 
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                 <div>
                     <label for="presentacion_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Presentación
@@ -574,22 +576,22 @@ renderizarEncabezado('Primera Pesada', 'primera');
                         <option value="" disabled selected>Selecciona una presentación</option>
                     </select>
                 </div>
-            </div>
 
-            <div style="max-width: 49%;">
-                <label for="responsable_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                    Usuario responsable
-                </label>
-                <select id="responsable_id" name="responsable_id" class="form-control" style="height: 42px; border-radius: 6px;" onchange="actualizarNotaResponsable(this)">
-                    <?php foreach ($listaUsuarios as $u): ?>
-                        <option value="<?= $u['id'] ?>" <?= $u['id'] === $usuarioActual['id'] ? 'selected' : '' ?>>
-                            <?= htmlspecialchars($u['nombre'], ENT_QUOTES, 'UTF-8') ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <small id="txtResponsableNota" style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 0.35rem;">
-                    La captura queda registrada por <?= htmlspecialchars($usuarioActual['nombre'], ENT_QUOTES, 'UTF-8') ?>.
-                </small>
+                <div>
+                    <label for="responsable_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                        Usuario responsable
+                    </label>
+                    <select id="responsable_id" name="responsable_id" class="form-control" style="height: 42px; border-radius: 6px;" onchange="actualizarNotaResponsable(this)">
+                        <?php foreach ($listaUsuarios as $u): ?>
+                            <option value="<?= $u['id'] ?>" <?= $u['id'] === $usuarioActual['id'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($u['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small id="txtResponsableNota" style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 0.35rem;">
+                        La captura queda registrada por <?= htmlspecialchars($usuarioActual['nombre'], ENT_QUOTES, 'UTF-8') ?>.
+                    </small>
+                </div>
             </div>
         </div>
 
@@ -832,13 +834,25 @@ document.addEventListener('DOMContentLoaded', () => {
 function cambiarTransaccionPrincipal(tipo) {
     const selTipoReg = document.getElementById('tipo_registro');
     const inputHiddenOp = document.getElementById('tipo_operacion');
-    const inputDisplayOp = document.getElementById('tipo_operacion_display');
+    const badgeOp = document.getElementById('badgeOpOperacion');
+    const btnCompra = document.getElementById('btnTxCompra');
+    const btnVenta = document.getElementById('btnTxVenta');
     const btnFijar = document.getElementById('btnFijarPeso');
     const txtGuiaFijar = document.getElementById('txtGuiaFijar');
     const txtGuiaGuardar = document.getElementById('txtGuiaGuardar');
 
     inputHiddenOp.value = tipo;
-    inputDisplayOp.value = tipo;
+    if (badgeOp) {
+        badgeOp.innerText = tipo;
+        badgeOp.style.background = (tipo === 'COMPRA') ? '#dbeafe' : '#d1fae5';
+        badgeOp.style.color = (tipo === 'COMPRA') ? '#1e40af' : '#047857';
+    }
+    if (btnCompra && btnVenta) {
+        btnCompra.style.background = (tipo === 'COMPRA') ? '#1e40af' : 'transparent';
+        btnCompra.style.color = (tipo === 'COMPRA') ? '#ffffff' : '#475569';
+        btnVenta.style.background = (tipo === 'VENTA') ? '#047857' : 'transparent';
+        btnVenta.style.color = (tipo === 'VENTA') ? '#ffffff' : '#475569';
+    }
 
     // Regla de negocio:
     // - En COMPRA: Primero viene cargado -> se pesa PESO BRUTO.
@@ -847,11 +861,9 @@ function cambiarTransaccionPrincipal(tipo) {
     if (tipo === 'COMPRA') {
         selTipoReg.value = 'BRUTO';
         document.getElementById('tipo_registro_hidden').value = 'BRUTO';
-        inputDisplayOp.style.color = '#1e40af';
     } else {
         selTipoReg.value = 'TARA';
         document.getElementById('tipo_registro_hidden').value = 'TARA';
-        inputDisplayOp.style.color = '#047857';
     }
 
     // Habilitar botón de fijar peso automáticamente al tener ya seleccionado el tipo
