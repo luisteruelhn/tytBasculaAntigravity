@@ -73,8 +73,14 @@
 
 ---
 
-## 5. Cómo Actualizar Hostinger en el Futuro
+## 5. Cómo Actualizar Hostinger desde GitHub (Rama `produccion`)
 
-* Si se agregan mejoras a la web en la PC local o de desarrollo:
-  1. En `http://localhost/bascula/despliegue.php` (tus datos ya quedan guardados en `web/config/sync_remoto.php`), ingresa la contraseña MySQL de Hostinger y vuelve a generar el `.zip` (o sube por FTP/Administrador de archivos los archivos modificados dentro de `public_html/bascula/` y `public_html/src/` **sin borrar `config/local.php`**).
-  2. Si hubo cambios de estructura SQL, aplica el script idempotente correspondiente en el **phpMyAdmin** de Hostinger.
+* **Opción recomendada (1 clic en Hostinger → Avanzado → Git):**
+  1. Antes de conectar Git por primera vez, guarda una copia de tu `public_html/config/local.php` actual (contiene `DB_*` y `SYNC_TOKEN`).
+  2. En Hostinger hPanel → **Avanzado → Git**:
+     * Repositorio: `https://github.com/luisteruelhn/tytBasculaAntigravity.git`
+     * Rama: **`produccion`**
+     * Directorio de instalación: dejar vacío (para `public_html`).
+  3. Una vez clonado, coloca tu `local.php` dentro de **`public_html/web/config/local.php`** (al estar en `.gitignore`, los futuros **Deploy / Actualizar** de Hostinger nunca lo borrarán).
+  4. El `.htaccess`, `index.php` y `robots.txt` de la raíz protegen automáticamente `api/`, `scripts/`, `web/config/` y `web/src/`, muestran la página institucional en `inversionesvallecillo.com/` y enrutan `/bascula/` hacia `web/public/`.
+* **Opción alternativa (.zip):** Generar el `.zip` desde `http://localhost/bascula/despliegue.php` y extraerlo en `public_html`.

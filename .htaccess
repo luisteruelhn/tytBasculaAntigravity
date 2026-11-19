@@ -1,0 +1,13 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bloquear acceso directo a carpetas internas, código fuente, scripts y archivos sensibles
+    RewriteRule ^(\.git|\.agents|\.runtime|\.venv|api|scripts|dbbackup|runtime|web/config|web/src)(/|$) - [F,L,NC]
+    RewriteRule \.(md|sql|py|cmd|json|bak|log|env|ini)$ - [F,L,NC]
+
+    # Enrutar /bascula/* de forma transparente hacia web/public/*
+    RewriteRule ^bascula/?$ web/public/login.php [L]
+    RewriteRule ^bascula/(.+)$ web/public/$1 [L,QSA]
+</IfModule>
+
+Options -Indexes
