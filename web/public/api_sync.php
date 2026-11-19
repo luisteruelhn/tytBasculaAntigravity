@@ -39,6 +39,7 @@ if (!is_array($payload)) {
 // Tablas permitidas para sincronización idempotente (excluye configuración serial local)
 $tablasPermitidas = [
     't_empresas',
+    't_usuarios',
     't_categorias',
     't_presentaciones',
     't_productos',

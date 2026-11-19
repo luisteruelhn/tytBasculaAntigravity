@@ -218,5 +218,6 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Creado cliente local `web/src/sync_nube.php` conectado con `t_sincronizacion_pendiente` e integrado automáticamente al guardar `primera_pesada.php` y `segunda_pesada.php`.
   - Actualizado `web/public/despliegue.php` con generación de paquete `.zip` listo para `/public_html` de `inversionesvallecillo.com` (compatible con o sin `ZipArchive`), inyección automática de `config/local.php` (`DB_*` + `SYNC_TOKEN`), protección `.htaccess` y botón **☁️ Sincronizar Ahora con Hostinger**.
   - Agregada página institucional discreta `web/config/landing_hostinger.html` (como `index.php` raíz en Hostinger sin enlaces al sistema), `robots.txt` y `<meta name="robots" content="noindex, nofollow">` en `layout.php` y `login.php`.
+  - Incluida la tabla `t_usuarios` en `api_sync.php` y `sync_nube.php` para sincronizar usuarios, roles y contraseñas desde la PC local hacia Hostinger.
 * **Indicador de Modo en Vivo (`primera_pesada.php`, `segunda_pesada.php`, `layout.php`)**:
   - Corregido `#liveModoTexto` para reflejar dinámicamente `Modo real` o `Modo simulado` según `data.origen` de FastAPI (`:8018`), e incluida la sincronización automática al cargar `primera_pesada.php` y `segunda_pesada.php`.

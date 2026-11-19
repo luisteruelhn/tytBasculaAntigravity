@@ -182,9 +182,10 @@ function sincronizarPesadaAutomatica(int $idPesada): void
             return;
         }
 
-        // Incluir catálogos ligeros para garantizar integridad referencial en Hostinger
+        // Incluir catálogos ligeros y usuarios para garantizar integridad referencial en Hostinger
         $tablas = [
             't_empresas'                => $pdo->query('SELECT * FROM t_empresas')->fetchAll(PDO::FETCH_ASSOC),
+            't_usuarios'                => $pdo->query('SELECT * FROM t_usuarios')->fetchAll(PDO::FETCH_ASSOC),
             't_categorias'              => $pdo->query('SELECT * FROM t_categorias')->fetchAll(PDO::FETCH_ASSOC),
             't_presentaciones'          => $pdo->query('SELECT * FROM t_presentaciones')->fetchAll(PDO::FETCH_ASSOC),
             't_productos'               => $pdo->query('SELECT * FROM t_productos')->fetchAll(PDO::FETCH_ASSOC),
@@ -225,6 +226,7 @@ function sincronizarTodoConNube(PDO $pdo): array
 {
     $tablas = [
         't_empresas'                => $pdo->query('SELECT * FROM t_empresas')->fetchAll(PDO::FETCH_ASSOC),
+        't_usuarios'                => $pdo->query('SELECT * FROM t_usuarios')->fetchAll(PDO::FETCH_ASSOC),
         't_categorias'              => $pdo->query('SELECT * FROM t_categorias')->fetchAll(PDO::FETCH_ASSOC),
         't_presentaciones'          => $pdo->query('SELECT * FROM t_presentaciones')->fetchAll(PDO::FETCH_ASSOC),
         't_productos'               => $pdo->query('SELECT * FROM t_productos')->fetchAll(PDO::FETCH_ASSOC),
