@@ -357,12 +357,12 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                         Placa: <strong style="color: var(--text-main); font-size: 1.12rem;"><?= htmlspecialchars($pesadaActiva['placa'], ENT_QUOTES, 'UTF-8') ?></strong>
                     </div>
                 </div>
-                <div style="background: linear-gradient(135deg, #1e3a5f 0%, #0f233a 100%); color: #ffffff; border-radius: 12px; padding: 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; border: 1px solid #2563eb44;">
-                    <span style="font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #93c5fd;">
+                <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0f172a; border-radius: 12px; padding: 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; border: 1px solid #7dd3fc;">
+                    <span style="font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #0369a1;">
                         Primera Pesada (<?= $pesadaActiva['tipo_primera_pesada'] ?>)
                     </span>
-                    <div style="font-size: 2.6rem; font-weight: 900; line-height: 1.05; margin-top: 0.25rem; color: #ffffff;">
-                        <?= number_format($primerPeso, 0) ?> <span style="font-size: 1.25rem; font-weight: 700; color: #cbd5e1;">lb</span>
+                    <div style="font-size: 2.6rem; font-weight: 900; line-height: 1.05; margin-top: 0.25rem; color: #0f172a;">
+                        <?= number_format($primerPeso, 0) ?> <span style="font-size: 1.25rem; font-weight: 700; color: #334155;">lb</span>
                     </div>
                 </div>
             </div>
