@@ -357,7 +357,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                         Placa: <strong style="color: var(--text-main); font-size: 1.12rem;"><?= htmlspecialchars($pesadaActiva['placa'], ENT_QUOTES, 'UTF-8') ?></strong>
                     </div>
                 </div>
-                <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0f172a; padding: 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; border-left: 1px solid #7dd3fc;">
+                <div style="background: linear-gradient(to left, #dbeafe 0%, #eff6ff 55%, #ffffff 100%); color: #0f172a; padding: 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right;">
                     <span style="font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #0369a1;">
                         Primera Pesada (<?= $pesadaActiva['tipo_primera_pesada'] ?>)
                     </span>
