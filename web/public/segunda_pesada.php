@@ -342,9 +342,9 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
             <input type="hidden" id="primerPesoVal" value="<?= $primerPeso ?>">
             <input type="hidden" id="tipoPrimeraPesada" value="<?= $pesadaActiva['tipo_primera_pesada'] ?>">
 
-            <!-- DETALLE DE LA NOTA ABIERTA (BALANCEADO CON EL ANCHO DEL INDICADOR) -->
-            <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; align-items: stretch; margin-bottom: 1.5rem;">
-                <div class="card" style="padding: 1.5rem 1.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: center;">
+            <!-- DETALLE DE LA NOTA ABIERTA (TARJETA ÚNICA DIVIDIDA Y ALINEADA AL INDICADOR) -->
+            <div class="card" style="padding: 0; overflow: hidden; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; display: grid; grid-template-columns: 1.1fr 1fr; align-items: stretch;">
+                <div style="padding: 1.5rem 1.75rem; background: var(--bg-surface); display: flex; flex-direction: column; justify-content: center;">
                     <span style="font-size: 0.88rem; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">
                         <?= ($pesadaActiva['tipo_operacion'] === 'COMPRA' ? 'COMPRA #' . $pesadaActiva['id_compra'] : 'VENTA #' . $pesadaActiva['id_venta']) ?>
                     </span>
@@ -357,7 +357,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                         Placa: <strong style="color: var(--text-main); font-size: 1.12rem;"><?= htmlspecialchars($pesadaActiva['placa'], ENT_QUOTES, 'UTF-8') ?></strong>
                     </div>
                 </div>
-                <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0f172a; border-radius: 12px; padding: 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; border: 1px solid #7dd3fc;">
+                <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0f172a; padding: 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; border-left: 1px solid #7dd3fc;">
                     <span style="font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #0369a1;">
                         Primera Pesada (<?= $pesadaActiva['tipo_primera_pesada'] ?>)
                     </span>
