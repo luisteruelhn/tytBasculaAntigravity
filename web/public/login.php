@@ -157,7 +157,7 @@ $tokenFormulario = obtenerCsrfToken();
         .hero-title-group h2 {
             font-size: 1.25rem;
             font-weight: 800;
-            color: var(--text-main);
+            color: #f8fafc;
             letter-spacing: 0.5px;
             line-height: 1.2;
         }
@@ -298,18 +298,94 @@ $tokenFormulario = obtenerCsrfToken();
                 <img src="assets/img/tytlogo.png" alt="TYT Systems" class="hero-logo">
                 <div class="hero-title-group">
                     <span>CONTROL DE CARGA PESADA</span>
-                    <h2>BÁSCULA CAMIONERA</h2>
+                    <h2>TRUCK SCALE</h2>
                 </div>
             </div>
 
-            <!-- Gráfico Vectorial: Cabezal Cuadradito (Cabover) con Rastra sobre Báscula -->
+            <!-- Gráfico Vectorial: Rastra de Carga Pesada sobre Báscula -->
             <div class="rastra-graphic">
                 <svg class="rastra-svg" viewBox="0 0 520 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <!-- Gradientes Metálicos Sobrios -->
+                        <linearGradient id="opBlue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#2563eb"/>
+                            <stop offset="30%" stop-color="#1d4ed8"/>
+                            <stop offset="72%" stop-color="#172554"/>
+                            <stop offset="100%" stop-color="#0b1333"/>
+                        </linearGradient>
+                        <linearGradient id="opBlueDark" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#1e3a8a"/>
+                            <stop offset="100%" stop-color="#091029"/>
+                        </linearGradient>
+                        <!-- Gradientes ghost-flame azules apenas perceptibles (flujo frente -> atrás) -->
+                        <linearGradient id="opGhostFlame" x1="1" y1="0.1" x2="0" y2="0.45">
+                            <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.26"/>
+                            <stop offset="45%" stop-color="#60a5fa" stop-opacity="0.16"/>
+                            <stop offset="80%" stop-color="#3b82f6" stop-opacity="0.09"/>
+                            <stop offset="100%" stop-color="#bfdbfe" stop-opacity="0.01"/>
+                        </linearGradient>
+                        <linearGradient id="opGhostFlameSoft" x1="1" y1="0.2" x2="0" y2="0.4">
+                            <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.18"/>
+                            <stop offset="60%" stop-color="#93c5fd" stop-opacity="0.10"/>
+                            <stop offset="100%" stop-color="#bfdbfe" stop-opacity="0.01"/>
+                        </linearGradient>
+                        <linearGradient id="chromeV" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#f8fafc"/>
+                            <stop offset="28%" stop-color="#e2e8f0"/>
+                            <stop offset="54%" stop-color="#64748b"/>
+                            <stop offset="78%" stop-color="#f1f5f9"/>
+                            <stop offset="100%" stop-color="#475569"/>
+                        </linearGradient>
+                        <linearGradient id="chromeH" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#94a3b8"/>
+                            <stop offset="35%" stop-color="#f8fafc"/>
+                            <stop offset="68%" stop-color="#cbd5e1"/>
+                            <stop offset="100%" stop-color="#475569"/>
+                        </linearGradient>
+                        <linearGradient id="trailerGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#334155"/>
+                            <stop offset="55%" stop-color="#1e293b"/>
+                            <stop offset="100%" stop-color="#0f172a"/>
+                        </linearGradient>
+                        <linearGradient id="glassGrad" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#334155"/>
+                            <stop offset="50%" stop-color="#0f172a"/>
+                            <stop offset="100%" stop-color="#020617"/>
+                        </linearGradient>
+                        <linearGradient id="deckGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#475569"/>
+                            <stop offset="100%" stop-color="#1e293b"/>
+                        </linearGradient>
+                        <filter id="headlightGlow" x="-40%" y="-40%" width="180%" height="180%">
+                            <feGaussianBlur stdDeviation="2" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+
+                        <!-- Silueta compacta del cabezal para recorte limpio de las llamas -->
+                        <clipPath id="cabBodyClip">
+                            <path d="M 340 138 L 340 50 Q 340 36 356 35 C 374 34 394 38 406 54 L 415 86 C 436 87 458 90 475 95 L 476 144 L 470 148 C 468 133 432 133 430 148 L 424 148 L 424 138 Z"/>
+                        </clipPath>
+
+                        <!-- Rueda Alcoa Cromada de 10 birlos reutilizable -->
+                        <g id="opWheel">
+                            <circle cx="0" cy="0" r="16" fill="#050810" stroke="#1e293b" stroke-width="2.2"/>
+                            <circle cx="0" cy="0" r="12.5" fill="none" stroke="#334155" stroke-width="1"/>
+                            <circle cx="0" cy="0" r="9.2" fill="url(#chromeV)" stroke="#94a3b8" stroke-width="0.8"/>
+                            <circle cx="0" cy="0" r="6.2" fill="none" stroke="#1e293b" stroke-width="1.6" stroke-dasharray="1.8 2.1"/>
+                            <circle cx="0" cy="0" r="3.6" fill="#475569" stroke="#e2e8f0" stroke-width="0.8"/>
+                            <circle cx="0" cy="0" r="1.4" fill="#cbd5e1"/>
+                        </g>
+                    </defs>
+
                     <!-- Sombra general del vehículo sobre la plataforma -->
-                    <ellipse cx="250" cy="172" rx="230" ry="8" fill="#000000" opacity="0.4"/>
+                    <ellipse cx="260" cy="172" rx="238" ry="7" fill="#000000" opacity="0.48"/>
 
                     <!-- Plataforma de Báscula de Acero y Celdas de Carga -->
-                    <rect x="15" y="172" width="490" height="14" rx="2" fill="#334155" stroke="#475569" stroke-width="2"/>
+                    <rect x="15" y="172" width="490" height="14" rx="2" fill="url(#deckGrad)" stroke="#64748b" stroke-width="1.6"/>
+                    <line x1="16" y1="174" x2="504" y2="174" stroke="#94a3b8" stroke-width="0.8" opacity="0.5"/>
                     <!-- Rampas laterales -->
                     <polygon points="5,186 15,172 15,186" fill="#475569"/>
                     <polygon points="505,172 515,186 505,186" fill="#475569"/>
@@ -321,92 +397,132 @@ $tokenFormulario = obtenerCsrfToken();
                     <rect x="5" y="198" width="510" height="12" fill="#1e293b"/>
                     <line x1="5" y1="198" x2="515" y2="198" stroke="#334155" stroke-width="1"/>
 
-                    <!-- REMOLQUE / FURGÓN DE RASTRA (53 Pies) -->
-                    <rect x="25" y="38" width="270" height="104" rx="3" fill="#1e293b" stroke="#3b82f6" stroke-width="2.5"/>
+                    <!-- CHASIS Y QUINTA RUEDA (Conecta Furgón con Cabezal) -->
+                    <rect x="256" y="138" width="214" height="9" rx="1.5" fill="#0f172a" stroke="#334155" stroke-width="1"/>
+                    <rect x="288" y="134" width="32" height="6" rx="1.5" fill="#475569"/>
+
+                    <!-- REMOLQUE / FURGÓN LARGO DE RASTRA (53 Pies) -->
+                    <rect x="18" y="38" width="308" height="98" rx="3" fill="url(#trailerGrad)" stroke="#64748b" stroke-width="2"/>
                     <!-- Panel corrugado / franjas estructurales del furgón -->
-                    <line x1="75" y1="39" x2="75" y2="141" stroke="#334155" stroke-width="2"/>
-                    <line x1="125" y1="39" x2="125" y2="141" stroke="#334155" stroke-width="2"/>
-                    <line x1="175" y1="39" x2="175" y2="141" stroke="#334155" stroke-width="2"/>
-                    <line x1="225" y1="39" x2="225" y2="141" stroke="#334155" stroke-width="2"/>
-                    <line x1="275" y1="39" x2="275" y2="141" stroke="#334155" stroke-width="2"/>
-                    <!-- Franja reflectiva de seguridad en el furgón -->
-                    <rect x="26" y="132" width="268" height="6" fill="#f59e0b" opacity="0.85"/>
-                    <rect x="26" y="44" width="268" height="3" fill="#3b82f6" opacity="0.6"/>
+                    <line x1="62" y1="39" x2="62" y2="135" stroke="#334155" stroke-width="1.4"/>
+                    <line x1="106" y1="39" x2="106" y2="135" stroke="#334155" stroke-width="1.4"/>
+                    <line x1="150" y1="39" x2="150" y2="135" stroke="#334155" stroke-width="1.4"/>
+                    <line x1="194" y1="39" x2="194" y2="135" stroke="#334155" stroke-width="1.4"/>
+                    <line x1="238" y1="39" x2="238" y2="135" stroke="#334155" stroke-width="1.4"/>
+                    <line x1="282" y1="39" x2="282" y2="135" stroke="#334155" stroke-width="1.4"/>
+                    <!-- Reflejo superior metálico y líneas horizontales en tonalidades azules -->
+                    <line x1="20" y1="41" x2="324" y2="41" stroke="#93c5fd" stroke-width="1" opacity="0.28"/>
+                    <rect x="19" y="44" width="306" height="2.5" fill="#3b82f6" opacity="0.48"/>
+                    <rect x="19" y="117" width="306" height="4" fill="#1d4ed8" opacity="0.55"/>
+                    <rect x="19" y="121" width="306" height="1.8" fill="#60a5fa" opacity="0.42"/>
+                    <!-- Franja inferior reflectiva en tono azul metálico -->
+                    <rect x="19" y="128" width="306" height="5" fill="#2563eb" opacity="0.68"/>
+                    <rect x="19" y="128" width="306" height="1.2" fill="#93c5fd" opacity="0.45"/>
                     <!-- Patas / Tren de apoyo del remolque -->
-                    <rect x="135" y="142" width="8" height="24" fill="#64748b"/>
-                    <rect x="150" y="142" width="8" height="24" fill="#64748b"/>
-                    <rect x="130" y="162" width="32" height="5" fill="#475569"/>
+                    <rect x="186" y="136" width="7" height="25" fill="#64748b"/>
+                    <rect x="200" y="136" width="7" height="25" fill="#64748b"/>
+                    <rect x="181" y="159" width="31" height="5" rx="1" fill="#475569"/>
 
-                    <!-- CHIMENEAS DE ESCAPE VERTICALES (Detrás del Cabezal) -->
-                    <rect x="296" y="22" width="7" height="85" fill="#94a3b8" stroke="#cbd5e1" stroke-width="1"/>
-                    <polygon points="299,12 295,22 304,22" fill="#cbd5e1"/>
-                    <rect x="306" y="26" width="6" height="81" fill="#64748b"/>
+                    <!-- GUARDABARROS TRASERO AZUL ESCULPIDO (Sobre ejes de tracción traseros) -->
+                    <path d="M 263 148 Q 267 132 282 132 L 318 132 Q 335 132 337 148 L 329 148 Q 327 138 318 138 L 282 138 Q 273 138 271 148 Z" fill="url(#opBlue)" stroke="#3b82f6" stroke-width="0.9"/>
 
-                    <!-- CABEZAL CUADRADITO / CHATO (Cabover Classic COE) -->
-                    <!-- Carrocería principal cúbica/chata -->
-                    <path d="M 298 142 L 298 42 L 398 42 Q 412 42 412 56 L 412 142 Z" fill="#2563eb" stroke="#60a5fa" stroke-width="2.5"/>
-                    
-                    <!-- Deflector / Visera superior cuadrada -->
-                    <path d="M 330 36 L 416 36 L 414 43 L 330 43 Z" fill="#1d4ed8"/>
-                    
-                    <!-- Gran Parabrisas Cuadrado / Panorámico -->
-                    <rect x="338" y="48" width="70" height="36" rx="2" fill="#0f172a" stroke="#93c5fd" stroke-width="1.5"/>
-                    <!-- Brillo de cristal -->
-                    <polygon points="342,80 375,52 388,52 355,80" fill="#93c5fd" opacity="0.25"/>
-                    <polygon points="372,80 400,56 405,56 385,80" fill="#93c5fd" opacity="0.25"/>
+                    <!-- ESCAPES INCLINADOS CROMADOS (Sutil guiño detrás del sleeper) -->
+                    <polygon points="331,136 336,136 324,25 318,28" fill="url(#chromeH)" stroke="#f8fafc" stroke-width="0.6"/>
+                    <polygon points="336,136 341,136 330,30 325,33" fill="url(#chromeH)" stroke="#cbd5e1" stroke-width="0.5"/>
+                    <rect x="328" y="72" width="13" height="3" rx="1" fill="#475569"/>
+                    <rect x="331" y="112" width="12" height="3" rx="1" fill="#475569"/>
 
+                    <!-- CABEZAL COMPACTO CON TROMPA CORTA (Estética Custom Azul/Rojo Sutil) -->
+                    <!-- Base de carrocería azul metálico -->
+                    <path d="M 340 138 L 340 50 Q 340 36 356 35 C 374 34 394 38 406 54 L 415 86 C 436 87 458 90 475 95 L 476 144 L 470 148 C 468 133 432 133 430 148 L 424 148 L 424 138 Z" fill="url(#opBlue)" stroke="#3b82f6" stroke-width="1.3"/>
+
+                    <!-- Grupo recortado a la carrocería: Brillos, Llamas Sutiles y Líneas de Panel -->
+                    <g clip-path="url(#cabBodyClip)">
+                        <!-- Brillo superior aerodinámico -->
+                        <path d="M 344 43 C 366 37 388 39 403 54" stroke="#93c5fd" stroke-width="2.2" opacity="0.4" stroke-linecap="round"/>
+
+                        <!-- Llamas fantasma (ghost flames) 100% azules, apenas perceptibles (frente -> atrás) -->
+                        <path d="M 476 94 L 476 102 C 458 99 440 96 422 95 C 409 94 398 92 388 88 C 402 88 416 89 430 90 C 446 92 462 93 476 94 Z" fill="url(#opGhostFlame)"/>
+                        <path d="M 476 104 L 476 114 C 456 110 434 108 412 107 C 392 106 373 103 354 96 C 372 95 390 98 408 98 C 430 99 454 101 476 104 Z" fill="url(#opGhostFlame)"/>
+                        <path d="M 474 118 L 474 131 C 456 125 438 122 420 123 C 398 124 374 121 350 113 C 372 112 394 114 414 114 C 434 115 454 116 474 118 Z" fill="url(#opGhostFlame)"/>
+                        <path d="M 412 82 C 396 81 378 82 360 76 C 374 73 392 75 408 78 Z" fill="url(#opGhostFlameSoft)"/>
+                        <path d="M 396 126 C 380 128 364 127 348 123 C 362 121 378 122 396 126 Z" fill="url(#opGhostFlameSoft)"/>
+
+                        <!-- Reflejos muy tenues de barniz siguiendo las lenguas azules -->
+                        <path d="M 474 95 C 452 93 426 91 394 89" stroke="#bfdbfe" stroke-width="0.55" opacity="0.18" stroke-linecap="round"/>
+                        <path d="M 474 105 C 446 102 414 100 364 96" stroke="#bfdbfe" stroke-width="0.55" opacity="0.16" stroke-linecap="round"/>
+                        <path d="M 468 119 C 436 116 398 115 358 113" stroke="#bfdbfe" stroke-width="0.5" opacity="0.14" stroke-linecap="round"/>
+
+                        <!-- Costuras limpias de sleeper y puerta -->
+                        <line x1="376" y1="36" x2="376" y2="138" stroke="#090d16" stroke-width="1.2" opacity="0.65"/>
+                        <path d="M 378 62 L 407 62 L 413 88 L 413 136 L 378 136 Z" fill="none" stroke="#090d16" stroke-width="1" opacity="0.5"/>
+                    </g>
+
+                    <!-- Reborde del paso de rueda delantero -->
+                    <path d="M 430 148 C 432 133 468 133 470 148" fill="none" stroke="#60a5fa" stroke-width="1.2" opacity="0.65"/>
+
+                    <!-- VENTANAS, VISERA CROMADA Y ESPEJO -->
                     <!-- Ventana lateral del conductor -->
-                    <rect x="306" y="52" width="24" height="28" rx="2" fill="#0f172a" stroke="#93c5fd" stroke-width="1.5"/>
-                    <!-- Manija de puerta -->
-                    <rect x="310" y="90" width="8" height="3" rx="1" fill="#cbd5e1"/>
+                    <path d="M 381 64 L 403 64 L 405 85 L 381 85 Z" fill="url(#glassGrad)" stroke="#cbd5e1" stroke-width="1.1"/>
+                    <polygon points="384,83 395,66 400,66 389,83" fill="#93c5fd" opacity="0.22"/>
+                    <!-- Botaguas superior -->
+                    <path d="M 380 63 L 405 63 L 406 67 L 380 66 Z" fill="#1d4ed8" stroke="#60a5fa" stroke-width="0.6"/>
 
-                    <!-- Parrilla Frontal Cuadrada Clásica (Parrillón Chato) -->
-                    <rect x="372" y="92" width="37" height="36" rx="2" fill="#090d16" stroke="#94a3b8" stroke-width="1.5"/>
-                    <!-- Ranuras de ventilación cromadas -->
-                    <line x1="375" y1="98" x2="406" y2="98" stroke="#cbd5e1" stroke-width="2"/>
-                    <line x1="375" y1="104" x2="406" y2="104" stroke="#cbd5e1" stroke-width="2"/>
-                    <line x1="375" y1="110" x2="406" y2="110" stroke="#cbd5e1" stroke-width="2"/>
-                    <line x1="375" y1="116" x2="406" y2="116" stroke="#cbd5e1" stroke-width="2"/>
-                    <line x1="375" y1="122" x2="406" y2="122" stroke="#cbd5e1" stroke-width="2"/>
+                    <!-- Parabrisas inclinado -->
+                    <path d="M 404 60 L 411 60 L 417 85 L 408 85 Z" fill="url(#glassGrad)" stroke="#e2e8f0" stroke-width="1.1"/>
+                    <line x1="407" y1="62" x2="412" y2="83" stroke="#93c5fd" stroke-width="1.1" opacity="0.35"/>
 
-                    <!-- Parachoques Frontal Pesado Cromado -->
-                    <rect x="365" y="134" width="49" height="12" rx="2" fill="#94a3b8" stroke="#f1f5f9" stroke-width="1.5"/>
-                    <!-- Faroles delanteros cuadrados gemelos -->
-                    <rect x="396" y="136" width="7" height="7" rx="1" fill="#fef08a" stroke="#ca8a04" stroke-width="1"/>
-                    <rect x="386" y="136" width="7" height="7" rx="1" fill="#fef08a" stroke="#ca8a04" stroke-width="1"/>
+                    <!-- Visera cromada con luces de gálibo discretas -->
+                    <path d="M 399 53 Q 412 53 420 60 L 416 64 Q 409 58 400 58 Z" fill="url(#chromeV)" stroke="#f8fafc" stroke-width="0.8"/>
+                    <circle cx="404" cy="53" r="1.2" fill="#fef08a"/>
+                    <circle cx="409.5" cy="54" r="1.2" fill="#fef08a"/>
+                    <circle cx="415" cy="56" r="1.2" fill="#fef08a"/>
 
-                    <!-- Tanque de Diésel Cilíndrico y Estribos -->
-                    <rect x="312" y="142" width="42" height="15" rx="4" fill="#64748b" stroke="#94a3b8" stroke-width="1"/>
-                    <!-- Estribo de acceso a cabina -->
-                    <line x1="394" y1="148" x2="406" y2="148" stroke="#94a3b8" stroke-width="2"/>
+                    <!-- Espejo retrovisor cromado -->
+                    <line x1="404" y1="68" x2="409" y2="68" stroke="#cbd5e1" stroke-width="1.1"/>
+                    <line x1="405" y1="81" x2="409" y2="81" stroke="#cbd5e1" stroke-width="1.1"/>
+                    <rect x="408.5" y="66" width="3" height="17" rx="1" fill="url(#chromeV)" stroke="#475569" stroke-width="0.5"/>
 
-                    <!-- RUEDAS DE ALTA RESISTENCIA (Rines de 10 birlos) -->
-                    <!-- Eje Trasero Furgón 1 -->
-                    <circle cx="58" cy="156" r="17" fill="#020617" stroke="#334155" stroke-width="3"/>
-                    <circle cx="58" cy="156" r="8" fill="#94a3b8"/>
-                    <circle cx="58" cy="156" r="3" fill="#0f172a"/>
-                    <!-- Eje Trasero Furgón 2 -->
-                    <circle cx="98" cy="156" r="17" fill="#020617" stroke="#334155" stroke-width="3"/>
-                    <circle cx="98" cy="156" r="8" fill="#94a3b8"/>
-                    <circle cx="98" cy="156" r="3" fill="#0f172a"/>
+                    <!-- Manija y toma de aire cromada lateral -->
+                    <rect x="382" y="102" width="9" height="2.6" rx="1" fill="url(#chromeV)"/>
+                    <rect x="418" y="99" width="13" height="9" rx="1.8" fill="url(#chromeV)" stroke="#1e293b" stroke-width="0.8"/>
+                    <line x1="420.5" y1="102" x2="428.5" y2="102" stroke="#334155" stroke-width="0.9"/>
+                    <line x1="420.5" y1="105" x2="428.5" y2="105" stroke="#334155" stroke-width="0.9"/>
 
-                    <!-- Eje de Tracción Trasero Cabezal 1 -->
-                    <circle cx="282" cy="156" r="17" fill="#020617" stroke="#334155" stroke-width="3"/>
-                    <circle cx="282" cy="156" r="8" fill="#94a3b8"/>
-                    <circle cx="282" cy="156" r="3" fill="#0f172a"/>
-                    <!-- Eje de Tracción Trasero Cabezal 2 -->
-                    <circle cx="322" cy="156" r="17" fill="#020617" stroke="#334155" stroke-width="3"/>
-                    <circle cx="322" cy="156" r="8" fill="#94a3b8"/>
-                    <circle cx="322" cy="156" r="3" fill="#0f172a"/>
+                    <!-- PARRILLA VERTICAL CROMADA, FARO LED Y PARACHOQUES -->
+                    <path d="M 473 93 L 483 95 L 485 135 L 473 135 Z" fill="#0f172a" stroke="url(#chromeV)" stroke-width="2.2"/>
+                    <line x1="476.5" y1="96" x2="477" y2="133" stroke="#e2e8f0" stroke-width="1.1"/>
+                    <line x1="479.5" y1="96" x2="480.2" y2="133" stroke="#cbd5e1" stroke-width="1.1"/>
+                    <line x1="482" y1="97" x2="483" y2="133" stroke="#e2e8f0" stroke-width="1.1"/>
 
-                    <!-- Eje Direccional Delantero (Justo debajo de la cabina chata) -->
-                    <circle cx="392" cy="156" r="17" fill="#020617" stroke="#334155" stroke-width="3"/>
-                    <circle cx="392" cy="156" r="8" fill="#cbd5e1"/>
-                    <circle cx="392" cy="156" r="3" fill="#0f172a"/>
+                    <!-- Faro delantero LED -->
+                    <path d="M 464 117 L 473 119 L 473 125 L 464 124 Z" fill="#fef08a" stroke="#e2e8f0" stroke-width="0.9" filter="url(#headlightGlow)"/>
+
+                    <!-- Parachoques cromado y faldón inferior azul -->
+                    <path d="M 466 135 L 490 136 L 488 149 L 466 148 Z" fill="url(#chromeV)" stroke="#f8fafc" stroke-width="0.9"/>
+                    <line x1="468" y1="140" x2="488" y2="141" stroke="#ffffff" stroke-width="1.1" opacity="0.8"/>
+                    <path d="M 465 148 L 482 149 L 479 155 L 464 154 Z" fill="url(#opBlueDark)" stroke="#3b82f6" stroke-width="0.7"/>
+
+                    <!-- TANQUE DE DIÉSEL Y ESTRIBOS CROMADOS (Limpio entre ejes traseros y delantero) -->
+                    <rect x="340" y="137" width="40" height="15" rx="5.5" fill="url(#chromeV)" stroke="#94a3b8" stroke-width="0.9"/>
+                    <line x1="344" y1="140.5" x2="376" y2="140.5" stroke="#ffffff" stroke-width="1.5" opacity="0.75" stroke-linecap="round"/>
+                    <rect x="351" y="137" width="2.5" height="15" fill="#334155"/>
+                    <rect x="368" y="137" width="2.5" height="15" fill="#334155"/>
+
+                    <rect x="383" y="138" width="40" height="14" rx="2.5" fill="url(#chromeV)" stroke="#94a3b8" stroke-width="0.9"/>
+                    <rect x="388" y="141.5" width="30" height="2.6" rx="1" fill="#1e293b"/>
+                    <rect x="388" y="146.5" width="30" height="2.6" rx="1" fill="#1e293b"/>
+
+                    <!-- RUEDAS DE ALTA RESISTENCIA (5 ejes alineados sobre y=172) -->
+                    <use href="#opWheel" x="56" y="156"/>
+                    <use href="#opWheel" x="94" y="156"/>
+                    <use href="#opWheel" x="282" y="156"/>
+                    <use href="#opWheel" x="318" y="156"/>
+                    <use href="#opWheel" x="450" y="156"/>
 
                     <!-- DISPLAY DIGITAL DE LA BÁSCULA (Indicador Industrial) -->
-                    <rect x="382" y="10" width="124" height="26" rx="4" fill="#020617" stroke="#10b981" stroke-width="1.5"/>
-                    <text x="392" y="28" fill="#10b981" font-family="'Courier New', monospace" font-size="13" font-weight="900" letter-spacing="1">84,520 LB</text>
+                    <rect x="394" y="8" width="116" height="25" rx="4" fill="#020617" stroke="#10b981" stroke-width="1.5"/>
+                    <text x="403" y="25" fill="#10b981" font-family="'Courier New', monospace" font-size="12.5" font-weight="900" letter-spacing="1">84,520 LB</text>
                 </svg>
             </div>
 
