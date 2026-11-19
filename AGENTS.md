@@ -17,6 +17,6 @@ El selector debe cambiar efectivamente la fuente y mostrar Real o Simulado de ac
 
 
 ## Skills del Proyecto y Cumplimiento Obligatorio
-- **Apego estricto a las skills (sin importar el modelo activo):** Toda intervención debe seguir las skills portables ubicadas en `.agents\skills\` (`surgical-code-editing`, `documentacionSkill`, `clean-architecture-anti-spaghetti`, `web-security-hardening`, `print-and-reporting`, `fastapi-lean-and-secure`, `github-produccion-flow`, `web-deploy-packager` y `crear-copia-agents-skills`).
+- **Apego estricto a las skills (sin importar el modelo activo):** Toda intervención debe seguir las skills portables ubicadas en `.agents\skills\` (`surgical-code-editing`, `documentacionSkill`, `clean-architecture-anti-spaghetti`, `web-security-hardening`, `print-and-reporting`, `fastapi-lean-and-secure`, `github-produccion-flow`, `web-deploy-packager`, `crear-copia-agents-skills`, `bascula-sync-nube`, `serial-hardware-windows` y `mariadb-safe-migrations`).
 - **Portabilidad:** Conservar `.agents\skills\` dentro del proyecto para mantener consistencia al cambiar de PC o entorno.
 - **Trazabilidad:** Validar sintaxis (`php -l`), actualizar `BITACORA_GEMINI.md` ante hitos relevantes y realizar commits atómicos inmediatos en formato Conventional Commits por cada avance o corrección.

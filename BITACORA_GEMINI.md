@@ -204,3 +204,5 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Documentado cierre en `IMPLEMENTACION_FINAL.MD`.
 * **Primera Pesada (`web/public/primera_pesada.php`)**:
   - Ajustada sugerencia de `CEIBITA SUR, SANTA BARBARA` (placeholder y datalist): se sugiere en **Origen** cuando la operación es `VENTA` y en **Destino** cuando es `COMPRA`.
+* **Nuevas Skills Portables (`.agents/skills/` y `AGENTS.md`)**:
+  - Agregadas `bascula-sync-nube`, `serial-hardware-windows` y `mariadb-safe-migrations` para estandarizar sincronización offline-first a Hostinger, manejo seguro de `DCB`/`COM` sin tocar Windows y migraciones MariaDB idempotentes.
