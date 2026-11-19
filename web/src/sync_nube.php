@@ -243,3 +243,67 @@ function sincronizarTodoConNube(PDO $pdo): array
     }
     return $res;
 }
+
+/**
+ * Procesa únicamente las pesadas encoladas en t_sincronizacion_pendiente (si existen).
+ * Usado por el reintento automático cada 5 minutos en el equipo local.
+ *
+ * @return array{ok: bool, pendientes: int, enviados: int}
+ */
+function procesarPendientesSyncNube(PDO $pdo): array
+{
+    $cfg = obtenerConfigSyncNube();
+    if (!$cfg['habilitado']) {
+        return ['ok' => false, 'pendientes' => 0, 'enviados' => 0];
+    }
+
+    $stmtPend = $pdo->query("
+        SELECT entidad_id FROM t_sincronizacion_pendiente
+        WHERE entidad = 't_pesadas' AND enviado_at IS NULL
+        ORDER BY creado_at ASC LIMIT 20
+    ");
+    $ids = array_values(array_unique(array_filter(array_map('intval', $stmtPend->fetchAll(PDO::FETCH_COLUMN)))));
+    if (empty($ids)) {
+        return ['ok' => true, 'pendientes' => 0, 'enviados' => 0];
+    }
+
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $stmtPesadas = $pdo->prepare("SELECT * FROM t_pesadas WHERE idpesada IN ({$placeholders})");
+    $stmtPesadas->execute($ids);
+    $filasPesadas = $stmtPesadas->fetchAll(PDO::FETCH_ASSOC);
+
+    if (empty($filasPesadas)) {
+        return ['ok' => true, 'pendientes' => 0, 'enviados' => 0];
+    }
+
+    $tablas = [
+        't_empresas'                => $pdo->query('SELECT * FROM t_empresas')->fetchAll(PDO::FETCH_ASSOC),
+        't_usuarios'                => $pdo->query('SELECT * FROM t_usuarios')->fetchAll(PDO::FETCH_ASSOC),
+        't_categorias'              => $pdo->query('SELECT * FROM t_categorias')->fetchAll(PDO::FETCH_ASSOC),
+        't_presentaciones'          => $pdo->query('SELECT * FROM t_presentaciones')->fetchAll(PDO::FETCH_ASSOC),
+        't_productos'               => $pdo->query('SELECT * FROM t_productos')->fetchAll(PDO::FETCH_ASSOC),
+        't_producto_presentaciones' => $pdo->query('SELECT * FROM t_producto_presentaciones')->fetchAll(PDO::FETCH_ASSOC),
+        't_taras'                   => $pdo->query('SELECT * FROM t_taras')->fetchAll(PDO::FETCH_ASSOC),
+        't_clie_prov'               => $pdo->query('SELECT * FROM t_clie_prov')->fetchAll(PDO::FETCH_ASSOC),
+        't_pesadas'                 => $filasPesadas,
+    ];
+
+    $res = enviarPayloadSyncNube($tablas, 5);
+    if ($res['ok']) {
+        $stmtOk = $pdo->prepare("
+            UPDATE t_sincronizacion_pendiente
+            SET enviado_at = NOW(), intentos = intentos + 1
+            WHERE entidad = 't_pesadas' AND entidad_id IN ({$placeholders}) AND enviado_at IS NULL
+        ");
+        $stmtOk->execute(array_map('strval', $ids));
+        return ['ok' => true, 'pendientes' => 0, 'enviados' => count($filasPesadas)];
+    }
+
+    $stmtFail = $pdo->prepare("
+        UPDATE t_sincronizacion_pendiente
+        SET intentos = intentos + 1
+        WHERE entidad = 't_pesadas' AND entidad_id IN ({$placeholders}) AND enviado_at IS NULL
+    ");
+    $stmtFail->execute(array_map('strval', $ids));
+    return ['ok' => false, 'pendientes' => count($ids), 'enviados' => 0];
+}

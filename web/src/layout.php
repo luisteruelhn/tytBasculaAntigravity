@@ -552,6 +552,13 @@ async function sincronizarBasculaApi() {
 }
 
 document.addEventListener('DOMContentLoaded', sincronizarBasculaApi);
+
+// Reintento automático de pesadas pendientes hacia Hostinger cada 5 minutos
+function intentarSyncPendientesNube() {
+    fetch('api_sync_pendientes.php', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+}
+setTimeout(intentarSyncPendientesNube, 15000);
+setInterval(intentarSyncPendientesNube, 300000);
 </script>
 <?php endif; ?>
 
