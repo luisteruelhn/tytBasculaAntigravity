@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inversiones Vallecillo, SB — Agroindustria y Comercialización</title>
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --ink: #0f172a;
+            --muted: #475569;
+            --brand: #0f233a;
+            --accent: #1d4ed8;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            line-height: 1.6;
+        }
+        header {
+            background: linear-gradient(135deg, #0f233a 0%, #1e3a5f 100%);
+            color: #ffffff;
+            padding: 4rem 1.5rem;
+            text-align: center;
+        }
+        header .eyebrow {
+            display: inline-block;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #93c5fd;
+            margin-bottom: 0.75rem;
+        }
+        header h1 {
+            margin: 0 0 0.75rem 0;
+            font-size: clamp(1.9rem, 4vw, 2.8rem);
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        header p {
+            margin: 0 auto;
+            max-width: 640px;
+            color: #cbd5e1;
+            font-size: 1.05rem;
+        }
+        main {
+            max-width: 960px;
+            margin: -2rem auto 3rem auto;
+            padding: 0 1.25rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 1.75rem;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+        }
+        .card h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.15rem;
+            color: var(--brand);
+        }
+        .card p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.94rem;
+        }
+        .info-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .info-box strong {
+            display: block;
+            font-size: 1.05rem;
+            margin-bottom: 0.25rem;
+        }
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: #64748b;
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <span class="eyebrow">Santa Bárbara, Honduras</span>
+        <h1>INVERSIONES VALLECILLO, SB</h1>
+        <p>Acopio, procesamiento y comercialización agrícola con estándares de calidad, trazabilidad y pesaje certificado.</p>
+    </header>
+
+    <main>
+        <div class="grid">
+            <div class="card">
+                <h2>Café</h2>
+                <p>Recepción, clasificación y comercialización de café pergamino, húmedo, oro y derivados de la región.</p>
+            </div>
+            <div class="card">
+                <h2>Aceites</h2>
+                <p>Manejo y distribución de aceites vegetales a granel con control preciso de volumen y peso.</p>
+            </div>
+            <div class="card">
+                <h2>Granos Básicos</h2>
+                <p>Comercialización responsable de granos alimenticios y suministro directo para el sector productivo.</p>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div>
+                <strong>Ubicación</strong>
+                <span style="color: var(--muted); font-size: 0.95rem;">
+                    Ceibita Sur, Frente a Antiguo Plantel de la ICA, Santa Bárbara, Honduras.
+                </span>
+            </div>
+            <div style="text-align: right;">
+                <strong>Atención</strong>
+                <span style="color: var(--muted); font-size: 0.95rem;">Operaciones y logística agroindustrial</span>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        &copy; <?php echo date('Y'); ?> Inversiones Vallecillo, SB. Todos los derechos reservados.
+    </footer>
+</body>
+</html>

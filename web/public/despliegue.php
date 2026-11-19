@@ -189,10 +189,11 @@ function construirZipDespliegue(string $webRoot, string $localPhpContent): ?stri
     mkdir($stageDir, 0775, true);
 
     // Estructura lista para /public_html de inversionesvallecillo.com:
-    // - /public_html/index.php -> redirige a /bascula/login.php
-    // - /public_html/bascula/  -> archivos públicos (login.php, index.php, api_sync.php, etc.)
-    // - /public_html/src/      -> protegido por .htaccess
-    // - /public_html/config/   -> protegido por .htaccess + local.php inyectado
+    // - /public_html/index.php  -> página institucional discreta (sin enlaces al sistema)
+    // - /public_html/robots.txt -> bloquea indexación de rutas privadas en buscadores
+    // - /public_html/bascula/   -> archivos públicos (login.php, index.php, api_sync.php, etc.)
+    // - /public_html/src/       -> protegido por .htaccess
+    // - /public_html/config/    -> protegido por .htaccess + local.php inyectado
     copiarDirectorioStaging($webRoot . DIRECTORY_SEPARATOR . 'public', $stageDir . DIRECTORY_SEPARATOR . 'bascula');
     copiarDirectorioStaging($webRoot . DIRECTORY_SEPARATOR . 'src', $stageDir . DIRECTORY_SEPARATOR . 'src');
     copiarDirectorioStaging($webRoot . DIRECTORY_SEPARATOR . 'config', $stageDir . DIRECTORY_SEPARATOR . 'config');
@@ -203,8 +204,14 @@ function construirZipDespliegue(string $webRoot, string $localPhpContent): ?stri
     file_put_contents($stageDir . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . '.htaccess', $htaccessDeny);
     file_put_contents($stageDir . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . '.htaccess', $htaccessDeny);
 
-    $rootIndex = "<?php\nheader('Location: bascula/login.php');\nexit;\n";
+    $landingFile = $webRoot . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'landing_hostinger.html';
+    $rootIndex = is_file($landingFile)
+        ? (string)file_get_contents($landingFile)
+        : "<?php\nheader('HTTP/1.1 200 OK');\necho 'Inversiones Vallecillo, SB';\n";
     file_put_contents($stageDir . DIRECTORY_SEPARATOR . 'index.php', $rootIndex);
+
+    $robotsTxt = "User-agent: *\nDisallow: /bascula/\nDisallow: /config/\nDisallow: /src/\n";
+    file_put_contents($stageDir . DIRECTORY_SEPARATOR . 'robots.txt', $robotsTxt);
 
     $zipTemp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'bascula_deploy_' . bin2hex(random_bytes(4)) . '.zip';
 
@@ -405,10 +412,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                         @unlink($tmpLocal);
 
+                        $landingFile = $webRoot . '/config/landing_hostinger.html';
                         $tmpIdx = tempnam(sys_get_temp_dir(), 'root_idx_');
-                        file_put_contents($tmpIdx, "<?php\nheader('Location: bascula/login.php');\nexit;\n");
+                        file_put_contents($tmpIdx, is_file($landingFile) ? file_get_contents($landingFile) : 'Inversiones Vallecillo, SB');
                         @ftp_put($conn, $destBase . '/index.php', $tmpIdx, FTP_BINARY);
                         @unlink($tmpIdx);
+
+                        $tmpRob = tempnam(sys_get_temp_dir(), 'root_rob_');
+                        file_put_contents($tmpRob, "User-agent: *\nDisallow: /bascula/\nDisallow: /config/\nDisallow: /src/\n");
+                        @ftp_put($conn, $destBase . '/robots.txt', $tmpRob, FTP_BINARY);
+                        @unlink($tmpRob);
 
                         @ftp_close($conn);
                         $mensajeExito = "Despliegue completado por FTP en {$ftpHost}{$destBase}.";
