@@ -346,7 +346,7 @@ function renderizarPie(): void
         </main>
 
         <footer class="footer">
-            <p>tytBasculaAntigravity &copy; <?= date('Y') ?> — Sistema de Pesaje Electrónico Industrial</p>
+            <p>TYTOne Santa Bárbara Cel:+504 95173632 &copy; <?= date('Y') ?> — Sistema de Pesaje Electrónico Industrial</p>
         </footer>
     </div>
 </div>
