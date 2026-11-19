@@ -202,3 +202,5 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Creado `web/public/serial_prueba.php` (SSE con `probar_lectura_serial.py`) y conectados `layout.php`, `config_bascula.php`, `index.php` y `pesaje.js` con FastAPI `:8018` (commit `9cd44ed`).
   - Verificado `http://localhost/bascula/login.php` (HTTP 200) y FastAPI `:8018` (`/api/v1/salud` en modo `real` y `/api/v1/puertos` detectando `COM4`).
   - Documentado cierre en `IMPLEMENTACION_FINAL.MD`.
+* **Primera Pesada (`web/public/primera_pesada.php`)**:
+  - Ajustada sugerencia de `CEIBITA SUR, SANTA BARBARA` (placeholder y datalist): se sugiere en **Origen** cuando la operación es `VENTA` y en **Destino** cuando es `COMPRA`.

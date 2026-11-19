@@ -630,8 +630,8 @@ renderizarEncabezado('Primera Pesada', 'primera');
                     <label for="origen" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Origen / Punto de partida
                     </label>
-                    <input type="text" id="origen" name="origen" list="listaOrigenSugerido" class="form-control" style="height: 42px; border-radius: 6px;" placeholder="CEIBITA SUR, SANTA BARBARA">
-                    <datalist id="listaOrigenSugerido">
+                    <input type="text" id="origen" name="origen" class="form-control" style="height: 42px; border-radius: 6px;">
+                    <datalist id="listaCeibitaSugerida">
                         <option value="CEIBITA SUR, SANTA BARBARA">
                         <option value="CEIBITA SUR, SB">
                     </datalist>
@@ -642,7 +642,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
                 <label for="destino" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                     Destino
                 </label>
-                <input type="text" id="destino" name="destino" class="form-control" style="height: 42px; border-radius: 6px;">
+                <input type="text" id="destino" name="destino" list="listaCeibitaSugerida" class="form-control" style="height: 42px; border-radius: 6px;" placeholder="CEIBITA SUR, SANTA BARBARA">
             </div>
 
             <div>
@@ -874,8 +874,9 @@ function cambiarTransaccionPrincipal(tipo) {
     if (txtGuiaFijar) txtGuiaFijar.style.display = 'none';
     if (txtGuiaGuardar) txtGuiaGuardar.innerText = 'Fija el peso antes de guardar.';
 
-    // Actualizar filtro de Proveedor / Cliente y sub-bloque Guía de Remisión
+    // Actualizar filtro de Proveedor / Cliente, sugerencia Origen/Destino y sub-bloque Guía de Remisión
     filtrarPersonas(tipo);
+    actualizarSugerenciaUbicacion(tipo);
     const subGuia = document.getElementById('subBloqueGuiaUnica');
     if (subGuia) {
         subGuia.style.display = (tipo === 'VENTA') ? 'block' : 'none';
@@ -885,6 +886,27 @@ function cambiarTransaccionPrincipal(tipo) {
         selTipoReg.value = 'BRUTO';
         document.getElementById('tipo_registro_hidden').value = 'BRUTO';
         recalcularPesadaUnica();
+    }
+}
+
+function actualizarSugerenciaUbicacion(tipo) {
+    const inputOrigen = document.getElementById('origen');
+    const inputDestino = document.getElementById('destino');
+    if (!inputOrigen || !inputDestino) return;
+
+    const esVenta = (tipo === 'VENTA');
+    const sugerido = 'CEIBITA SUR, SANTA BARBARA';
+    const listaId = 'listaCeibitaSugerida';
+
+    inputOrigen.placeholder = esVenta ? sugerido : '';
+    inputDestino.placeholder = esVenta ? '' : sugerido;
+
+    if (esVenta) {
+        inputOrigen.setAttribute('list', listaId);
+        inputDestino.removeAttribute('list');
+    } else {
+        inputOrigen.removeAttribute('list');
+        inputDestino.setAttribute('list', listaId);
     }
 }
 
