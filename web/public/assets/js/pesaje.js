@@ -13,7 +13,7 @@ class MonitorBascula {
         this.temporizador = null;
         this.pesoActual = 0;
         this.esEstable = false;
-        this.modoActual = 'simulado';
+        this.modoActual = 'real';
 
         // Elementos del DOM
         this.elDisplayValor = document.getElementById('displayPesoValor');
@@ -58,7 +58,23 @@ class MonitorBascula {
     actualizarUI(datos) {
         this.pesoActual = Number(datos.peso_lb || 0);
         this.esEstable = Boolean(datos.estable);
-        this.modoActual = String(datos.origen || 'desconocido').toUpperCase();
+        this.modoActual = String(datos.origen || 'real').toUpperCase();
+
+        if (datos.error) {
+            if (this.elDisplayValor) {
+                this.elDisplayValor.textContent = '---';
+            }
+            if (this.elBadgeEstable) {
+                this.elBadgeEstable.textContent = String(datos.error).slice(0, 38).toUpperCase();
+                this.elBadgeEstable.title = String(datos.error);
+                this.elBadgeEstable.className = 'badge badge-inestable';
+            }
+            if (this.elBadgeModo) {
+                this.elBadgeModo.textContent = this.modoActual;
+                this.elBadgeModo.className = 'badge badge-modo';
+            }
+            return;
+        }
 
         // 1. Actualizar número de peso formateado (ej: "15,420")
         if (this.elDisplayValor) {

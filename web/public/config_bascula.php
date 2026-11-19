@@ -42,6 +42,8 @@ $mensajeExito = null;
 $mensajeError = null;
 
 // 2. PROCESAR ACCIONES DEL FORMULARIO
+$sincronizarApiAlCargar = false;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $accion = trim((string)($_POST['accion'] ?? ''));
 
@@ -104,6 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $mensajeExito = 'Parámetros de comunicación guardados correctamente.';
+            $sincronizarApiAlCargar = true;
             
             // Recargar datos
             $stmt->execute([':empresa_id' => $empresaId]);
@@ -120,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
         $stmtModo->execute([':uid' => (int)$usuarioActual['id'], ':id' => (int)$config['id']]);
         $mensajeExito = 'Báscula Real activada para la estación PRINCIPAL.';
+        $sincronizarApiAlCargar = true;
         $stmt->execute([':empresa_id' => $empresaId]);
         $config = $stmt->fetch(PDO::FETCH_ASSOC);
     } elseif ($accion === 'activar_simulado') {
@@ -132,6 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ");
         $stmtModo->execute([':uid' => (int)$usuarioActual['id'], ':id' => (int)$config['id']]);
         $mensajeExito = 'Modo Simulado activado para pruebas locales.';
+        $sincronizarApiAlCargar = true;
         $stmt->execute([':empresa_id' => $empresaId]);
         $config = $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -444,47 +449,106 @@ renderizarEncabezado('Configuración Báscula', 'config');
 <script>
 let timerPrueba = null;
 let segundosPrueba = 0;
+let ssePrueba = null;
+
+function agregarLineaLogPrueba(texto, color = '') {
+    const log = document.getElementById('testLog');
+    const div = document.createElement('div');
+    if (color) div.style.color = color;
+    div.textContent = `[${new Date().toLocaleTimeString()}] ${texto}`;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+}
 
 function iniciarPruebaEco() {
-    const puerto = document.getElementById('puerto_com').value.trim();
+    const puerto = document.getElementById('puerto_com').value.trim().toUpperCase();
     const baudios = document.getElementById('baudios').value;
+    const bitsDatos = document.getElementById('bits_datos').value;
+    const paridad = document.getElementById('paridad').value;
+    const bitsParada = document.getElementById('bits_parada').value;
+    const controlFlujo = document.getElementById('control_flujo').value;
 
     if (!puerto) {
         alert('Por favor indica un puerto COM primero.');
         return;
     }
 
+    detenerPruebaEco(false);
+
     document.getElementById('btnTestStart').disabled = true;
     document.getElementById('btnTestStop').disabled = false;
     document.getElementById('testEstado').textContent = 'Escuchando en ' + puerto;
     document.getElementById('testEstado').style.color = '#0b57d0';
-    document.getElementById('testParams').textContent = puerto + ', ' + baudios + ' baudios, 8N1';
+    document.getElementById('testParams').textContent = `${puerto}, ${baudios} baudios, ${bitsDatos}${paridad}${bitsParada}`;
     document.getElementById('testLog').style.display = 'block';
-    document.getElementById('testLog').innerHTML = `<div>[${new Date().toLocaleTimeString()}] Apertura de ${puerto}...</div>`;
-    
+    document.getElementById('testLog').innerHTML = '';
+    agregarLineaLogPrueba(`Conectando a ${puerto} (liberando lector 8018)...`);
+
     segundosPrueba = 0;
     document.getElementById('testTiempo').textContent = '0 s';
-
     timerPrueba = setInterval(() => {
         segundosPrueba++;
         document.getElementById('testTiempo').textContent = segundosPrueba + ' s';
-        if (segundosPrueba >= 30) {
-            detenerPruebaEco();
-        }
     }, 1000);
+
+    const params = new URLSearchParams({
+        puerto_com: puerto,
+        baudios: baudios,
+        bits_datos: bitsDatos,
+        paridad: paridad,
+        bits_parada: bitsParada,
+        control_flujo: controlFlujo
+    });
+
+    ssePrueba = new EventSource('serial_prueba.php?' + params.toString());
+    ssePrueba.onmessage = (evento) => {
+        try {
+            const dato = JSON.parse(evento.data);
+            if (dato.estado === 'cerrado') {
+                detenerPruebaEco(true);
+                return;
+            }
+            const texto = dato.texto ? `${dato.mensaje} -> ${dato.texto}` : (dato.mensaje || evento.data);
+            const color = dato.ok === false ? '#dc2626' : (dato.estado === 'datos' ? '#16a34a' : '');
+            agregarLineaLogPrueba(texto, color);
+        } catch (e) {
+            agregarLineaLogPrueba(evento.data);
+        }
+    };
+    ssePrueba.onerror = () => {
+        detenerPruebaEco(true);
+    };
 }
 
-function detenerPruebaEco() {
+function detenerPruebaEco(mostrarFin = true) {
+    if (ssePrueba) {
+        ssePrueba.close();
+        ssePrueba = null;
+    }
     if (timerPrueba) {
         clearInterval(timerPrueba);
         timerPrueba = null;
     }
     document.getElementById('btnTestStart').disabled = false;
     document.getElementById('btnTestStop').disabled = true;
-    document.getElementById('testEstado').textContent = 'Prueba finalizada';
-    document.getElementById('testEstado').style.color = '#64748b';
-    document.getElementById('testLog').innerHTML += `<div>[${new Date().toLocaleTimeString()}] Puerto liberado.</div>`;
+    if (mostrarFin) {
+        document.getElementById('testEstado').textContent = 'Prueba finalizada';
+        document.getElementById('testEstado').style.color = '#64748b';
+        agregarLineaLogPrueba('Puerto liberado.');
+    }
 }
+
+<?php if ($sincronizarApiAlCargar): ?>
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof notificarApiBascula === 'function') {
+        notificarApiBascula({
+            modo: '<?= ($config['modo'] ?? 'SERIAL') === 'SERIAL' ? 'real' : 'simulado' ?>',
+            puerto_com: <?= json_encode((string)($config['puerto_com'] ?? '')) ?>,
+            baudios: <?= (int)($config['baudios'] ?? 9600) ?>
+        });
+    }
+});
+<?php endif; ?>
 </script>
 
 <?php

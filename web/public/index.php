@@ -94,7 +94,7 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
             <div class="display-encabezado">
                 <span>Indicador Electrónico de Báscula</span>
                 <div class="display-badges">
-                    <span id="badgeModo" class="badge badge-modo">SIMULADO</span>
+                    <span id="badgeModo" class="badge badge-modo">REAL</span>
                     <span id="badgeEstable" class="badge badge-inestable">INICIALIZANDO...</span>
                 </div>
             </div>

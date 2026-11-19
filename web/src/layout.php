@@ -342,6 +342,33 @@ function renderizarPie(): void
 {
     $usuario = obtenerUsuarioActual();
     $esAdmin = $usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'ADMIN', 'REMOTO']);
+    $rolUsuario = $usuario['rol'] ?? '';
+    $hostActual = strtolower((string)($_SERVER['SERVER_NAME'] ?? ''));
+    $esModoRemoto = ($rolUsuario === 'REMOTO') || ($hostActual !== '' && !in_array($hostActual, ['localhost', '127.0.0.1', '::1'], true));
+    $configBasculaSync = null;
+
+    if ($usuario && !$esModoRemoto) {
+        try {
+            $pdoSync = obtenerDB();
+            $stmtSync = $pdoSync->prepare("
+                SELECT modo, puerto_com, baudios
+                FROM t_configuracion_bascula
+                WHERE empresa_id = :empresa_id AND estacion = 'PRINCIPAL'
+                LIMIT 1
+            ");
+            $stmtSync->execute([':empresa_id' => (int)($usuario['empresa_id'] ?? 1)]);
+            $filaSync = $stmtSync->fetch(PDO::FETCH_ASSOC);
+            if ($filaSync) {
+                $configBasculaSync = [
+                    'modo'       => (($filaSync['modo'] ?? 'SERIAL') === 'SERIAL') ? 'real' : 'simulado',
+                    'puerto_com' => (string)($filaSync['puerto_com'] ?? ''),
+                    'baudios'    => (int)($filaSync['baudios'] ?? 9600),
+                ];
+            }
+        } catch (Exception $e) {
+            $configBasculaSync = null;
+        }
+    }
 ?>
         </main>
 
@@ -475,6 +502,55 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+</script>
+<?php endif; ?>
+
+<?php if ($configBasculaSync !== null): ?>
+<script>
+const BASCULA_DB_SYNC = <?= json_encode($configBasculaSync, JSON_UNESCAPED_UNICODE) ?>;
+
+async function notificarApiBascula(cfg) {
+    const base = 'http://127.0.0.1:8018/api/v1';
+    try {
+        if (cfg.puerto_com) {
+            await fetch(base + '/configurar_serial', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ puerto_com: cfg.puerto_com, baudios: Number(cfg.baudios || 9600) })
+            });
+        }
+        if (cfg.modo) {
+            await fetch(base + '/modo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ modo: cfg.modo })
+            });
+        }
+    } catch (e) {
+        // Silencioso si el microservicio 8018 aún no está iniciado
+    }
+}
+
+async function sincronizarBasculaApi() {
+    if (!document.getElementById('displayPesoValor')) return;
+    try {
+        const resp = await fetch('http://127.0.0.1:8018/api/v1/salud');
+        if (!resp.ok) return;
+        const salud = await resp.json();
+        const requiereSync = (
+            salud.modo !== BASCULA_DB_SYNC.modo ||
+            (BASCULA_DB_SYNC.puerto_com && salud.puerto_com !== BASCULA_DB_SYNC.puerto_com) ||
+            (BASCULA_DB_SYNC.modo === 'real' && !salud.lector_activo)
+        );
+        if (requiereSync) {
+            await notificarApiBascula(BASCULA_DB_SYNC);
+        }
+    } catch (e) {
+        // Microservicio local apagado
+    }
+}
+
+document.addEventListener('DOMContentLoaded', sincronizarBasculaApi);
 </script>
 <?php endif; ?>
 
