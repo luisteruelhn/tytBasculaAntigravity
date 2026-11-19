@@ -204,6 +204,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Documentado cierre en `IMPLEMENTACION_FINAL.MD`.
 * **Primera Pesada (`web/public/primera_pesada.php`)**:
   - Ajustada sugerencia de `CEIBITA SUR, SANTA BARBARA` (placeholder y datalist): se sugiere en **Origen** cuando la operación es `VENTA` y en **Destino** cuando es `COMPRA`.
+  - Rediseñada la vista en un cockpit compacto de una sola pantalla alineado con Segunda Pesada: barra superior con switch `COMPRA`/`VENTA` + toggle `⚡ Pesada Única`, fila central `1.1fr / 1fr` (Captura + Indicador en vivo), tarjeta inferior unificada (4 columnas de operación, 5 columnas de vehículo/traslado, observaciones + botón guardar en una fila), desglose individual de descuentos en Pesada Única y panel `#avisoFaltantePrimera` con retroalimentación explícita de campos faltantes.
 * **Nuevas Skills Portables (`.agents/skills/` y `AGENTS.md`)**:
   - Agregadas `bascula-sync-nube`, `serial-hardware-windows` y `mariadb-safe-migrations` para estandarizar sincronización offline-first a Hostinger, manejo seguro de `DCB`/`COM` sin tocar Windows y migraciones MariaDB idempotentes.
 * **Segunda Pesada (`web/public/segunda_pesada.php`)**:

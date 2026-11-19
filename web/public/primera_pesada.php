@@ -391,135 +391,130 @@ renderizarEncabezado('Primera Pesada', 'primera');
         <input type="hidden" name="accion" value="guardar_primera">
         <input type="hidden" name="peso_fijado" id="inputPesoFijado" value="0">
 
-        <!-- SWITCH SEGMENTADO DE TIPO DE TRANSACCIÓN (ANTES DE CAPTURA DE PESO) -->
-        <div class="card" style="padding: 0.9rem 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                <span style="font-size: 0.85rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px;">
-                    Tipo de Transacción:
+        <!-- FILA 1: BARRA SUPERIOR COMPACTA (TIPO DE TRANSACCIÓN + TOGGLE PESADA ÚNICA) -->
+        <div class="card" style="padding: 0.75rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 0.85rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.85rem;">
+            <div style="display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+                <span style="font-size: 0.82rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px;">
+                    Transacción:
                 </span>
-                <div style="display: inline-flex; background: #e2e8f0; padding: 4px; border-radius: 10px; gap: 4px;">
-                    <button type="button" id="btnTxCompra" onclick="cambiarTransaccionPrincipal('COMPRA')" style="padding: 0.55rem 1.35rem; border-radius: 8px; font-weight: 800; font-size: 0.92rem; border: none; cursor: pointer; background: #1e40af; color: #ffffff; transition: all 0.15s ease;">
+                <div style="display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 9px; gap: 4px;">
+                    <button type="button" id="btnTxCompra" onclick="cambiarTransaccionPrincipal('COMPRA')" style="padding: 0.45rem 1.15rem; border-radius: 7px; font-weight: 800; font-size: 0.88rem; border: none; cursor: pointer; background: #1e40af; color: #ffffff; transition: all 0.15s ease;">
                         📥 COMPRA
                     </button>
-                    <button type="button" id="btnTxVenta" onclick="cambiarTransaccionPrincipal('VENTA')" style="padding: 0.55rem 1.35rem; border-radius: 8px; font-weight: 800; font-size: 0.92rem; border: none; cursor: pointer; background: transparent; color: #475569; transition: all 0.15s ease;">
+                    <button type="button" id="btnTxVenta" onclick="cambiarTransaccionPrincipal('VENTA')" style="padding: 0.45rem 1.15rem; border-radius: 7px; font-weight: 800; font-size: 0.88rem; border: none; cursor: pointer; background: transparent; color: #475569; transition: all 0.15s ease;">
                         📤 VENTA
                     </button>
                 </div>
+                <span id="badgeOpOperacion" style="font-size: 0.75rem; font-weight: 800; background: #dbeafe; color: #1e40af; padding: 0.2rem 0.65rem; border-radius: 999px;">
+                    COMPRA
+                </span>
             </div>
-            <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 600;">
-                1 clic para cambiar entre Compra (Bruto) y Venta (Tara)
-            </span>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <label style="display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; margin: 0; font-weight: 700; font-size: 0.85rem; color: #0f172a; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.4rem 0.85rem;">
+                    <input type="checkbox" id="chkPesadaUnica" name="pesada_unica" value="1" onchange="alternarPesadaUnica(this.checked, true)" style="width: 16px; height: 16px; cursor: pointer;">
+                    <span>⚡ Pesada Única (cerrar en un solo paso)</span>
+                </label>
+                <span id="avisoSugerenciaAceite" style="display: none; font-size: 0.76rem; color: #047857; font-weight: 700;">
+                    💡 Sugerido para ACEITE
+                </span>
+            </div>
         </div>
 
-        <!-- BLOQUE SUPERIOR: CAPTURA DEL PESO + INDICADOR LED -->
-        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; align-items: stretch;">
+        <!-- FILA 2: CAPTURA DEL PESO + INDICADOR EN VIVO (MISMA ALTURA) -->
+        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; margin-bottom: 0.85rem; align-items: stretch;">
             
             <!-- PANEL IZQUIERDO: SELECCIÓN Y FIJAR PESO -->
-            <div class="card" style="padding: 1.75rem; margin-bottom: 0; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: space-between;">
+            <div class="card" style="padding: 1rem 1.25rem; margin: 0; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <h3 style="font-size: 1.1rem; font-weight: 800; margin: 0 0 1.25rem 0; color: var(--text-main);">
-                        Captura del peso
-                    </h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem;">
+                        <h3 style="font-size: 1.02rem; font-weight: 800; margin: 0; color: var(--text-main);">
+                            Captura del peso
+                        </h3>
+                        <span id="txtGuiaFijar" style="font-size: 0.76rem; color: var(--text-muted);">
+                            Compra = Bruto &middot; Venta = Tara
+                        </span>
+                    </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.75rem; align-items: end; margin-bottom: 0.75rem;">
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                                <label for="tipo_registro" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin: 0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                <label for="tipo_registro" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin: 0;">
                                     Peso a registrar
                                 </label>
                                 <label style="display: inline-flex; align-items: center; cursor: pointer; margin: 0;" title="Habilitar cambio manual entre Peso Bruto y Tara">
-                                    <input type="checkbox" id="chk_habilitar_tipo_reg" onchange="alternarEdicionTipoRegistro(this.checked)" style="cursor: pointer; width: 16px; height: 16px;">
+                                    <input type="checkbox" id="chk_habilitar_tipo_reg" onchange="alternarEdicionTipoRegistro(this.checked)" style="cursor: pointer; width: 14px; height: 14px;">
                                 </label>
                             </div>
-                            <select id="tipo_registro" name="tipo_registro" class="form-control" style="height: 42px; border-radius: 6px; background: #f8fafc; color: #475569;" disabled>
+                            <select id="tipo_registro" name="tipo_registro" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem; background: #f8fafc; color: #475569;" disabled>
                                 <option value="BRUTO" selected>Peso Bruto</option>
                                 <option value="TARA">Tara de Vehículo</option>
                             </select>
-                            <!-- Input oculto para garantizar el envío POST cuando el select esté deshabilitado -->
                             <input type="hidden" id="tipo_registro_hidden" name="tipo_registro" value="BRUTO">
                         </div>
 
                         <div>
-                            <label for="modo_captura" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                            <label for="modo_captura" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
                                 Modo de captura
                             </label>
-                            <select id="modo_captura" name="modo_captura" class="form-control" style="height: 42px; border-radius: 6px;" onchange="alternarModoCaptura(this.value)">
-                                <option value="INDICADOR" selected>Indicador</option>
+                            <select id="modo_captura" name="modo_captura" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" onchange="alternarModoCaptura(this.value)">
+                                <option value="INDICADOR" selected>Indicador en vivo</option>
                                 <option value="MANUAL">Manual</option>
                             </select>
                         </div>
-                    </div>
 
-                    <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem;">
-                        <button type="button" id="btnFijarPeso" class="btn btn-primary" onclick="fijarPeso()" style="background: #2563eb; padding: 0.55rem 1.25rem; font-weight: 600; border-radius: 6px;" disabled>
+                        <button type="button" id="btnFijarPeso" class="btn btn-primary" onclick="fijarPeso()" style="background: #2563eb; height: 38px; padding: 0 1.15rem; font-weight: 700; border-radius: 6px; font-size: 0.88rem; white-space: nowrap;">
                             Fijar peso
                         </button>
-                        <span id="txtGuiaFijar" style="font-size: 0.82rem; color: var(--text-muted);">
-                            Selecciona bruto o tara antes de fijar el peso.
-                        </span>
                     </div>
 
-                    <div id="campoPesoManual" style="display: none; margin-bottom: 1.25rem;">
-                        <label for="input_manual" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
+                    <div id="campoPesoManual" style="display: none; margin-bottom: 0.75rem;">
+                        <label for="input_manual" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                             Ingresar peso manual (lb)
                         </label>
-                        <input type="number" id="input_manual" class="form-control" style="height: 42px; border-radius: 6px;" placeholder="0" min="1" step="1">
-                    </div>
-
-                    <!-- TOGGLE PESADA ÚNICA (CIERRE EN UN SOLO PASO) -->
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
-                        <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; margin: 0; font-weight: 700; font-size: 0.88rem; color: #0f172a;">
-                            <input type="checkbox" id="chkPesadaUnica" name="pesada_unica" value="1" onchange="alternarPesadaUnica(this.checked, true)" style="width: 18px; height: 18px; cursor: pointer;">
-                            <span>⚡ Pesada Única (cerrar boleta en un solo paso)</span>
-                        </label>
-                        <div id="avisoSugerenciaAceite" style="display: none; margin-top: 0.35rem; font-size: 0.78rem; color: #047857; font-weight: 600;">
-                            💡 Sugerido automáticamente para ACEITE (puedes desmarcarlo si irá a segunda pesada).
-                        </div>
+                        <input type="number" id="input_manual" class="form-control" style="height: 36px; border-radius: 6px; font-size: 0.88rem;" placeholder="0" min="1" step="1">
                     </div>
                 </div>
 
-                <!-- DISPLAY ROJO BURDEOS: PESO FIJADO -->
-                <div style="background: #701a2b; color: #ffffff; border-radius: 8px; padding: 1.25rem 1.5rem;">
-                    <div style="font-size: 0.72rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; opacity: 0.9; margin-bottom: 0.25rem;">
+                <!-- DISPLAY ROJO BURDEOS COMPACTO: PESO FIJADO -->
+                <div style="background: #701a2b; color: #ffffff; border-radius: 8px; padding: 0.75rem 1.15rem; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; opacity: 0.92;">
                         PESO FIJADO
-                    </div>
-                    <div style="font-size: 2.2rem; font-weight: 900; line-height: 1; display: flex; align-items: baseline; gap: 0.4rem;">
+                    </span>
+                    <div style="font-size: 1.85rem; font-weight: 900; line-height: 1; display: flex; align-items: baseline; gap: 0.35rem;">
                         <span id="valorPesoFijado">--</span>
-                        <span style="font-size: 1.1rem; font-weight: 600; opacity: 0.85;">lb</span>
+                        <span style="font-size: 0.95rem; font-weight: 600; opacity: 0.85;">lb</span>
                     </div>
                 </div>
             </div>
 
-            <!-- PANEL DERECHO: INDICADOR EN VIVO (CARD AZUL MARINO INDUSTRIAL) -->
-            <div style="background: #0f233a; color: #ffffff; border-radius: 12px; padding: 1.75rem 2rem; display: flex; flex-direction: column; justify-content: space-between; box-shadow: var(--shadow-md);">
-                <div>
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
-                        <div>
-                            <span style="font-size: 0.72rem; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #94a3b8;">
-                                INDICADOR DE PESO
-                            </span>
-                            <h2 style="font-size: 1.6rem; font-weight: 800; margin: 0.25rem 0 0 0; color: #ffffff;">
-                                Lectura en vivo
-                            </h2>
-                        </div>
-                        <span id="liveEstableBadge" style="background: #1e3a5f; color: #60a5fa; font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.85rem; border-radius: 999px; border: 1px solid #2563eb;">
-                            Estable
+            <!-- PANEL DERECHO: INDICADOR EN VIVO COMPACTO -->
+            <div style="background: #0f233a; color: #ffffff; border-radius: 12px; padding: 1rem 1.35rem; display: flex; flex-direction: column; justify-content: space-between;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div>
+                        <span style="font-size: 0.68rem; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #94a3b8;">
+                            INDICADOR DE PESO
                         </span>
+                        <h2 style="font-size: 1.25rem; font-weight: 800; margin: 0.1rem 0 0 0; color: #ffffff;">
+                            Lectura en vivo
+                        </h2>
                     </div>
+                    <span id="liveEstableBadge" style="background: #1e3a5f; color: #60a5fa; font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.7rem; border-radius: 999px; border: 1px solid #2563eb;">
+                        Estable
+                    </span>
+                </div>
 
-                    <!-- DISPLAY CENTRAL DEL PESO -->
-                    <div style="text-align: center; padding: 2rem 0;">
-                        <div style="font-size: 4rem; font-weight: 900; line-height: 1; letter-spacing: -1px; display: inline-flex; align-items: baseline; gap: 0.5rem;">
-                            <span id="livePesoValor">0</span>
-                            <span style="font-size: 1.6rem; font-weight: 700; color: #93c5fd;">lb</span>
-                        </div>
+                <div style="text-align: center; padding: 0.45rem 0;">
+                    <div style="font-size: 3.1rem; font-weight: 900; line-height: 1; letter-spacing: -1px; display: inline-flex; align-items: baseline; gap: 0.4rem;">
+                        <span id="livePesoValor">0</span>
+                        <span style="font-size: 1.35rem; font-weight: 700; color: #93c5fd;">lb</span>
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; font-size: 0.8rem; color: #94a3b8;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.6rem; font-size: 0.76rem; color: #94a3b8;">
                     <div>
                         <span id="liveModoTexto">Conectando...</span>
-                        <div style="font-size: 0.72rem; color: #64748b;" id="liveUltimaLectura">Última lectura: --:--:--</div>
+                        <div style="font-size: 0.68rem; color: #64748b;" id="liveUltimaLectura">Última lectura: --:--:--</div>
                     </div>
                     <div style="text-align: right;">
                         <span style="color: #cbd5e1;">Fuente &middot; Configurada</span>
@@ -528,25 +523,27 @@ renderizarEncabezado('Primera Pesada', 'primera');
             </div>
         </div>
 
-        <!-- BLOQUE OPERACIÓN (GRID SIMÉTRICO 2x2) -->
-        <div class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.5rem;">
+        <!-- FILA 3: OPERACIÓN + VEHÍCULO Y TRASLADO + OBSERVACIONES (TARJETA COMPACTA UNIFICADA) -->
+        <div class="card" style="padding: 1.1rem 1.35rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1rem;">
             <input type="hidden" id="tipo_operacion" name="tipo_operacion" value="COMPRA">
-            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 1.25rem;">
-                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: var(--text-main);">
-                    Operación
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.5rem;">
+                <h3 style="font-size: 1rem; font-weight: 800; margin: 0; color: var(--text-main);">
+                    Datos de operación, vehículo y traslado
                 </h3>
-                <span id="badgeOpOperacion" style="font-size: 0.78rem; font-weight: 800; background: #dbeafe; color: #1e40af; padding: 0.2rem 0.7rem; border-radius: 999px;">
-                    COMPRA
-                </span>
+                <small id="txtResponsableNota" style="color: var(--text-muted); font-size: 0.75rem;">
+                    La captura queda registrada por <?= htmlspecialchars($usuarioActual['nombre'], ENT_QUOTES, 'UTF-8') ?>.
+                </small>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;">
+            <!-- SUB-FILA A: OPERACIÓN (4 COLUMNAS) -->
+            <div style="display: grid; grid-template-columns: 1.3fr 1.1fr 0.9fr 0.9fr; gap: 0.85rem; margin-bottom: 0.8rem;">
                 <div>
-                    <label for="clie_prov_id" id="lblPersona" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                        Proveedor
+                    <label for="clie_prov_id" id="lblPersona" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                        Proveedor <span style="color: var(--danger);">*</span>
                     </label>
-                    <select id="clie_prov_id" name="clie_prov_id" class="form-control" style="height: 42px; border-radius: 6px;" required>
-                        <option value="" disabled selected>Selecciona una persona o empresa</option>
+                    <select id="clie_prov_id" name="clie_prov_id" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;">
+                        <option value="" disabled selected>Selecciona persona o empresa</option>
                         <?php foreach ($listaPersonas as $p): ?>
                             <option value="<?= $p['id'] ?>" data-cliente="<?= $p['es_cliente'] ?>" data-proveedor="<?= $p['es_proveedor'] ?>">
                                 <?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?>
@@ -556,10 +553,10 @@ renderizarEncabezado('Primera Pesada', 'primera');
                 </div>
 
                 <div>
-                    <label for="producto_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                        Producto
+                    <label for="producto_id" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                        Producto <span style="color: var(--danger);">*</span>
                     </label>
-                    <select id="producto_id" name="producto_id" class="form-control" style="height: 42px; border-radius: 6px;" onchange="filtrarPresentaciones(this.value)" required>
+                    <select id="producto_id" name="producto_id" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" onchange="filtrarPresentaciones(this.value)">
                         <option value="" disabled selected>Selecciona un producto</option>
                         <?php foreach ($listaProductos as $prod): ?>
                             <option value="<?= $prod['id'] ?>">
@@ -568,208 +565,212 @@ renderizarEncabezado('Primera Pesada', 'primera');
                         <?php endforeach; ?>
                     </select>
                 </div>
-            </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                 <div>
-                    <label for="presentacion_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                        Presentación
+                    <label for="presentacion_id" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                        Presentación <span style="color: var(--danger);">*</span>
                     </label>
-                    <select id="presentacion_id" name="presentacion_id" class="form-control" style="height: 42px; border-radius: 6px;" required>
-                        <option value="" disabled selected>Selecciona una presentación</option>
+                    <select id="presentacion_id" name="presentacion_id" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;">
+                        <option value="" disabled selected>Selecciona presentación</option>
                     </select>
                 </div>
 
                 <div>
-                    <label for="responsable_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                    <label for="responsable_id" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Usuario responsable
                     </label>
-                    <select id="responsable_id" name="responsable_id" class="form-control" style="height: 42px; border-radius: 6px;" onchange="actualizarNotaResponsable(this)">
+                    <select id="responsable_id" name="responsable_id" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" onchange="actualizarNotaResponsable(this)">
                         <?php foreach ($listaUsuarios as $u): ?>
                             <option value="<?= $u['id'] ?>" <?= $u['id'] === $usuarioActual['id'] ? 'selected' : '' ?>>
                                 <?= htmlspecialchars($u['nombre'], ENT_QUOTES, 'UTF-8') ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <small id="txtResponsableNota" style="color: var(--text-muted); font-size: 0.78rem; display: block; margin-top: 0.35rem;">
-                        La captura queda registrada por <?= htmlspecialchars($usuarioActual['nombre'], ENT_QUOTES, 'UTF-8') ?>.
-                    </small>
                 </div>
             </div>
-        </div>
 
-        <!-- BLOQUE VEHÍCULO Y TRASLADO -->
-        <div class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 2rem;">
-            <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0 0 1.25rem 0; color: var(--text-main);">
-                Vehículo y traslado
-            </h3>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;">
+            <!-- SUB-FILA B: VEHÍCULO Y TRASLADO (5 COLUMNAS) -->
+            <div style="display: grid; grid-template-columns: 0.75fr 1fr 0.85fr 1.1fr 1.1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
                 <div>
-                    <label for="placa" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                    <label for="placa" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Placa <span style="color: var(--danger);">*</span>
                     </label>
-                    <input type="text" id="placa" name="placa" class="form-control" style="height: 42px; border-radius: 6px; text-transform: uppercase;" required>
+                    <input type="text" id="placa" name="placa" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem; text-transform: uppercase;">
                 </div>
                 <div>
-                    <label for="motorista" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                    <label for="motorista" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Motorista
                     </label>
-                    <input type="text" id="motorista" name="motorista" class="form-control" style="height: 42px; border-radius: 6px;">
+                    <input type="text" id="motorista" name="motorista" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;">
                 </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.25rem;">
                 <div>
-                    <label for="licencia" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                    <label for="licencia" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Licencia
                     </label>
-                    <input type="text" id="licencia" name="licencia" class="form-control" style="height: 42px; border-radius: 6px;">
+                    <input type="text" id="licencia" name="licencia" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;">
                 </div>
                 <div>
-                    <label for="origen" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
+                    <label for="origen" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Origen / Punto de partida
                     </label>
-                    <input type="text" id="origen" name="origen" class="form-control" style="height: 42px; border-radius: 6px;">
+                    <input type="text" id="origen" name="origen" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;">
                     <datalist id="listaCeibitaSugerida">
                         <option value="CEIBITA SUR, SANTA BARBARA">
                         <option value="CEIBITA SUR, SB">
                     </datalist>
                 </div>
-            </div>
-
-            <div style="max-width: 49%; margin-bottom: 1.25rem;">
-                <label for="destino" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                    Destino
-                </label>
-                <input type="text" id="destino" name="destino" list="listaCeibitaSugerida" class="form-control" style="height: 42px; border-radius: 6px;" placeholder="CEIBITA SUR, SANTA BARBARA">
-            </div>
-
-            <div>
-                <label for="observaciones" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                    Observaciones
-                </label>
-                <textarea id="observaciones" name="observaciones" class="form-control" rows="3" style="border-radius: 6px;"></textarea>
-            </div>
-        </div>
-
-        <!-- BLOQUE DE CIERRE DIRECTO (VISIBLE SOLO EN PESADA ÚNICA) -->
-        <div id="bloquePesadaUnica" class="card" style="display: none; padding: 1.75rem 2rem; border-radius: 12px; border: 2px solid #0b57d0; background: var(--bg-surface); margin-bottom: 2rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.5rem;">
-                <h3 style="font-size: 1.15rem; font-weight: 800; margin: 0; color: #0b57d0;">
-                    ⚡ Liquidación y Cierre Directo (Pesada Única)
-                </h3>
-                <span style="font-size: 0.8rem; font-weight: 700; color: #475569;">1 QQ = 100 lb</span>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
                 <div>
-                    <label for="peso_comp_unica" id="lblPesoCompUnica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
-                        Tara vehículo / recipiente (lb)
+                    <label for="destino" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                        Destino
                     </label>
-                    <input type="number" id="peso_comp_unica" name="peso_comp_unica" class="form-control" value="0" min="0" step="1" oninput="recalcularPesadaUnica()">
-                </div>
-                <div>
-                    <label for="idempaque_unica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
-                        Tipo de empaque
-                    </label>
-                    <select id="idempaque_unica" name="idempaque" class="form-control" onchange="recalcularPesadaUnica()">
-                        <option value="0" data-tara="0">Sin empaque (0 lb)</option>
-                        <?php foreach ($listaEmpaques as $emp): ?>
-                            <option value="<?= (int)$emp['idempaque'] ?>" data-tara="<?= (float)$emp['taralbs'] ?>">
-                                <?= htmlspecialchars($emp['nombre'], ENT_QUOTES, 'UTF-8') ?> (<?= number_format((float)$emp['taralbs'], 3) ?> lb)
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-                <div>
-                    <label for="cantidad_empaques_unica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
-                        Cantidad de empaques
-                    </label>
-                    <input type="number" id="cantidad_empaques_unica" name="cantidad_empaques" class="form-control" value="0" min="0" step="1" oninput="recalcularPesadaUnica()">
-                </div>
-                <div>
-                    <label for="ajuste_humedad_unica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
-                        % Humedad
-                    </label>
-                    <input type="number" id="ajuste_humedad_unica" name="ajuste_humedad_pct" class="form-control" value="0" min="0" max="100" step="0.01" oninput="recalcularPesadaUnica()">
-                </div>
-                <div>
-                    <label for="descuento_calidad_unica" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted);">
-                        % Defectos
-                    </label>
-                    <input type="number" id="descuento_calidad_unica" name="descuento_calidad_pct" class="form-control" value="0" min="0" max="100" step="0.01" oninput="recalcularPesadaUnica()">
+                    <input type="text" id="destino" name="destino" list="listaCeibitaSugerida" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" placeholder="CEIBITA SUR, SANTA BARBARA">
                 </div>
             </div>
 
-            <!-- RESUMEN EN VIVO DE PESADA ÚNICA -->
-            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
-                <div id="resUnicaDetalle" style="font-size: 0.85rem; color: #334155;">
-                    Fija el peso para ver la liquidación final.
+            <!-- BLOQUE DE CIERRE DIRECTO (VISIBLE SOLO EN PESADA ÚNICA) -->
+            <div id="bloquePesadaUnica" style="display: none; padding: 0.9rem 1.1rem; border-radius: 10px; border: 2px solid #0b57d0; background: #f8fafc; margin-bottom: 0.85rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.5rem;">
+                    <h4 style="font-size: 0.95rem; font-weight: 800; margin: 0; color: #0b57d0;">
+                        ⚡ Liquidación y Cierre Directo (Pesada Única)
+                    </h4>
+                    <span style="font-size: 0.75rem; font-weight: 700; color: #475569;">1 QQ = 100 lb</span>
                 </div>
-                <div style="text-align: right;">
-                    <span style="font-size: 0.78rem; color: #64748b; display: block;">TOTAL FINAL</span>
-                    <strong id="resUnicaTotal" style="font-size: 1.35rem; color: #881337;">0 lb &middot; 0.00 QQ</strong>
-                </div>
-            </div>
 
-            <!-- GUÍA DE REMISIÓN EN PESADA ÚNICA (SOLO SI ES VENTA) -->
-            <div id="subBloqueGuiaUnica" style="display: none; border-top: 1px dashed #cbd5e1; padding-top: 1rem; margin-top: 0.5rem;">
-                <h4 style="margin: 0 0 0.75rem 0; font-size: 0.95rem; font-weight: 800; color: #047857;">
-                    Guía de Remisión (Venta)
-                </h4>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 0.75rem;">
                     <div>
-                        <label for="guia_remision_unica" class="form-label" style="font-size: 0.8rem;">N° Guía de Remisión</label>
-                        <input type="text" id="guia_remision_unica" name="guia_remision" class="form-control" maxlength="30" placeholder="Ej. 002861">
+                        <label for="peso_comp_unica" id="lblPesoCompUnica" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                            Tara vehículo / recipiente (lb)
+                        </label>
+                        <input type="number" id="peso_comp_unica" name="peso_comp_unica" class="form-control" style="height: 36px; font-size: 0.86rem;" value="0" min="0" step="1" oninput="recalcularPesadaUnica()">
                     </div>
                     <div>
-                        <label for="motivo_traslado_unica" class="form-label" style="font-size: 0.8rem;">Motivo de Traslado</label>
-                        <select id="motivo_traslado_unica" name="motivo_traslado" class="form-control" onchange="document.getElementById('boxMotivoOtroUnica').style.display = (this.value === 'Otros (especificar)') ? 'block' : 'none';">
-                            <option value="Venta" selected>Venta</option>
-                            <option value="Compra">Compra</option>
-                            <option value="Consignación">Consignación</option>
-                            <option value="Venta con entrega a terceros">Venta con entrega a terceros</option>
-                            <option value="Venta sujeta a confirmación por el comprador">Venta sujeta a confirmación por el comprador</option>
-                            <option value="Traslado entre establecimientos de la misma Empresa">Traslado entre establecimientos de la misma Empresa</option>
-                            <option value="Devolución">Devolución</option>
-                            <option value="Otros (especificar)">Otros (especificar)</option>
-                            <option value="Recojo de bienes">Recojo de bienes</option>
-                            <option value="Importación">Importación</option>
-                            <option value="Exportación">Exportación</option>
-                            <option value="Traslado zona primaria">Traslado zona primaria</option>
-                            <option value="Traslado por emisor itinerante de comprobantes de pago">Traslado por emisor itinerante de comprobantes de pago</option>
-                            <option value="Traslado de bienes para transformación">Traslado de bienes para transformación</option>
-                            <option value="Transformación">Transformación</option>
+                        <label for="idempaque_unica" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                            Tipo de empaque
+                        </label>
+                        <select id="idempaque_unica" name="idempaque" class="form-control" style="height: 36px; font-size: 0.86rem;" onchange="recalcularPesadaUnica()">
+                            <option value="0" data-tara="0">Sin empaque (0 lb)</option>
+                            <?php foreach ($listaEmpaques as $emp): ?>
+                                <option value="<?= (int)$emp['idempaque'] ?>" data-tara="<?= (float)$emp['taralbs'] ?>">
+                                    <?= htmlspecialchars($emp['nombre'], ENT_QUOTES, 'UTF-8') ?> (<?= number_format((float)$emp['taralbs'], 3) ?> lb)
+                                </option>
+                            <?php endforeach; ?>
                         </select>
                     </div>
-                    <div id="boxMotivoOtroUnica" style="display: none;">
-                        <label for="motivo_traslado_otro_unica" class="form-label" style="font-size: 0.8rem;">Especificar otro motivo</label>
-                        <input type="text" id="motivo_traslado_otro_unica" name="motivo_traslado_otro" class="form-control" maxlength="120">
+                    <div>
+                        <label for="cantidad_empaques_unica" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                            Cantidad de empaques
+                        </label>
+                        <input type="number" id="cantidad_empaques_unica" name="cantidad_empaques" class="form-control" style="height: 36px; font-size: 0.86rem;" value="0" min="0" step="1" oninput="recalcularPesadaUnica()">
                     </div>
                     <div>
-                        <label for="marca_vehiculo_unica" class="form-label" style="font-size: 0.8rem;">Marca del Vehículo</label>
-                        <input type="text" id="marca_vehiculo_unica" name="marca_vehiculo" class="form-control" maxlength="60">
+                        <label for="ajuste_humedad_unica" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                            % Humedad
+                        </label>
+                        <input type="number" id="ajuste_humedad_unica" name="ajuste_humedad_pct" class="form-control" style="height: 36px; font-size: 0.86rem;" value="0" min="0" max="100" step="0.01" oninput="recalcularPesadaUnica()">
                     </div>
                     <div>
-                        <label for="transportista_rtn_unica" class="form-label" style="font-size: 0.8rem;">R.T.N. Transportista</label>
-                        <input type="text" id="transportista_rtn_unica" name="transportista_rtn" class="form-control" maxlength="20">
+                        <label for="descuento_calidad_unica" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                            % Defectos
+                        </label>
+                        <input type="number" id="descuento_calidad_unica" name="descuento_calidad_pct" class="form-control" style="height: 36px; font-size: 0.86rem;" value="0" min="0" max="100" step="0.01" oninput="recalcularPesadaUnica()">
+                    </div>
+                </div>
+
+                <!-- RESUMEN EN VIVO DE PESADA ÚNICA (CON DESCUENTOS DETALLADOS) -->
+                <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.65rem 1rem; margin-bottom: 0.65rem;">
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr) 1.3fr; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem;">
+                        <div>
+                            <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Neto Inicial</span>
+                            <strong id="resUnicaNeto" style="font-size: 1.05rem; color: var(--text-main);">0 lb</strong>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Tara Sacos</span>
+                            <strong id="resUnicaTaraEmp" style="font-size: 1.05rem; color: #475569;">0 lb</strong>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Desc. Humedad</span>
+                            <strong id="resUnicaDescHum" style="font-size: 1.05rem; color: #b91c1c;">0 lb</strong>
+                        </div>
+                        <div>
+                            <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Desc. Defectos</span>
+                            <strong id="resUnicaDescDef" style="font-size: 1.05rem; color: #b91c1c;">0 lb</strong>
+                        </div>
+                        <div style="background: #eff6ff; padding: 0.4rem 0.7rem; border-radius: 6px; border: 1px solid #bfdbfe; text-align: right;">
+                            <span style="font-size: 0.66rem; color: #1e40af; font-weight: 800; text-transform: uppercase; display: block;">TOTAL FINAL</span>
+                            <strong id="resUnicaTotal" style="font-size: 1.15rem; color: #1e40af;">0 lb &middot; 0.00 QQ</strong>
+                        </div>
+                    </div>
+                    <div id="resUnicaDetalle" style="font-size: 0.75rem; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 0.35rem;">
+                        Fija el peso para ver la liquidación final.
+                    </div>
+                </div>
+
+                <!-- GUÍA DE REMISIÓN EN PESADA ÚNICA (SOLO SI ES VENTA) -->
+                <div id="subBloqueGuiaUnica" style="display: none; border-top: 1px dashed #cbd5e1; padding-top: 0.65rem;">
+                    <div style="font-size: 0.78rem; font-weight: 800; color: #047857; margin-bottom: 0.45rem; text-transform: uppercase;">
+                        Guía de Remisión (Venta)
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
+                        <div>
+                            <label for="guia_remision_unica" class="form-label" style="font-size: 0.74rem; margin-bottom: 0.15rem;">N° Guía de Remisión</label>
+                            <input type="text" id="guia_remision_unica" name="guia_remision" class="form-control" style="height: 34px; font-size: 0.85rem;" maxlength="30" placeholder="Ej. 002861">
+                        </div>
+                        <div>
+                            <label for="motivo_traslado_unica" class="form-label" style="font-size: 0.74rem; margin-bottom: 0.15rem;">Motivo de Traslado</label>
+                            <select id="motivo_traslado_unica" name="motivo_traslado" class="form-control" style="height: 34px; font-size: 0.85rem;" onchange="document.getElementById('boxMotivoOtroUnica').style.display = (this.value === 'Otros (especificar)') ? 'block' : 'none';">
+                                <option value="Venta" selected>Venta</option>
+                                <option value="Compra">Compra</option>
+                                <option value="Consignación">Consignación</option>
+                                <option value="Venta con entrega a terceros">Venta con entrega a terceros</option>
+                                <option value="Venta sujeta a confirmación por el comprador">Venta sujeta a confirmación por el comprador</option>
+                                <option value="Traslado entre establecimientos de la misma Empresa">Traslado entre establecimientos de la misma Empresa</option>
+                                <option value="Devolución">Devolución</option>
+                                <option value="Otros (especificar)">Otros (especificar)</option>
+                                <option value="Recojo de bienes">Recojo de bienes</option>
+                                <option value="Importación">Importación</option>
+                                <option value="Exportación">Exportación</option>
+                                <option value="Traslado zona primaria">Traslado zona primaria</option>
+                                <option value="Traslado por emisor itinerante de comprobantes de pago">Traslado por emisor itinerante de comprobantes de pago</option>
+                                <option value="Traslado de bienes para transformación">Traslado de bienes para transformación</option>
+                                <option value="Transformación">Transformación</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="marca_vehiculo_unica" class="form-label" style="font-size: 0.74rem; margin-bottom: 0.15rem;">Marca del Vehículo</label>
+                            <input type="text" id="marca_vehiculo_unica" name="marca_vehiculo" class="form-control" style="height: 34px; font-size: 0.85rem;" maxlength="60">
+                        </div>
+                        <div>
+                            <label for="transportista_rtn_unica" class="form-label" style="font-size: 0.74rem; margin-bottom: 0.15rem;">R.T.N. Transportista</label>
+                            <input type="text" id="transportista_rtn_unica" name="transportista_rtn" class="form-control" style="height: 34px; font-size: 0.85rem;" maxlength="20">
+                        </div>
+                        <div id="boxMotivoOtroUnica" style="display: none; grid-column: 1 / -1;">
+                            <label for="motivo_traslado_otro_unica" class="form-label" style="font-size: 0.74rem; margin-bottom: 0.15rem;">Especificar otro motivo</label>
+                            <input type="text" id="motivo_traslado_otro_unica" name="motivo_traslado_otro" class="form-control" style="height: 34px; font-size: 0.85rem;" maxlength="120">
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- ACCIONES INFERIORES -->
-        <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 3rem;">
-            <button type="submit" id="btnGuardarPesada" class="btn btn-primary" style="background: #2563eb; padding: 0.75rem 1.75rem; font-weight: 700; border-radius: 6px;" disabled>
-                Guardar primera pesada
-            </button>
-            <a href="index.php" style="color: #1e40af; font-size: 0.95rem; font-weight: 600; text-decoration: none;">
-                Cancelar
-            </a>
-            <span id="txtGuiaGuardar" style="font-size: 0.85rem; color: var(--text-muted);">
-                Selecciona si registras peso bruto o tara del vehículo.
-            </span>
+            <!-- SUB-FILA FINAL: OBSERVACIONES + BOTÓN DE GUARDADO EN UNA SOLA FRANJA -->
+            <div style="display: grid; grid-template-columns: 1.4fr auto; gap: 1rem; align-items: end;">
+                <div>
+                    <label for="observaciones" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                        Observaciones
+                    </label>
+                    <input type="text" id="observaciones" name="observaciones" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" placeholder="Notas opcionales sobre la carga o vehículo">
+                </div>
+                <div style="display: flex; gap: 0.85rem; align-items: center;">
+                    <button type="submit" id="btnGuardarPesada" class="btn btn-primary" style="background: #2563eb; height: 38px; padding: 0 1.5rem; font-weight: 700; border-radius: 6px; font-size: 0.92rem; white-space: nowrap;">
+                        Guardar primera pesada
+                    </button>
+                    <a href="index.php" style="color: #64748b; font-size: 0.88rem; font-weight: 600; text-decoration: none;">
+                        Cancelar
+                    </a>
+                </div>
+            </div>
+
+            <div id="avisoFaltantePrimera" style="display: none; margin-top: 0.75rem; padding: 0.75rem 0.95rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; font-size: 0.85rem; font-weight: 600;"></div>
+            <span id="txtGuiaGuardar" style="display: none;"></span>
         </div>
     </form>
     <?php endif; ?>
@@ -1007,8 +1008,17 @@ function recalcularPesadaUnica() {
     const finalLb = Math.max(0, base - descH - descD);
     const qq = finalLb / 100;
 
+    const elNeto = document.getElementById('resUnicaNeto');
+    const elTaraEmp = document.getElementById('resUnicaTaraEmp');
+    const elDescHum = document.getElementById('resUnicaDescHum');
+    const elDescDef = document.getElementById('resUnicaDescDef');
     const elDetalle = document.getElementById('resUnicaDetalle');
     const elTotal = document.getElementById('resUnicaTotal');
+
+    if (elNeto) elNeto.innerText = `${netoVeh.toLocaleString('en-US')} lb`;
+    if (elTaraEmp) elTaraEmp.innerText = `${taraEmp.toLocaleString('en-US')} lb`;
+    if (elDescHum) elDescHum.innerText = `${descH.toLocaleString('en-US')} lb (${pctH}%)`;
+    if (elDescDef) elDescDef.innerText = `${descD.toLocaleString('en-US')} lb (${pctD}%)`;
     if (elDetalle) {
         elDetalle.innerText = `Bruto: ${bruto.toLocaleString('en-US')} lb · Tara: ${taraV.toLocaleString('en-US')} lb · Neto: ${netoVeh.toLocaleString('en-US')} lb · Tara emp: ${taraEmp.toLocaleString('en-US')} lb · Base: ${base.toLocaleString('en-US')} lb`;
     }
@@ -1016,6 +1026,82 @@ function recalcularPesadaUnica() {
         elTotal.innerText = `${finalLb.toLocaleString('en-US')} lb · ${qq.toFixed(2)} QQ`;
     }
 }
+
+function mostrarAvisoPrimera(mensajes) {
+    const box = document.getElementById('avisoFaltantePrimera');
+    if (!box) return;
+    const lista = Array.isArray(mensajes) ? mensajes : [mensajes];
+    box.innerHTML = '<strong>No se puede guardar todavía. Falta lo siguiente:</strong><ul style="margin: 0.35rem 0 0 1.2rem; padding: 0;">' +
+        lista.map((m) => `<li>${m}</li>`).join('') + '</ul>';
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function ocultarAvisoPrimera() {
+    const box = document.getElementById('avisoFaltantePrimera');
+    if (box) box.style.display = 'none';
+}
+
+function obtenerFaltantesPrimeraPesada() {
+    const faltantes = [];
+    const pesoFijado = parseFloat(document.getElementById('inputPesoFijado')?.value || '0');
+    const tipoOp = document.getElementById('tipo_operacion')?.value || 'COMPRA';
+    const persona = document.getElementById('clie_prov_id')?.value || '';
+    const producto = document.getElementById('producto_id')?.value || '';
+    const presentacion = document.getElementById('presentacion_id')?.value || '';
+    const placa = (document.getElementById('placa')?.value || '').trim();
+    const chkUnica = document.getElementById('chkPesadaUnica');
+
+    if (pesoFijado <= 0) {
+        faltantes.push('Fijar el peso de la báscula (haz clic en <strong>Fijar peso</strong>).');
+    }
+    if (!persona) {
+        faltantes.push(`Seleccionar el <strong>${tipoOp === 'COMPRA' ? 'Proveedor' : 'Cliente'}</strong>.`);
+    }
+    if (!producto) {
+        faltantes.push('Seleccionar el <strong>Producto</strong>.');
+    }
+    if (!presentacion) {
+        faltantes.push('Seleccionar la <strong>Presentación</strong>.');
+    }
+    if (!placa) {
+        faltantes.push('Ingresar el número de <strong>Placa</strong> del vehículo.');
+    }
+
+    if (chkUnica && chkUnica.checked) {
+        const tipoReg = document.getElementById('tipo_registro_hidden')?.value || 'BRUTO';
+        const pesoComp = parseFloat(document.getElementById('peso_comp_unica')?.value || '0');
+        const bruto = (tipoReg === 'BRUTO') ? pesoFijado : pesoComp;
+        const taraV = (tipoReg === 'BRUTO') ? pesoComp : pesoFijado;
+        if (pesoFijado > 0 && bruto <= taraV) {
+            faltantes.push('En Pesada Única, el Peso Bruto debe ser mayor que la Tara del vehículo/recipiente.');
+        }
+        if (tipoOp === 'VENTA') {
+            const selMotivo = document.getElementById('motivo_traslado_unica');
+            const inpOtro = document.getElementById('motivo_traslado_otro_unica');
+            if (selMotivo && selMotivo.value === 'Otros (especificar)' && inpOtro && inpOtro.value.trim() === '') {
+                faltantes.push('Especificar el motivo de traslado ("Otros (especificar)") en la Guía de Remisión.');
+            }
+        }
+    }
+
+    return faltantes;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const formP = document.getElementById('formPrimeraPesada');
+    if (formP) {
+        formP.addEventListener('submit', (e) => {
+            const faltantes = obtenerFaltantesPrimeraPesada();
+            if (faltantes.length > 0) {
+                e.preventDefault();
+                mostrarAvisoPrimera(faltantes);
+            } else {
+                ocultarAvisoPrimera();
+            }
+        });
+    }
+});
 
 function alternarModoCaptura(modo) {
     const divManual = document.getElementById('campoPesoManual');
@@ -1032,24 +1118,22 @@ function fijarPeso() {
         const inpManual = document.getElementById('input_manual');
         pesoAFijar = parseInt(inpManual.value || '0', 10);
         if (pesoAFijar <= 0) {
-            alert('Por favor ingresa un peso manual válido.');
+            mostrarAvisoPrimera('Por favor ingresa un peso manual válido mayor a 0 lb antes de fijar.');
             inpManual.focus();
             return;
         }
     } else {
         pesoAFijar = pesoEnVivo;
+        if (pesoAFijar <= 0) {
+            mostrarAvisoPrimera('No hay una lectura válida (&gt; 0 lb) en el indicador. Verifica la báscula o cambia a modo Manual.');
+            return;
+        }
     }
 
     document.getElementById('inputPesoFijado').value = pesoAFijar;
     document.getElementById('valorPesoFijado').innerText = pesoAFijar.toLocaleString('en-US');
 
-    // Habilitar botón de guardado
-    const btnGuardar = document.getElementById('btnGuardarPesada');
-    const txtGuiaGuardar = document.getElementById('txtGuiaGuardar');
-    if (btnGuardar) {
-        btnGuardar.disabled = false;
-        if (txtGuiaGuardar) txtGuiaGuardar.style.display = 'none';
-    }
+    ocultarAvisoPrimera();
     recalcularPesadaUnica();
 }
 
