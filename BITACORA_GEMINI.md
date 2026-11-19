@@ -213,5 +213,9 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Redistribuida la vista de cierre de `segunda_pesada.php` en un cockpit compacto de 2 columnas (`1.1fr / 1fr`) con desglose individual de descuentos (Humedad y Calidad) y primera pesada apilada bajo tara fijada.
 * **Boletas e Historial (`web/public/pesadas.php` y `segunda_pesada.php`)**:
   - Corregido `TypeError: htmlspecialchars(): Argument #1 ($string) must be of type string, null given` en registros con `placa`, `persona_nombre`, `producto_nombre` o `presentacion_nombre` en `NULL`.
+* **Sincronización Offline-First Local → Hostinger (`inversionesvallecillo.com`)**:
+  - Creado receptor HTTPS `web/public/api_sync.php` autenticado con `X-Bascula-Token` (`SYNC_TOKEN`) e inserción idempotente (`ON DUPLICATE KEY UPDATE`).
+  - Creado cliente local `web/src/sync_nube.php` conectado con `t_sincronizacion_pendiente` e integrado automáticamente al guardar `primera_pesada.php` y `segunda_pesada.php`.
+  - Actualizado `web/public/despliegue.php` con generación de paquete `.zip` listo para `/public_html` de `inversionesvallecillo.com` (compatible con o sin `ZipArchive`), inyección automática de `config/local.php` (`DB_*` + `SYNC_TOKEN`), protección `.htaccess` y botón **☁️ Sincronizar Ahora con Hostinger**.
 * **Indicador de Modo en Vivo (`primera_pesada.php`, `segunda_pesada.php`, `layout.php`)**:
   - Corregido `#liveModoTexto` para reflejar dinámicamente `Modo real` o `Modo simulado` según `data.origen` de FastAPI (`:8018`), e incluida la sincronización automática al cargar `primera_pesada.php` y `segunda_pesada.php`.

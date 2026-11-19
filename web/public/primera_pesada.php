@@ -233,6 +233,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 $idPesada = (int)$pdo->lastInsertId();
                 $pdo->commit();
 
+                require_once dirname(__DIR__) . '/src/sync_nube.php';
+                sincronizarPesadaAutomatica($idPesada);
+
                 // Cargar datos para la vista de confirmación post-guardado (fiel a Imagen 2)
                 $stmtInfo = $pdo->prepare("
                     SELECT p.*, cp.nombre AS persona_nombre, pr.nombre AS presentacion_nombre, 

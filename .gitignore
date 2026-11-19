@@ -6,6 +6,7 @@ __pdfs/
 dbbackup/
 deploy_remoto/
 web/config/local.php
+web/config/sync_remoto.php
 .env
 .env.*
 !.env.example

@@ -176,6 +176,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 
                 $pdo->commit();
 
+                require_once dirname(__DIR__) . '/src/sync_nube.php';
+                sincronizarPesadaAutomatica((int)$idPesada);
+
                 // Cargar datos de la boleta cerrada para confirmación
                 $stmtCerrada = $pdo->prepare("
                     SELECT p.*, cp.nombre AS persona_nombre, pr.nombre AS presentacion_nombre, 
