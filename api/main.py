@@ -30,11 +30,9 @@ app.add_middleware(
 )
 
 # Estado global del microservicio
-# La regla general: por defecto es 'real' en producción.
-# En este entorno de desarrollo sin báscula, inicializamos en 'simulado'
-# o permitimos alternar con /api/v1/modo
+# Regla del proyecto: fuente predeterminada es 'real' (indicador físico).
 estado_servicio = {
-    "modo": "simulado",  # 'real' o 'simulado'
+    "modo": "real",  # 'real' o 'simulado'
     "puerto_com": None,
     "baudios": 9600,
 }
@@ -67,6 +65,7 @@ def salud():
     return {
         "ok": True,
         "modo": estado_servicio["modo"],
+        "puerto_com": estado_servicio["puerto_com"],
         "lector_activo": lector_global.corriendo,
     }
 
@@ -154,3 +153,19 @@ def configurar_serial(req: SerialConfigRequest):
         "ok": True,
         "mensaje": f"Puerto {req.puerto_com} configurado a {req.baudios} baudios",
     }
+
+
+@app.post("/api/v1/lector/detener")
+def detener_lector_temporal():
+    """Detiene temporalmente el lector serial para liberar el puerto COM en pruebas."""
+    lector_global.detener()
+    return {"ok": True, "lector_activo": lector_global.corriendo}
+
+
+@app.post("/api/v1/lector/iniciar")
+def iniciar_lector_temporal():
+    """Reanuda el lector serial si el modo activo es 'real' y hay puerto configurado."""
+    if estado_servicio["modo"] == "real" and estado_servicio["puerto_com"]:
+        lector_global.configurar(estado_servicio["puerto_com"], estado_servicio["baudios"])
+        lector_global.iniciar()
+    return {"ok": True, "lector_activo": lector_global.corriendo}

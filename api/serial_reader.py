@@ -83,16 +83,17 @@ def parsear_trama_lp7510(trama_bytes: bytes) -> Optional[Dict[str, Any]]:
     Parsea una trama continua de indicador industrial LP7510 / C18.
     Formato típico: ST,GS,+  15420 lb\r\n  o  US,GS,+  15400 lb\r\n
     """
-    texto = trama_bytes.strip(b" \r\n")
+    texto = trama_bytes.strip(b" \r\n\t")
     # Expresión regular para validar trama estándar de pesaje industrial
-    patron = rb"^(ST|US|OL),(GS|NT),([+-])\s*(\d{1,9}(?:\.\d{1,3})?)\s*(lb|kg)$"
-    coincidencia = re.fullmatch(patron, texto)
+    patron = rb"^(ST|US|OL)\s*,\s*(GS|NT)\s*,\s*([+-])\s*(\d{1,9}(?:\.\d{1,3})?)\s*(lb|lbs|kg)$"
+    coincidencia = re.fullmatch(patron, texto, re.IGNORECASE)
     if not coincidencia:
         return None
 
     estado_trama, modo, signo, valor_str, unidad = coincidencia.groups()
+    estado_upper = estado_trama.upper()
 
-    if estado_trama == b"OL":
+    if estado_upper == b"OL":
         # Sobrecarga de báscula
         return {"error": "Sobrecarga en el indicador de báscula"}
 
@@ -103,10 +104,14 @@ def parsear_trama_lp7510(trama_bytes: bytes) -> Optional[Dict[str, Any]]:
     except ValueError:
         return None
 
+    unidad_norm = unidad.decode("ascii").lower()
+    if unidad_norm == "lbs":
+        unidad_norm = "lb"
+
     return {
         "peso_lb": peso_num,
-        "estable": (estado_trama == b"ST"),
-        "unidad": unidad.decode("ascii").lower(),
+        "estable": (estado_upper == b"ST"),
+        "unidad": unidad_norm,
         "origen": "real",
         "timestamp": time.time(),
     }
@@ -144,6 +149,32 @@ class LectorSerialWin32:
         if self.hilo and self.hilo.is_alive():
             self.hilo.join(timeout=1.5)
 
+    def _configurar_sesion_serial(self, kernel: Any, handle: Any) -> Optional[DCB]:
+        """Guarda el DCB actual y aplica 9600/baudios 8N1 solo en la sesión abierta."""
+        kernel.GetCommState.argtypes = [wintypes.HANDLE, ctypes.POINTER(DCB)]
+        kernel.GetCommState.restype = wintypes.BOOL
+        kernel.SetCommState.argtypes = [wintypes.HANDLE, ctypes.POINTER(DCB)]
+        kernel.SetCommState.restype = wintypes.BOOL
+
+        dcb_original = DCB()
+        dcb_original.DCBlength = ctypes.sizeof(DCB)
+        if not kernel.GetCommState(handle, ctypes.byref(dcb_original)):
+            return None
+
+        dcb_sesion = DCB()
+        ctypes.memmove(ctypes.byref(dcb_sesion), ctypes.byref(dcb_original), ctypes.sizeof(DCB))
+        dcb_sesion.BaudRate = int(self.baudios)
+        dcb_sesion.ByteSize = 8
+        dcb_sesion.Parity = 0   # NOPARITY
+        dcb_sesion.StopBits = 0 # ONESTOPBIT (1 bit de parada)
+        kernel.SetCommState(handle, ctypes.byref(dcb_sesion))
+        return dcb_original
+
+    def _restaurar_sesion_serial(self, kernel: Any, handle: Any, dcb_original: Optional[DCB]) -> None:
+        """Restaura el DCB original al cerrar el puerto sin alterar el controlador de Windows."""
+        if dcb_original is not None:
+            kernel.SetCommState(handle, ctypes.byref(dcb_original))
+
     def _bucle_lectura(self) -> None:
         """Hilo de lectura continua con kernel32."""
         kernel = ctypes.WinDLL("kernel32", use_last_error=True)
@@ -160,6 +191,7 @@ class LectorSerialWin32:
         kernel.ReadFile.argtypes = [wintypes.HANDLE, wintypes.LPVOID, wintypes.DWORD, ctypes.POINTER(wintypes.DWORD), wintypes.LPVOID]
         kernel.CloseHandle.argtypes = [wintypes.HANDLE]
 
+        dcb_original = self._configurar_sesion_serial(kernel, handle)
         buffer = b""
         try:
             while self.corriendo:
@@ -174,8 +206,8 @@ class LectorSerialWin32:
                     leidos = wintypes.DWORD()
                     if kernel.ReadFile(handle, datos, min(bytes_en_cola, 512), ctypes.byref(leidos), None):
                         buffer += datos.raw[: leidos.value]
-                        while b"\n" in buffer:
-                            linea, buffer = buffer.split(b"\n", 1)
+                        while b"\r" in buffer or b"\n" in buffer:
+                            linea, buffer = re.split(b"[\r\n]+", buffer, maxsplit=1)
                             lectura = parsear_trama_lp7510(linea)
                             if lectura and "peso_lb" in lectura:
                                 self.ultima_lectura = lectura
@@ -184,6 +216,7 @@ class LectorSerialWin32:
 
                 time.sleep(0.05)
         finally:
+            self._restaurar_sesion_serial(kernel, handle, dcb_original)
             kernel.CloseHandle(handle)
             self.corriendo = False
 
