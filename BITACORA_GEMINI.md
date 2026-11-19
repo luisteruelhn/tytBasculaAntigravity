@@ -195,3 +195,10 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Verificadas columnas nuevas en `t_empresas` (`telefono`, `email`), `t_pesadas` (`observaciones_segunda`, `guia_remision`, `motivo_traslado`, etc.), tablas `t_categorias` y `t_presentaciones`, y usuario `maria.jose` con rol `REMOTO`.
 * **Validación de sintaxis PHP**:
   - Verificados todos los archivos `.php` bajo `web/` con `php -l` (cero errores).
+* **Enlace en XAMPP y Lectura Serial Real (`COM4`)**:
+  - Respaldada carpeta anterior en `C:\xampp\htdocs\bascula_respaldo` y creado *Junction* `C:\xampp\htdocs\bascula` → `k:\TYTOneBasculaAntigravity\web\public`.
+  - Actualizado `api/serial_reader.py` con `_configurar_sesion_serial()` / `_restaurar_sesion_serial()` (DCB `9600, 8N1` solo en sesión) y soporte `\r`/`\n` + `lb`/`lbs`/`kg` en `parsear_trama_lp7510()`.
+  - Actualizado `api/main.py` con `modo = "real"` por defecto, `puerto_com` en `/api/v1/salud`, y `/api/v1/lector/detener` + `/api/v1/lector/iniciar` (commit `74b1afe`).
+  - Creado `web/public/serial_prueba.php` (SSE con `probar_lectura_serial.py`) y conectados `layout.php`, `config_bascula.php`, `index.php` y `pesaje.js` con FastAPI `:8018` (commit `9cd44ed`).
+  - Verificado `http://localhost/bascula/login.php` (HTTP 200) y FastAPI `:8018` (`/api/v1/salud` en modo `real` y `/api/v1/puertos` detectando `COM4`).
+  - Documentado cierre en `IMPLEMENTACION_FINAL.MD`.
