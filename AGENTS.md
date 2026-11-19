@@ -15,3 +15,8 @@ El selector debe cambiar efectivamente la fuente y mostrar Real o Simulado de ac
    - Mantener el stack plano, rápido y directo: PHP nativo conciso + MariaDB limpio + FastAPI ligero de hardware.
    - Cada intervención debe ser mínima, precisa y funcional sin inflar el código ni desperdiciar tokens.
 
+
+## Skills del Proyecto y Cumplimiento Obligatorio
+- **Apego estricto a las skills (sin importar el modelo activo):** Toda intervención debe seguir las skills portables ubicadas en `.agents\skills\` (`surgical-code-editing`, `documentacionSkill`, `clean-architecture-anti-spaghetti`, `web-security-hardening`, `print-and-reporting`, `fastapi-lean-and-secure`, `github-produccion-flow`, `web-deploy-packager` y `crear-copia-agents-skills`).
+- **Portabilidad:** Conservar `.agents\skills\` dentro del proyecto para mantener consistencia al cambiar de PC o entorno.
+- **Trazabilidad:** Validar sintaxis (`php -l`), actualizar `BITACORA_GEMINI.md` ante hitos relevantes y realizar commits atómicos inmediatos en formato Conventional Commits por cada avance o corrección.

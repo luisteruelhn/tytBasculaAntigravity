@@ -167,3 +167,15 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * Creado módulo **`Despliegue / Nube`** (`web/public/despliegue.php` exclusivo `SUPER`) + soporte `web/config/local.php` (`local.example.php`) protegido en `.gitignore`.
 * Creada rama **`produccion`** en Git y documentación operativa para planta en `IMPLEMENT.md` + script idempotente `scripts/actualizar_bd_pc_bascula.sql`.
 * Limpieza de archivos temporales (`cookies.txt`) y exclusión de logos privados en `.gitignore`.
+
+---
+
+## 2026-11-18 / 2026-11-19 — Sesión 03: Personalización de Login, Pie de Página y Portabilidad de Skills
+
+* **Login (`web/public/login.php`)**:
+  - Rediseñada ilustración SVG de rastra sobre báscula con furgón largo en franjas azules y cabezal compacto con llamas fantasma (*ghost flames*) azules sutiles de flujo frente → atrás.
+  - Corregido contraste del título del panel izquierdo en modo claro (`#f8fafc`) y actualizado texto a `TRUCK SCALE`.
+* **Pie de página (`web/src/layout.php`)**:
+  - Actualizado mensaje del footer a `TYTOne Santa Bárbara Cel:+504 95173632 © 2026 — Sistema de Pesaje Electrónico Industrial`.
+* **Portabilidad y gobernanza (`.agents/skills/`, `AGENTS.md`)**:
+  - Copiadas las skills globales dentro de `.agents/skills/` y registrado el cumplimiento obligatorio de skills y commits atómicos en `AGENTS.md`.
