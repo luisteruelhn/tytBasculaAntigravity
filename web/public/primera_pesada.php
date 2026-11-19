@@ -523,21 +523,22 @@ renderizarEncabezado('Primera Pesada', 'primera');
             </div>
         </div>
 
-        <!-- FILA 3: OPERACIÓN + VEHÍCULO Y TRASLADO + OBSERVACIONES (TARJETA COMPACTA UNIFICADA) -->
+        <!-- FILA 3: OPERACIÓN + VEHÍCULO + TRASLADO Y OBSERVACIONES (3 FILAS DE 3 COLUMNAS) -->
         <div class="card" style="padding: 1.1rem 1.35rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1rem;">
             <input type="hidden" id="tipo_operacion" name="tipo_operacion" value="COMPRA">
+            <input type="hidden" id="responsable_id" name="responsable_id" value="<?= (int)$usuarioActual['id'] ?>">
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.5rem;">
                 <h3 style="font-size: 1rem; font-weight: 800; margin: 0; color: var(--text-main);">
                     Datos de operación, vehículo y traslado
                 </h3>
-                <small id="txtResponsableNota" style="color: var(--text-muted); font-size: 0.75rem;">
-                    La captura queda registrada por <?= htmlspecialchars($usuarioActual['nombre'], ENT_QUOTES, 'UTF-8') ?>.
+                <small id="txtResponsableNota" style="color: var(--text-muted); font-size: 0.76rem; font-weight: 600;">
+                    Responsable: <strong style="color: var(--text-main);"><?= htmlspecialchars($usuarioActual['nombre'], ENT_QUOTES, 'UTF-8') ?></strong>
                 </small>
             </div>
 
-            <!-- SUB-FILA A: OPERACIÓN (4 COLUMNAS) -->
-            <div style="display: grid; grid-template-columns: 1.3fr 1.1fr 0.9fr 0.9fr; gap: 0.85rem; margin-bottom: 0.8rem;">
+            <!-- LÍNEA 1: PROVEEDOR/CLIENTE, PRODUCTO, PRESENTACIÓN (3 COLUMNAS) -->
+            <div style="display: grid; grid-template-columns: 1.3fr 1.1fr 0.9fr; gap: 0.85rem; margin-bottom: 0.75rem;">
                 <div>
                     <label for="clie_prov_id" id="lblPersona" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Proveedor <span style="color: var(--danger);">*</span>
@@ -574,23 +575,10 @@ renderizarEncabezado('Primera Pesada', 'primera');
                         <option value="" disabled selected>Selecciona presentación</option>
                     </select>
                 </div>
-
-                <div>
-                    <label for="responsable_id" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                        Usuario responsable
-                    </label>
-                    <select id="responsable_id" name="responsable_id" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" onchange="actualizarNotaResponsable(this)">
-                        <?php foreach ($listaUsuarios as $u): ?>
-                            <option value="<?= $u['id'] ?>" <?= $u['id'] === $usuarioActual['id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($u['nombre'], ENT_QUOTES, 'UTF-8') ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
             </div>
 
-            <!-- SUB-FILA B: VEHÍCULO Y TRASLADO (5 COLUMNAS) -->
-            <div style="display: grid; grid-template-columns: 0.75fr 1fr 0.85fr 1.1fr 1.1fr; gap: 0.85rem; margin-bottom: 0.85rem;">
+            <!-- LÍNEA 2: PLACA, MOTORISTA, LICENCIA (3 COLUMNAS) -->
+            <div style="display: grid; grid-template-columns: 0.9fr 1.3fr 1.1fr; gap: 0.85rem; margin-bottom: 0.75rem;">
                 <div>
                     <label for="placa" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Placa <span style="color: var(--danger);">*</span>
@@ -609,6 +597,10 @@ renderizarEncabezado('Primera Pesada', 'primera');
                     </label>
                     <input type="text" id="licencia" name="licencia" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;">
                 </div>
+            </div>
+
+            <!-- LÍNEA 3: ORIGEN, DESTINO, OBSERVACIONES (3 COLUMNAS) -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 0.85rem; margin-bottom: 0.9rem;">
                 <div>
                     <label for="origen" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Origen / Punto de partida
@@ -624,6 +616,12 @@ renderizarEncabezado('Primera Pesada', 'primera');
                         Destino
                     </label>
                     <input type="text" id="destino" name="destino" list="listaCeibitaSugerida" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" placeholder="CEIBITA SUR, SANTA BARBARA">
+                </div>
+                <div>
+                    <label for="observaciones" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                        Observaciones
+                    </label>
+                    <input type="text" id="observaciones" name="observaciones" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" placeholder="Notas opcionales sobre la carga o vehículo">
                 </div>
             </div>
 
@@ -751,26 +749,18 @@ renderizarEncabezado('Primera Pesada', 'primera');
                 </div>
             </div>
 
-            <!-- SUB-FILA FINAL: OBSERVACIONES + BOTÓN DE GUARDADO EN UNA SOLA FRANJA -->
-            <div style="display: grid; grid-template-columns: 1.4fr auto; gap: 1rem; align-items: end;">
-                <div>
-                    <label for="observaciones" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                        Observaciones
-                    </label>
-                    <input type="text" id="observaciones" name="observaciones" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" placeholder="Notas opcionales sobre la carga o vehículo">
-                </div>
-                <div style="display: flex; gap: 0.85rem; align-items: center;">
-                    <button type="submit" id="btnGuardarPesada" class="btn btn-primary" style="background: #2563eb; height: 38px; padding: 0 1.5rem; font-weight: 700; border-radius: 6px; font-size: 0.92rem; white-space: nowrap;">
-                        Guardar primera pesada
-                    </button>
-                    <a href="index.php" style="color: #64748b; font-size: 0.88rem; font-weight: 600; text-decoration: none;">
-                        Cancelar
-                    </a>
-                </div>
-            </div>
-
-            <div id="avisoFaltantePrimera" style="display: none; margin-top: 0.75rem; padding: 0.75rem 0.95rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; font-size: 0.85rem; font-weight: 600;"></div>
+            <div id="avisoFaltantePrimera" style="display: none; margin-bottom: 0.75rem; padding: 0.75rem 0.95rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; font-size: 0.85rem; font-weight: 600;"></div>
             <span id="txtGuiaGuardar" style="display: none;"></span>
+
+            <!-- ACCIONES ABAJO: GUARDAR JUNTO A CANCELAR -->
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button type="submit" id="btnGuardarPesada" class="btn btn-primary" style="background: #2563eb; height: 38px; padding: 0 1.65rem; font-weight: 700; border-radius: 6px; font-size: 0.92rem; white-space: nowrap;">
+                    Guardar primera pesada
+                </button>
+                <a href="index.php" style="color: #64748b; font-size: 0.9rem; font-weight: 600; text-decoration: none;">
+                    Cancelar
+                </a>
+            </div>
         </div>
     </form>
     <?php endif; ?>
