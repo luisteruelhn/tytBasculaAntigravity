@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS t_empresas (
     nombre_comercial VARCHAR(150),
     rtn VARCHAR(20),
     direccion VARCHAR(255),
+    telefono VARCHAR(50),
+    email VARCHAR(150),
     logo VARCHAR(255),
     activo BOOLEAN NOT NULL DEFAULT TRUE
 ) ENGINE=InnoDB;

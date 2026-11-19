@@ -8,6 +8,11 @@
 
 SET NAMES utf8mb4;
 
+-- 0. Columnas de contacto en t_empresas (usadas en empresa.php, boleta.php y guia_remision.php)
+ALTER TABLE t_empresas
+    ADD COLUMN IF NOT EXISTS telefono VARCHAR(50) DEFAULT NULL AFTER direccion,
+    ADD COLUMN IF NOT EXISTS email VARCHAR(150) DEFAULT NULL AFTER telefono;
+
 -- 1. Nuevas tablas de catálogos (Categorías y Presentaciones)
 CREATE TABLE IF NOT EXISTS t_categorias (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -37,6 +42,11 @@ INSERT IGNORE INTO t_categorias (empresa_id, codigo, nombre, descripcion, activo
     (1, 'ACEITES', 'ACEITES', 'Aceite crudo, refinado de palma y grasas', 1),
     (1, 'GRANOS_BASICOS', 'GRANOS BÁSICOS', 'Maíz, frijol, arroz, sorgo y granos alimenticios', 1);
 
+-- Semilla inicial de presentaciones (solo si no existen para empresa 1)
+INSERT IGNORE INTO t_presentaciones (empresa_id, codigo, nombre, descripcion, activo) VALUES
+    (1, 'SACOS', 'SACOS', 'Presentación en sacos o bultos', 1),
+    (1, 'GRANEL', 'A GRANEL', 'Carga a granel sin empaque', 1);
+
 -- 2. Columna categoria_id en t_productos
 ALTER TABLE t_productos
     ADD COLUMN IF NOT EXISTS categoria_id INT UNSIGNED DEFAULT NULL AFTER empresa_id;
@@ -47,6 +57,7 @@ ALTER TABLE t_configuracion_bascula
 
 -- 4. Columnas de Guía de Remisión en t_pesadas (Ventas)
 ALTER TABLE t_pesadas
+    ADD COLUMN IF NOT EXISTS observaciones_segunda TEXT NULL AFTER observaciones,
     ADD COLUMN IF NOT EXISTS guia_remision VARCHAR(30) NULL AFTER observaciones_segunda,
     ADD COLUMN IF NOT EXISTS motivo_traslado VARCHAR(80) NULL AFTER guia_remision,
     ADD COLUMN IF NOT EXISTS motivo_traslado_otro VARCHAR(120) NULL AFTER motivo_traslado,
