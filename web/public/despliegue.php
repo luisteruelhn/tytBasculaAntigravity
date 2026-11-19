@@ -27,20 +27,21 @@ $tokenSugerido = $cfgSyncActual['token'] !== ''
     ? $cfgSyncActual['token']
     : bin2hex(random_bytes(16));
 
-// Valores por defecto o conservados en sesión (sin guardar contraseñas en BD)
-$form = $_SESSION['deploy_form'] ?? [
-    'db_host'         => 'localhost',
-    'db_port'         => 3306,
-    'db_name'         => '',
-    'db_user'         => '',
-    'ftp_host'        => 'ftp.inversionesvallecillo.com',
-    'ftp_port'        => 21,
-    'ftp_user'        => '',
-    'ftp_path'        => '/public_html',
-    'ftp_ssl'         => 0,
+// Cargar valores guardados en web/config/sync_remoto.php (persiste igual que config_bascula.php)
+$formGuardado = [
+    'db_host'         => defined('SYNC_DB_HOST') ? (string)SYNC_DB_HOST : 'localhost',
+    'db_port'         => defined('SYNC_DB_PORT') ? (int)SYNC_DB_PORT : 3306,
+    'db_name'         => defined('SYNC_DB_NAME') ? (string)SYNC_DB_NAME : '',
+    'db_user'         => defined('SYNC_DB_USER') ? (string)SYNC_DB_USER : '',
+    'ftp_host'        => defined('SYNC_FTP_HOST') ? (string)SYNC_FTP_HOST : 'ftp.inversionesvallecillo.com',
+    'ftp_port'        => defined('SYNC_FTP_PORT') ? (int)SYNC_FTP_PORT : 21,
+    'ftp_user'        => defined('SYNC_FTP_USER') ? (string)SYNC_FTP_USER : '',
+    'ftp_path'        => defined('SYNC_FTP_PATH') ? (string)SYNC_FTP_PATH : '/public_html',
+    'ftp_ssl'         => defined('SYNC_FTP_SSL') ? (int)SYNC_FTP_SSL : 0,
     'sync_remote_url' => $cfgSyncActual['url'] ?: 'https://inversionesvallecillo.com/bascula/api_sync.php',
     'sync_token'      => $tokenSugerido,
 ];
+$form = array_merge($formGuardado, $_SESSION['deploy_form'] ?? []);
 
 if (empty($form['sync_remote_url'])) {
     $form['sync_remote_url'] = 'https://inversionesvallecillo.com/bascula/api_sync.php';
@@ -73,7 +74,7 @@ function generarContenidoLocalPhp(string $host, int $port, string $name, string 
 /**
  * Guarda en esta PC de producción el archivo privado web/config/sync_remoto.php.
  */
-function guardarConfigSyncLocal(string $url, string $token): void
+function guardarConfigSyncLocal(string $url, string $token, array $extra = []): void
 {
     $contenido = "<?php\n"
         . "/**\n"
@@ -81,7 +82,16 @@ function guardarConfigSyncLocal(string $url, string $token): void
         . " */\n"
         . "declare(strict_types=1);\n\n"
         . "if (!defined('SYNC_REMOTE_URL')) define('SYNC_REMOTE_URL', " . var_export($url, true) . ");\n"
-        . "if (!defined('SYNC_TOKEN')) define('SYNC_TOKEN', " . var_export($token, true) . ");\n";
+        . "if (!defined('SYNC_TOKEN')) define('SYNC_TOKEN', " . var_export($token, true) . ");\n"
+        . "if (!defined('SYNC_DB_HOST')) define('SYNC_DB_HOST', " . var_export((string)($extra['db_host'] ?? 'localhost'), true) . ");\n"
+        . "if (!defined('SYNC_DB_PORT')) define('SYNC_DB_PORT', " . (int)($extra['db_port'] ?? 3306) . ");\n"
+        . "if (!defined('SYNC_DB_NAME')) define('SYNC_DB_NAME', " . var_export((string)($extra['db_name'] ?? ''), true) . ");\n"
+        . "if (!defined('SYNC_DB_USER')) define('SYNC_DB_USER', " . var_export((string)($extra['db_user'] ?? ''), true) . ");\n"
+        . "if (!defined('SYNC_FTP_HOST')) define('SYNC_FTP_HOST', " . var_export((string)($extra['ftp_host'] ?? ''), true) . ");\n"
+        . "if (!defined('SYNC_FTP_PORT')) define('SYNC_FTP_PORT', " . (int)($extra['ftp_port'] ?? 21) . ");\n"
+        . "if (!defined('SYNC_FTP_USER')) define('SYNC_FTP_USER', " . var_export((string)($extra['ftp_user'] ?? ''), true) . ");\n"
+        . "if (!defined('SYNC_FTP_PATH')) define('SYNC_FTP_PATH', " . var_export((string)($extra['ftp_path'] ?? '/public_html'), true) . ");\n"
+        . "if (!defined('SYNC_FTP_SSL')) define('SYNC_FTP_SSL', " . (int)($extra['ftp_ssl'] ?? 0) . ");\n";
 
     file_put_contents(dirname(__DIR__) . '/config/sync_remoto.php', $contenido);
 }
@@ -301,12 +311,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($syncUrl === '' || $syncToken === '') {
                 $mensajeError = 'Indica la URL remota de sincronización y el Token Secreto.';
             } else {
-                guardarConfigSyncLocal($syncUrl, $syncToken);
-                $mensajeExito = 'Configuración local de sincronización guardada en web/config/sync_remoto.php. Las pesadas nuevas se enviarán automáticamente a ' . $syncUrl;
+                guardarConfigSyncLocal($syncUrl, $syncToken, $form);
+                $mensajeExito = 'Configuración guardada permanentemente en este equipo. Las pesadas nuevas se enviarán automáticamente a ' . $syncUrl;
             }
         } elseif ($accion === 'sincronizar_ahora') {
             if ($syncUrl !== '' && $syncToken !== '') {
-                guardarConfigSyncLocal($syncUrl, $syncToken);
+                guardarConfigSyncLocal($syncUrl, $syncToken, $form);
             }
             $resSync = sincronizarTodoConNube($pdo);
             if ($resSync['ok']) {
@@ -341,7 +351,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mensajeError = 'Ingresa Host, Base de datos y Usuario MySQL de Hostinger para generar el paquete.';
             } else {
                 if ($syncUrl !== '' && $syncToken !== '') {
-                    guardarConfigSyncLocal($syncUrl, $syncToken);
+                    guardarConfigSyncLocal($syncUrl, $syncToken, $form);
                 }
                 $localPhp = generarContenidoLocalPhp($dbHost, $dbPort, $dbName, $dbUser, $dbPass, $syncToken);
                 $zipTemp = construirZipDespliegue(dirname(__DIR__), $localPhp);
@@ -367,7 +377,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $mensajeError = 'Completa también los datos de Base de Datos MySQL para generar config/local.php.';
             } else {
                 if ($syncUrl !== '' && $syncToken !== '') {
-                    guardarConfigSyncLocal($syncUrl, $syncToken);
+                    guardarConfigSyncLocal($syncUrl, $syncToken, $form);
                 }
                 $conn = $ftpSsl && function_exists('ftp_ssl_connect')
                     ? @ftp_ssl_connect($ftpHost, $ftpPort, 10)
