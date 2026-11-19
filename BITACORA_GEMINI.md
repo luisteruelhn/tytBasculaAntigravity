@@ -206,3 +206,5 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Ajustada sugerencia de `CEIBITA SUR, SANTA BARBARA` (placeholder y datalist): se sugiere en **Origen** cuando la operación es `VENTA` y en **Destino** cuando es `COMPRA`.
 * **Nuevas Skills Portables (`.agents/skills/` y `AGENTS.md`)**:
   - Agregadas `bascula-sync-nube`, `serial-hardware-windows` y `mariadb-safe-migrations` para estandarizar sincronización offline-first a Hostinger, manejo seguro de `DCB`/`COM` sin tocar Windows y migraciones MariaDB idempotentes.
+* **Segunda Pesada (`web/public/segunda_pesada.php`)**:
+  - Resaltado el encabezado de la nota abierta con tipografía más grande y tarjeta de **Primera Pesada** con fondo azul marino balanceada al ancho exacto del cuadro del indicador (`1.1fr / 1fr`).

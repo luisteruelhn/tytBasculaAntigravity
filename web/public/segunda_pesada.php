@@ -342,29 +342,27 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
             <input type="hidden" id="primerPesoVal" value="<?= $primerPeso ?>">
             <input type="hidden" id="tipoPrimeraPesada" value="<?= $pesadaActiva['tipo_primera_pesada'] ?>">
 
-            <!-- DETALLE DE LA NOTA ABIERTA -->
-            <div class="card" style="padding: 1.5rem 1.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: #f8fafc; margin-bottom: 1.5rem;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
-                    <div>
-                        <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; text-transform: uppercase;">
-                            <?= ($pesadaActiva['tipo_operacion'] === 'COMPRA' ? 'COMPRA #' . $pesadaActiva['id_compra'] : 'VENTA #' . $pesadaActiva['id_venta']) ?>
-                        </span>
-                        <h2 style="font-size: 1.4rem; font-weight: 800; margin: 0.15rem 0 0.35rem 0; color: var(--text-main);">
-                            <?= htmlspecialchars($pesadaActiva['persona_nombre'], ENT_QUOTES, 'UTF-8') ?>
-                        </h2>
-                        <div style="font-size: 0.95rem; color: var(--text-muted);">
-                            <?= htmlspecialchars($pesadaActiva['producto_nombre'], ENT_QUOTES, 'UTF-8') ?> &middot; 
-                            <?= htmlspecialchars($pesadaActiva['presentacion_nombre'], ENT_QUOTES, 'UTF-8') ?> &middot; 
-                            Placa: <strong style="color: var(--text-main);"><?= htmlspecialchars($pesadaActiva['placa'], ENT_QUOTES, 'UTF-8') ?></strong>
-                        </div>
+            <!-- DETALLE DE LA NOTA ABIERTA (BALANCEADO CON EL ANCHO DEL INDICADOR) -->
+            <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1.5rem; align-items: stretch; margin-bottom: 1.5rem;">
+                <div class="card" style="padding: 1.5rem 1.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: center;">
+                    <span style="font-size: 0.88rem; font-weight: 800; color: #1e40af; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <?= ($pesadaActiva['tipo_operacion'] === 'COMPRA' ? 'COMPRA #' . $pesadaActiva['id_compra'] : 'VENTA #' . $pesadaActiva['id_venta']) ?>
+                    </span>
+                    <h2 style="font-size: 1.75rem; font-weight: 900; margin: 0.25rem 0 0.45rem 0; color: var(--text-main); line-height: 1.15;">
+                        <?= htmlspecialchars($pesadaActiva['persona_nombre'], ENT_QUOTES, 'UTF-8') ?>
+                    </h2>
+                    <div style="font-size: 1.08rem; font-weight: 600; color: var(--text-muted);">
+                        <?= htmlspecialchars($pesadaActiva['producto_nombre'], ENT_QUOTES, 'UTF-8') ?> &middot; 
+                        <?= htmlspecialchars($pesadaActiva['presentacion_nombre'], ENT_QUOTES, 'UTF-8') ?> &middot; 
+                        Placa: <strong style="color: var(--text-main); font-size: 1.12rem;"><?= htmlspecialchars($pesadaActiva['placa'], ENT_QUOTES, 'UTF-8') ?></strong>
                     </div>
-                    <div style="text-align: right;">
-                        <span style="font-size: 0.78rem; font-weight: 700; color: #475569; text-transform: uppercase;">
-                            Primera Pesada (<?= $pesadaActiva['tipo_primera_pesada'] ?>)
-                        </span>
-                        <div style="font-size: 1.8rem; font-weight: 900; color: #701a2b;">
-                            <?= number_format($primerPeso, 0) ?> <span style="font-size: 1rem;">lb</span>
-                        </div>
+                </div>
+                <div style="background: linear-gradient(135deg, #1e3a5f 0%, #0f233a 100%); color: #ffffff; border-radius: 12px; padding: 1.5rem 2rem; display: flex; flex-direction: column; justify-content: center; align-items: flex-end; text-align: right; border: 1px solid #2563eb44;">
+                    <span style="font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #93c5fd;">
+                        Primera Pesada (<?= $pesadaActiva['tipo_primera_pesada'] ?>)
+                    </span>
+                    <div style="font-size: 2.6rem; font-weight: 900; line-height: 1.05; margin-top: 0.25rem; color: #ffffff;">
+                        <?= number_format($primerPeso, 0) ?> <span style="font-size: 1.25rem; font-weight: 700; color: #cbd5e1;">lb</span>
                     </div>
                 </div>
             </div>
