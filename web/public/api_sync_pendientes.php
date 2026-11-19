@@ -28,7 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    $resultado = procesarPendientesSyncNube(obtenerDB());
+    $modo = trim((string)($_GET['modo'] ?? 'pendientes'));
+    $resultado = ($modo === 'todo')
+        ? sincronizarTodoConNube(obtenerDB())
+        : procesarPendientesSyncNube(obtenerDB());
     echo json_encode($resultado, JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
     echo json_encode(['ok' => false, 'error' => 'Error al procesar pendientes']);

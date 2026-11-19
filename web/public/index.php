@@ -196,9 +196,15 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
                 </span>
             </li>
             <?php else: ?>
-            <li style="display: flex; justify-content: space-between; align-items: center;">
+            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
                 <span>Microservicio Báscula (FastAPI :8018):</span>
                 <span id="badgeEstadoMicroservicio" class="badge badge-modo">CONSULTANDO...</span>
+            </li>
+            <li style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+                <span id="estadoSyncInicio" style="font-size: 0.85rem; color: var(--text-muted);">Sincronización con Hostinger:</span>
+                <button type="button" id="btnSyncInicio" onclick="sincronizarNubeInicio()" class="btn btn-primary" style="background: #047857; padding: 0.4rem 0.95rem; font-size: 0.84rem; font-weight: 700; border-radius: 6px;">
+                    ☁️ Sincronizar con la Nube
+                </button>
             </li>
             <?php endif; ?>
         </ul>
@@ -260,6 +266,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         badge.className = 'badge badge-inestable';
     }
 });
+
+async function sincronizarNubeInicio() {
+    const btn = document.getElementById('btnSyncInicio');
+    const lbl = document.getElementById('estadoSyncInicio');
+    if (!btn || !lbl) return;
+
+    btn.disabled = true;
+    btn.textContent = 'Sincronizando...';
+    lbl.textContent = 'Enviando datos a Hostinger...';
+    lbl.style.color = 'var(--text-muted)';
+
+    try {
+        const resp = await fetch('api_sync_pendientes.php?modo=todo', {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+        const data = await resp.json();
+        if (data.ok) {
+            lbl.textContent = '✅ ' + (data.mensaje || 'Sincronizado correctamente');
+            lbl.style.color = '#16a34a';
+        } else {
+            lbl.textContent = '⚠️ ' + (data.mensaje || data.error || 'No se pudo sincronizar');
+            lbl.style.color = '#dc2626';
+        }
+    } catch (e) {
+        lbl.textContent = '⚠️ Error de conexión con el servidor local';
+        lbl.style.color = '#dc2626';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '☁️ Sincronizar con la Nube';
+    }
+}
 </script>
 <?php endif; ?>
 
