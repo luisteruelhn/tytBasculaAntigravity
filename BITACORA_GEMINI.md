@@ -179,3 +179,6 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Actualizado mensaje del footer a `TYTOne Santa Bárbara Cel:+504 95173632 © 2026 — Sistema de Pesaje Electrónico Industrial`.
 * **Portabilidad y gobernanza (`.agents/skills/`, `AGENTS.md`)**:
   - Copiadas las skills globales dentro de `.agents/skills/` y registrado el cumplimiento obligatorio de skills y commits atómicos en `AGENTS.md`.
+* **Auditoría DB/XAMPP y Guía de Sincronización (`IMPLEMENT.md`, `scripts/`)**:
+  - Detectadas y agregadas columnas `telefono` y `email` faltantes en `t_empresas` (`scripts/dbBascula.sql` y `scripts/actualizar_bd_pc_bascula.sql`), semilla base de `t_presentaciones` (`SACOS`, `GRANEL`) y `observaciones_segunda` idempotente en `t_pesadas`.
+  - Documentado baseline real de XAMPP (Apache 2.4.58, PHP 8.5.12, MariaDB 10.11.16), inventario de 12 tablas y protocolo paso a paso de sincronización manual en `IMPLEMENT.md`.
