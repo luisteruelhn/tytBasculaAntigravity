@@ -602,9 +602,12 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                 <textarea id="observaciones_segunda" name="observaciones_segunda" class="form-control" rows="2" placeholder="Notas sobre el estado de la carga o cierre"></textarea>
             </div>
 
+            <!-- RETROALIMENTACIÓN DE VALIDACIÓN ANTES DE GUARDAR -->
+            <div id="avisoFaltanteGuardar" style="display: none; margin-bottom: 1rem; padding: 0.9rem 1.15rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; font-size: 0.92rem; font-weight: 600;"></div>
+
             <!-- ACCIÓN DE CIERRE -->
             <div style="display: flex; gap: 1.25rem; align-items: center; margin-bottom: 3rem;">
-                <button type="submit" id="btnCerrarPesada" class="btn btn-primary" style="background: #0b57d0; padding: 0.75rem 2rem; font-weight: 700; border-radius: 6px; font-size: 1rem;" disabled>
+                <button type="submit" id="btnCerrarPesada" class="btn btn-primary" style="background: #0b57d0; padding: 0.75rem 2rem; font-weight: 700; border-radius: 6px; font-size: 1rem;">
                     Guardar y cerrar nota
                 </button>
                 <a href="segunda_pesada.php" style="color: #64748b; font-size: 0.95rem; font-weight: 600; text-decoration: none;">
@@ -738,7 +741,64 @@ function conectarLecturaEnVivo() {
 document.addEventListener('DOMContentLoaded', () => {
     conectarLecturaEnVivo();
     calcularTotales();
+
+    const form = document.getElementById('formSegundaPesada');
+    if (form) {
+        form.addEventListener('submit', (e) => {
+            const faltantes = obtenerFaltantesSegundaPesada();
+            if (faltantes.length > 0) {
+                e.preventDefault();
+                mostrarAvisoFaltante(faltantes);
+            } else {
+                ocultarAvisoFaltante();
+            }
+        });
+    }
 });
+
+function mostrarAvisoFaltante(mensajes) {
+    const box = document.getElementById('avisoFaltanteGuardar');
+    if (!box) return;
+    const lista = Array.isArray(mensajes) ? mensajes : [mensajes];
+    box.innerHTML = '<strong>No se puede guardar todavía. Falta lo siguiente:</strong><ul style="margin: 0.35rem 0 0 1.2rem; padding: 0;">' +
+        lista.map((m) => `<li>${m}</li>`).join('') + '</ul>';
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function ocultarAvisoFaltante() {
+    const box = document.getElementById('avisoFaltanteGuardar');
+    if (box) box.style.display = 'none';
+}
+
+function obtenerFaltantesSegundaPesada() {
+    const faltantes = [];
+    const primerPeso = parseFloat(document.getElementById('primerPesoVal')?.value || '0');
+    const segundoPeso = parseFloat(document.getElementById('inputPesoFijado')?.value || '0');
+    const tipoPrimera = document.getElementById('tipoPrimeraPesada')?.value || 'BRUTO';
+
+    if (segundoPeso <= 0) {
+        faltantes.push('Fijar el peso complementario (haz clic en <strong>Fijar peso complementario</strong>).');
+    } else {
+        const bruto = (tipoPrimera === 'BRUTO') ? primerPeso : segundoPeso;
+        const tara  = (tipoPrimera === 'BRUTO') ? segundoPeso : primerPeso;
+        if (bruto <= tara) {
+            faltantes.push(
+                tipoPrimera === 'TARA'
+                    ? `El peso bruto complementario (${bruto.toLocaleString('en-US')} lb) debe ser mayor que la tara inicial (${tara.toLocaleString('en-US')} lb).`
+                    : `La tara del vehículo (${tara.toLocaleString('en-US')} lb) debe ser menor que el peso bruto inicial (${bruto.toLocaleString('en-US')} lb).`
+            );
+        }
+    }
+
+    const selMotivo = document.getElementById('motivo_traslado');
+    const inpOtro = document.getElementById('motivo_traslado_otro');
+    if (selMotivo && selMotivo.value === 'Otro' && inpOtro && inpOtro.value.trim() === '') {
+        faltantes.push('Especificar el motivo de traslado ("Otro") en la Guía de Remisión.');
+    }
+
+    return faltantes;
+}
 
 function alternarModoCaptura(modo) {
     const divManual = document.getElementById('campoPesoManual');
@@ -755,20 +815,22 @@ function fijarSegundoPeso() {
         const inpManual = document.getElementById('input_manual');
         peso = parseInt(inpManual.value || '0', 10);
         if (peso <= 0) {
-            alert('Ingresa un peso manual válido.');
+            mostrarAvisoFaltante('Ingresa un peso manual válido mayor a 0 lb antes de fijar.');
             inpManual.focus();
             return;
         }
     } else {
         peso = pesoEnVivo;
+        if (peso <= 0) {
+            mostrarAvisoFaltante('No hay una lectura válida (&gt; 0 lb) en el indicador. Verifica la báscula o cambia a modo Manual.');
+            return;
+        }
     }
 
     document.getElementById('inputPesoFijado').value = peso;
     document.getElementById('valorSegundoPeso').innerText = peso.toLocaleString('en-US');
 
-    const btnCerrar = document.getElementById('btnCerrarPesada');
-    if (btnCerrar) btnCerrar.disabled = false;
-
+    ocultarAvisoFaltante();
     calcularTotales();
 }
 
