@@ -532,7 +532,7 @@ async function notificarApiBascula(cfg) {
 }
 
 async function sincronizarBasculaApi() {
-    if (!document.getElementById('displayPesoValor')) return;
+    if (!document.getElementById('displayPesoValor') && !document.getElementById('livePesoValor')) return;
     try {
         const resp = await fetch('http://127.0.0.1:8018/api/v1/salud');
         if (!resp.ok) return;

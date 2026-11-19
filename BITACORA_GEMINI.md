@@ -207,4 +207,6 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Nuevas Skills Portables (`.agents/skills/` y `AGENTS.md`)**:
   - Agregadas `bascula-sync-nube`, `serial-hardware-windows` y `mariadb-safe-migrations` para estandarizar sincronización offline-first a Hostinger, manejo seguro de `DCB`/`COM` sin tocar Windows y migraciones MariaDB idempotentes.
 * **Segunda Pesada (`web/public/segunda_pesada.php`)**:
-  - Resaltado el encabezado de la nota abierta con tipografía más grande y tarjeta de **Primera Pesada** con fondo azul marino balanceada al ancho exacto del cuadro del indicador (`1.1fr / 1fr`).
+  - Resaltado el encabezado de la nota abierta con tipografía más grande y tarjeta de **Primera Pesada** con fondo celeste difuminado unificada al ancho exacto del cuadro del indicador (`1.1fr / 1fr`).
+* **Indicador de Modo en Vivo (`primera_pesada.php`, `segunda_pesada.php`, `layout.php`)**:
+  - Corregido `#liveModoTexto` para reflejar dinámicamente `Modo real` o `Modo simulado` según `data.origen` de FastAPI (`:8018`), e incluida la sincronización automática al cargar `primera_pesada.php` y `segunda_pesada.php`.

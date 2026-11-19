@@ -518,7 +518,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
 
                 <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; font-size: 0.8rem; color: #94a3b8;">
                     <div>
-                        <span id="liveModoTexto">Modo simulado</span>
+                        <span id="liveModoTexto">Conectando...</span>
                         <div style="font-size: 0.72rem; color: #64748b;" id="liveUltimaLectura">Última lectura: --:--:--</div>
                     </div>
                     <div style="text-align: right;">
@@ -797,6 +797,13 @@ function conectarLecturaEnVivo() {
                 if (elBadge) {
                     elBadge.innerText = esPesoEstable ? 'Estable' : 'Inestable';
                     elBadge.style.color = esPesoEstable ? '#60a5fa' : '#f87171';
+                }
+
+                const elModo = document.getElementById('liveModoTexto');
+                if (elModo) {
+                    const esReal = String(data.origen || '').toLowerCase() === 'real';
+                    elModo.innerText = esReal ? 'Modo real' : 'Modo simulado';
+                    elModo.style.color = esReal ? '#6ee7b7' : '#94a3b8';
                 }
 
                 const elHora = document.getElementById('liveUltimaLectura');
