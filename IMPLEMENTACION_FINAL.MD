@@ -64,3 +64,15 @@
 4. **FastAPI (`http://127.0.0.1:8018`):**
    * `/api/v1/salud` → `{"ok":true,"modo":"real","puerto_com":null,"lector_activo":false}`
    * `/api/v1/puertos` → `["COM1","COM3","COM4"]`
+
+---
+
+## 5. Pendientes para el Despliegue Final (Corte Definitivo)
+
+1. **Arranque automático de FastAPI (`:8018`) al iniciar Windows:**
+   * Agregar acceso directo en la carpeta de Inicio de Windows (`shell:startup`) para levantar `runtime\python\python.exe -B -m uvicorn api.main:app --host 127.0.0.1 --port 8018` automáticamente junto con XAMPP **únicamente cuando se retire el sistema anterior**, ya que `COM4` en Windows es de uso exclusivo para un solo programa a la vez.
+2. **XAMPP Control (`C:\xampp\xampp-control.ini`):**
+   * Confirmar en `Config → Autostart of modules` que **Apache** y **MySQL** estén marcados para arrancar solos al abrir XAMPP con Windows.
+3. **Hostinger (`inversionesvallecillo.com`):**
+   * En `phpMyAdmin`, confirmar `ALTER TABLE t_usuarios AUTO_INCREMENT = 1000;` si se crearán usuarios exclusivos de la nube.
+   * Actualizar `public_html` con el `.zip` o rama `produccion` y verificar `SYNC_TOKEN` idéntico entre `public_html/config/local.php` y `web/config/sync_remoto.php`.
