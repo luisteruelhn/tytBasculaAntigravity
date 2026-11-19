@@ -909,4 +909,42 @@ select.form-control {
         padding: 0 1rem;
         margin: 1rem auto;
     }
+    .cockpit-grid-2,
+    .cockpit-split-bottom {
+        grid-template-columns: 1fr !important;
+    }
+    .cockpit-grid-3,
+    .cockpit-grid-4,
+    .cockpit-grid-5 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .cockpit-liq-5 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    .cockpit-liq-total {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 640px) {
+    .cockpit-grid-3,
+    .cockpit-grid-4,
+    .cockpit-grid-5,
+    .cockpit-captura-row,
+    .cockpit-liq-5 {
+        grid-template-columns: 1fr !important;
+    }
+    .cockpit-captura-row .btn,
+    .cockpit-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    .cockpit-actions {
+        flex-direction: column;
+        align-items: stretch !important;
+    }
+    .cockpit-actions a {
+        text-align: center;
+        padding: 0.4rem 0;
+    }
 }

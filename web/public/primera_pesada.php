@@ -422,7 +422,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
         </div>
 
         <!-- FILA 2: CAPTURA DEL PESO + INDICADOR EN VIVO (MISMA ALTURA) -->
-        <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; margin-bottom: 0.85rem; align-items: stretch;">
+        <div class="cockpit-grid-2" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; margin-bottom: 0.85rem; align-items: stretch;">
             
             <!-- PANEL IZQUIERDO: SELECCIÓN Y FIJAR PESO -->
             <div class="card" style="padding: 1rem 1.25rem; margin: 0; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); display: flex; flex-direction: column; justify-content: space-between;">
@@ -436,7 +436,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
                         </span>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.75rem; align-items: end; margin-bottom: 0.75rem;">
+                    <div class="cockpit-captura-row" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 0.75rem; align-items: end; margin-bottom: 0.75rem;">
                         <div>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
                                 <label for="tipo_registro" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin: 0;">
@@ -538,7 +538,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
             </div>
 
             <!-- LÍNEA 1: PROVEEDOR/CLIENTE, PRODUCTO, PRESENTACIÓN (3 COLUMNAS) -->
-            <div style="display: grid; grid-template-columns: 1.3fr 1.1fr 0.9fr; gap: 0.85rem; margin-bottom: 0.75rem;">
+            <div class="cockpit-grid-3" style="display: grid; grid-template-columns: 1.3fr 1.1fr 0.9fr; gap: 0.85rem; margin-bottom: 0.75rem;">
                 <div>
                     <label for="clie_prov_id" id="lblPersona" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Proveedor <span style="color: var(--danger);">*</span>
@@ -578,7 +578,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
             </div>
 
             <!-- LÍNEA 2: PLACA, MOTORISTA, LICENCIA (3 COLUMNAS) -->
-            <div style="display: grid; grid-template-columns: 0.9fr 1.3fr 1.1fr; gap: 0.85rem; margin-bottom: 0.75rem;">
+            <div class="cockpit-grid-3" style="display: grid; grid-template-columns: 0.9fr 1.3fr 1.1fr; gap: 0.85rem; margin-bottom: 0.75rem;">
                 <div>
                     <label for="placa" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Placa <span style="color: var(--danger);">*</span>
@@ -600,7 +600,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
             </div>
 
             <!-- LÍNEA 3: ORIGEN, DESTINO, OBSERVACIONES (3 COLUMNAS) -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 0.85rem; margin-bottom: 0.9rem;">
+            <div class="cockpit-grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 0.85rem; margin-bottom: 0.9rem;">
                 <div>
                     <label for="origen" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Origen / Punto de partida
@@ -634,7 +634,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
                     <span style="font-size: 0.75rem; font-weight: 700; color: #475569;">1 QQ = 100 lb</span>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 0.75rem;">
+                <div class="cockpit-grid-5" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.75rem; margin-bottom: 0.75rem;">
                     <div>
                         <label for="peso_comp_unica" id="lblPesoCompUnica" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                             Tara vehículo / recipiente (lb)
@@ -676,7 +676,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
 
                 <!-- RESUMEN EN VIVO DE PESADA ÚNICA (CON DESCUENTOS DETALLADOS) -->
                 <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.65rem 1rem; margin-bottom: 0.65rem;">
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr) 1.3fr; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem;">
+                    <div class="cockpit-liq-5" style="display: grid; grid-template-columns: repeat(4, 1fr) 1.3fr; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem;">
                         <div>
                             <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Neto Inicial</span>
                             <strong id="resUnicaNeto" style="font-size: 1.05rem; color: var(--text-main);">0 lb</strong>
@@ -693,7 +693,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
                             <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Desc. Defectos</span>
                             <strong id="resUnicaDescDef" style="font-size: 1.05rem; color: #b91c1c;">0 lb</strong>
                         </div>
-                        <div style="background: #eff6ff; padding: 0.4rem 0.7rem; border-radius: 6px; border: 1px solid #bfdbfe; text-align: right;">
+                        <div class="cockpit-liq-total" style="background: #eff6ff; padding: 0.4rem 0.7rem; border-radius: 6px; border: 1px solid #bfdbfe; text-align: right;">
                             <span style="font-size: 0.66rem; color: #1e40af; font-weight: 800; text-transform: uppercase; display: block;">TOTAL FINAL</span>
                             <strong id="resUnicaTotal" style="font-size: 1.15rem; color: #1e40af;">0 lb &middot; 0.00 QQ</strong>
                         </div>
@@ -708,7 +708,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
                     <div style="font-size: 0.78rem; font-weight: 800; color: #047857; margin-bottom: 0.45rem; text-transform: uppercase;">
                         Guía de Remisión (Venta)
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
+                    <div class="cockpit-grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
                         <div>
                             <label for="guia_remision_unica" class="form-label" style="font-size: 0.74rem; margin-bottom: 0.15rem;">N° Guía de Remisión</label>
                             <input type="text" id="guia_remision_unica" name="guia_remision" class="form-control" style="height: 34px; font-size: 0.85rem;" maxlength="30" placeholder="Ej. 002861">
@@ -753,7 +753,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
             <span id="txtGuiaGuardar" style="display: none;"></span>
 
             <!-- ACCIONES ABAJO: GUARDAR JUNTO A CANCELAR -->
-            <div style="display: flex; gap: 1rem; align-items: center;">
+            <div class="cockpit-actions" style="display: flex; gap: 1rem; align-items: center;">
                 <button type="submit" id="btnGuardarPesada" class="btn btn-primary" style="background: #2563eb; height: 38px; padding: 0 1.65rem; font-weight: 700; border-radius: 6px; font-size: 0.92rem; white-space: nowrap;">
                     Guardar primera pesada
                 </button>

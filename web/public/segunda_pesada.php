@@ -362,7 +362,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
             </div>
 
             <!-- FILA 2: CAPTURA COMPLEMENTARIA + INDICADOR EN VIVO (MISMA ALTURA) -->
-            <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; align-items: stretch; margin-bottom: 0.85rem;">
+            <div class="cockpit-grid-2" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; align-items: stretch; margin-bottom: 0.85rem;">
                 <!-- IZQUIERDA: CAPTURA COMPLEMENTARIA -->
                 <div class="card" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin: 0; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
@@ -380,7 +380,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                                 : 'En esta <strong>VENTA</strong>, el camión ya fue cargado y se debe capturar su peso bruto total (mayor a ' . number_format($primerPeso, 0) . ' lb).') ?>
                         </p>
 
-                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: end; margin-bottom: 0.65rem;">
+                        <div class="cockpit-captura-row" style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: end; margin-bottom: 0.65rem;">
                             <div>
                                 <label for="modo_captura" class="form-label" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
                                     Modo de captura
@@ -469,7 +469,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                 </h3>
 
                 <!-- 4 CONTROLES EN UNA SOLA FILA BALANCEADA -->
-                <div style="display: grid; grid-template-columns: 1.2fr 0.9fr 0.95fr 0.95fr; gap: 0.85rem; margin-bottom: 0.9rem;">
+                <div class="cockpit-grid-4" style="display: grid; grid-template-columns: 1.2fr 0.9fr 0.95fr 0.95fr; gap: 0.85rem; margin-bottom: 0.9rem;">
                     <div>
                         <label for="idempaque" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
                             Empaque o saco
@@ -509,7 +509,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                     <div style="font-size: 0.8rem; font-weight: 800; color: #047857; margin-bottom: 0.5rem; text-transform: uppercase;">
                         Guía de Remisión (Venta)
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
+                    <div class="cockpit-grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
                         <div>
                             <label for="guia_remision" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                                 N° Guía de Remisión
@@ -563,10 +563,10 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                 <div id="avisoPesoInvalido" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 8px; padding: 0.6rem 0.85rem; margin-bottom: 0.75rem; font-size: 0.84rem; font-weight: 600;"></div>
 
                 <!-- BLOQUE INFERIOR BALANCEADO: LIQUIDACIÓN DETALLADA (IZQUIERDA) + OBSERVACIONES (DERECHA) -->
-                <div style="display: grid; grid-template-columns: 1.35fr 0.85fr; gap: 1rem; align-items: stretch; margin-bottom: 0.9rem;">
+                <div class="cockpit-split-bottom" style="display: grid; grid-template-columns: 1.35fr 0.85fr; gap: 1rem; align-items: stretch; margin-bottom: 0.9rem;">
                     <!-- IZQUIERDA: LIQUIDACIÓN CON CADA DESCUENTO DETALLADO -->
                     <div style="background: #f8fafc; padding: 0.85rem 1.1rem; border-radius: 10px; border: 1px solid #cbd5e1; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr) 1.25fr; gap: 0.6rem; align-items: center; margin-bottom: 0.55rem;">
+                        <div class="cockpit-liq-5" style="display: grid; grid-template-columns: repeat(4, 1fr) 1.25fr; gap: 0.6rem; align-items: center; margin-bottom: 0.55rem;">
                             <div>
                                 <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Neto Inicial</span>
                                 <div id="resNetoInicial" style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);">0 lb</div>
@@ -585,7 +585,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                                 <div id="resDescCalidadLb" style="font-size: 1.1rem; font-weight: 800; color: #b91c1c;">0 lb</div>
                                 <small id="resDescCalidadPct" style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">0%</small>
                             </div>
-                            <div style="background: #eff6ff; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #bfdbfe; text-align: right;">
+                            <div class="cockpit-liq-total" style="background: #eff6ff; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #bfdbfe; text-align: right;">
                                 <span style="font-size: 0.68rem; color: #1e40af; font-weight: 800; text-transform: uppercase; display: block;">Peso Final</span>
                                 <div id="resPesoFinal" style="font-size: 1.35rem; font-weight: 900; color: #1e40af; line-height: 1.05;">0 lb</div>
                                 <small id="resQuintales" style="font-weight: 800; color: #1e3a8a; font-size: 0.82rem;">0.00 QQ</small>
@@ -607,7 +607,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
 
                 <div id="avisoFaltanteGuardar" style="display: none; margin-bottom: 0.75rem; padding: 0.75rem 0.95rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; font-size: 0.86rem; font-weight: 600;"></div>
 
-                <div style="display: flex; gap: 1rem; align-items: center;">
+                <div class="cockpit-actions" style="display: flex; gap: 1rem; align-items: center;">
                     <button type="submit" id="btnCerrarPesada" class="btn btn-primary" style="background: #0b57d0; padding: 0.65rem 1.65rem; font-weight: 700; border-radius: 6px; font-size: 0.95rem;">
                         Guardar y cerrar nota
                     </button>
