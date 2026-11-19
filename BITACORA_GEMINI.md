@@ -182,3 +182,16 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Auditoría DB/XAMPP y Guía de Sincronización (`IMPLEMENT.md`, `scripts/`)**:
   - Detectadas y agregadas columnas `telefono` y `email` faltantes en `t_empresas` (`scripts/dbBascula.sql` y `scripts/actualizar_bd_pc_bascula.sql`), semilla base de `t_presentaciones` (`SACOS`, `GRANEL`) y `observaciones_segunda` idempotente en `t_pesadas`.
   - Documentado baseline real de XAMPP (Apache 2.4.58, PHP 8.5.12, MariaDB 10.11.16), inventario de 12 tablas y protocolo paso a paso de sincronización manual en `IMPLEMENT.md`.
+
+---
+
+## 2026-11-19 — Sesión 04: Puesta en Marcha en PC de Producción (Local + Respaldo + Esquema BD)
+
+* **Respaldo previo obligatorio**:
+  - Generado respaldo completo de `dbbascula` en `dbbackup/respaldo_pre_sync_20261119.sql` (53,292 bytes) antes de aplicar cambios.
+* **Actualización segura de esquema (`scripts/actualizar_bd_pc_bascula.sql`)**:
+  - Ejecutado script idempotente sobre `dbbascula` (pasando de 10 a las **12 tablas** completas).
+  - Conservados intactos los datos previos (`4` pesadas, empresa `INVERSIONES VALLECILLO, SB`, usuario `admin`) y los parámetros físicos reales en `t_configuracion_bascula` (`modo = 'SERIAL'`, `puerto_com = 'COM4'`, `baudios = 9600`, `protocolo = 'C18 = 4'`).
+  - Verificadas columnas nuevas en `t_empresas` (`telefono`, `email`), `t_pesadas` (`observaciones_segunda`, `guia_remision`, `motivo_traslado`, etc.), tablas `t_categorias` y `t_presentaciones`, y usuario `maria.jose` con rol `REMOTO`.
+* **Validación de sintaxis PHP**:
+  - Verificados todos los archivos `.php` bajo `web/` con `php -l` (cero errores).
