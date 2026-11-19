@@ -367,13 +367,12 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                 </div>
             </div>
 
-            <!-- COCKPIT PRINCIPAL EN 2 COLUMNAS (TODO EN UNA PANTALLA) -->
-            <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; align-items: start; margin-bottom: 1.5rem;">
-                
-                <!-- COLUMNA IZQUIERDA: CAPTURA + TARA Y DESCUENTOS -->
-                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                    <div class="card" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin: 0;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem; gap: 0.5rem; flex-wrap: wrap;">
+            <!-- FILA 2: CAPTURA COMPLEMENTARIA + INDICADOR EN VIVO (MISMA ALTURA) -->
+            <div style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; align-items: stretch; margin-bottom: 0.85rem;">
+                <!-- IZQUIERDA: CAPTURA COMPLEMENTARIA -->
+                <div class="card" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin: 0; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; gap: 0.5rem; flex-wrap: wrap;">
                             <h3 style="font-size: 1.02rem; font-weight: 800; margin: 0; color: var(--text-main);">
                                 Captura complementaria
                             </h3>
@@ -381,13 +380,13 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                                 <?= ($tipoFaltante === 'TARA' ? '🚛 PESAJE DE TARA (SALIDA VACÍO)' : '📦 PESAJE DE BRUTO (SALIDA CARGADO)') ?>
                             </span>
                         </div>
-                        <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0 0 0.7rem 0;">
+                        <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0 0 0.65rem 0;">
                             <?= ($tipoFaltante === 'TARA' 
                                 ? 'En esta <strong>COMPRA</strong>, el camión ya descargó y se debe capturar su peso tara vacío (menor a ' . number_format($primerPeso, 0) . ' lb).'
                                 : 'En esta <strong>VENTA</strong>, el camión ya fue cargado y se debe capturar su peso bruto total (mayor a ' . number_format($primerPeso, 0) . ' lb).') ?>
                         </p>
 
-                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: end; margin-bottom: 0.75rem;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; gap: 0.75rem; align-items: end; margin-bottom: 0.65rem;">
                             <div>
                                 <label for="modo_captura" class="form-label" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
                                     Modo de captura
@@ -397,209 +396,218 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                                     <option value="MANUAL">Manual</option>
                                 </select>
                             </div>
-                            <button type="button" id="btnFijarPeso" class="btn btn-primary" onclick="fijarSegundoPeso()" style="background: #2563eb; height: 38px; padding: 0 1rem; font-weight: 700; border-radius: 6px; font-size: 0.88rem; white-space: nowrap;">
+                            <button type="button" id="btnFijarPeso" class="btn btn-primary" onclick="fijarSegundoPeso()" style="background: #2563eb; height: 38px; padding: 0 1.1rem; font-weight: 700; border-radius: 6px; font-size: 0.88rem; white-space: nowrap;">
                                 Fijar peso complementario
                             </button>
                         </div>
 
-                        <div id="campoPesoManual" style="display: none; margin-bottom: 0.75rem;">
+                        <div id="campoPesoManual" style="display: none; margin-bottom: 0.65rem;">
                             <label for="input_manual" class="form-label" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
                                 Ingresar peso manual (lb)
                             </label>
                             <input type="number" id="input_manual" class="form-control" style="height: 38px; border-radius: 6px;" placeholder="0" min="1" step="1">
                         </div>
-
-                        <!-- DISPLAY ROJO BURDEOS COMPACTO: SEGUNDO PESO FIJADO -->
-                        <div style="background: #701a2b; color: #ffffff; border-radius: 8px; padding: 0.75rem 1.15rem; display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 0.75rem; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; opacity: 0.92;">
-                                <?= ($tipoFaltante === 'TARA' ? 'TARA FIJADA' : 'PESO BRUTO FIJADO') ?>
-                            </span>
-                            <div style="font-size: 1.85rem; font-weight: 900; line-height: 1; display: flex; align-items: baseline; gap: 0.35rem;">
-                                <span id="valorSegundoPeso">--</span>
-                                <span style="font-size: 0.95rem; font-weight: 600; opacity: 0.85;">lb</span>
-                            </div>
-                        </div>
                     </div>
 
-                    <!-- DESCUENTOS Y TARA DE EMPAQUES (SACOS) -->
-                    <div class="card" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin: 0;">
-                        <h3 style="font-size: 1rem; font-weight: 800; margin: 0 0 0.75rem 0; color: var(--text-main);">
-                            Tara de empaque y descuentos
-                        </h3>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
-                            <div>
-                                <label for="idempaque" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                                    Empaque o saco
-                                </label>
-                                <select id="idempaque" name="idempaque" class="form-control" style="height: 36px; border-radius: 6px; font-size: 0.88rem;" onchange="calcularTotales()">
-                                    <option value="0" data-peso="0">Sin empaques (A granel)</option>
-                                    <?php foreach ($tarasEmpaque as $t): ?>
-                                        <option value="<?= (int)$t['idempaque'] ?>" data-peso="<?= (float)$t['taralbs'] ?>">
-                                            <?= htmlspecialchars($t['nombre'], ENT_QUOTES, 'UTF-8') ?> (<?= number_format((float)$t['taralbs'], 3) ?> lb)
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div>
-                                <label for="cantidad_empaques" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                                    Cantidad de sacos / empaques
-                                </label>
-                                <input type="number" min="0" step="1" id="cantidad_empaques" name="cantidad_empaques" class="form-control" style="height: 36px; border-radius: 6px; font-size: 0.88rem;" value="0" oninput="calcularTotales()">
-                            </div>
-                            <div>
-                                <label for="ajuste_humedad_pct" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                                    Descuento humedad (%)
-                                </label>
-                                <input type="number" min="0" max="100" step="0.1" id="ajuste_humedad_pct" name="ajuste_humedad_pct" class="form-control" style="height: 36px; border-radius: 6px; font-size: 0.88rem;" value="0" oninput="calcularTotales()">
-                            </div>
-                            <div>
-                                <label for="descuento_calidad_pct" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                                    Descuento calidad / defectos (%)
-                                </label>
-                                <input type="number" min="0" max="100" step="0.1" id="descuento_calidad_pct" name="descuento_calidad_pct" class="form-control" style="height: 36px; border-radius: 6px; font-size: 0.88rem;" value="0" oninput="calcularTotales()">
-                            </div>
-                        </div>
-
-                        <div id="avisoPesoInvalido" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 8px; padding: 0.6rem 0.85rem; margin-bottom: 0.65rem; font-size: 0.84rem; font-weight: 600;"></div>
-
-                        <div style="background: #f8fafc; padding: 0.8rem 1rem; border-radius: 8px; border: 1px solid #cbd5e1;">
-                            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; align-items: center;">
-                                <div>
-                                    <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Neto Inicial</span>
-                                    <div id="resNetoInicial" style="font-size: 1.05rem; font-weight: 800; color: var(--text-main);">0 lb</div>
-                                </div>
-                                <div>
-                                    <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Tara Sacos</span>
-                                    <div id="resTaraSacos" style="font-size: 1.05rem; font-weight: 800; color: #475569;">0 lb</div>
-                                </div>
-                                <div>
-                                    <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Descuentos</span>
-                                    <div id="resDescuentosLb" style="font-size: 1.05rem; font-weight: 800; color: #b91c1c;">0 lb</div>
-                                </div>
-                                <div style="background: #eff6ff; padding: 0.4rem 0.65rem; border-radius: 6px; border: 1px solid #bfdbfe; text-align: right;">
-                                    <span style="font-size: 0.66rem; color: #1e40af; font-weight: 800; text-transform: uppercase; display: block;">Peso Final</span>
-                                    <div id="resPesoFinal" style="font-size: 1.2rem; font-weight: 900; color: #1e40af; line-height: 1.05;">0 lb</div>
-                                    <small id="resQuintales" style="font-weight: 800; color: #1e3a8a; font-size: 0.78rem;">0.00 QQ</small>
-                                </div>
-                            </div>
-                            <div id="resDesgloseTexto" style="font-size: 0.76rem; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 0.45rem; line-height: 1.35;">
-                                Fija el peso complementario para ver la liquidación en vivo.
-                            </div>
+                    <!-- DISPLAY ROJO BURDEOS COMPACTO: SEGUNDO PESO FIJADO -->
+                    <div style="background: #701a2b; color: #ffffff; border-radius: 8px; padding: 0.75rem 1.15rem; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-size: 0.75rem; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; opacity: 0.92;">
+                            <?= ($tipoFaltante === 'TARA' ? 'TARA FIJADA' : 'PESO BRUTO FIJADO') ?>
+                        </span>
+                        <div style="font-size: 1.85rem; font-weight: 900; line-height: 1; display: flex; align-items: baseline; gap: 0.35rem;">
+                            <span id="valorSegundoPeso">--</span>
+                            <span style="font-size: 0.95rem; font-weight: 600; opacity: 0.85;">lb</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- COLUMNA DERECHA: INDICADOR COMPACTO + GUÍA (SI VENTA) + OBSERVACIONES + ACCIÓN -->
-                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
-                    <div style="background: #0f233a; color: #ffffff; border-radius: 12px; padding: 1rem 1.35rem; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.4rem;">
-                            <div>
-                                <span style="font-size: 0.68rem; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #94a3b8;">
-                                    INDICADOR DE PESO
-                                </span>
-                                <h2 style="font-size: 1.25rem; font-weight: 800; margin: 0.1rem 0 0 0; color: #ffffff;">
-                                    Lectura en vivo
-                                </h2>
-                            </div>
-                            <span id="liveEstableBadge" style="background: #1e3a5f; color: #60a5fa; font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.7rem; border-radius: 999px; border: 1px solid #2563eb;">
-                                Estable
+                <!-- DERECHA: INDICADOR AZUL MARINO EN VIVO -->
+                <div style="background: #0f233a; color: #ffffff; border-radius: 12px; padding: 1rem 1.35rem; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <span style="font-size: 0.68rem; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #94a3b8;">
+                                INDICADOR DE PESO
                             </span>
+                            <h2 style="font-size: 1.25rem; font-weight: 800; margin: 0.1rem 0 0 0; color: #ffffff;">
+                                Lectura en vivo
+                            </h2>
                         </div>
+                        <span id="liveEstableBadge" style="background: #1e3a5f; color: #60a5fa; font-size: 0.72rem; font-weight: 700; padding: 0.25rem 0.7rem; border-radius: 999px; border: 1px solid #2563eb;">
+                            Estable
+                        </span>
+                    </div>
 
-                        <div style="text-align: center; padding: 0.65rem 0;">
-                            <div style="font-size: 3.1rem; font-weight: 900; line-height: 1; letter-spacing: -1px; display: inline-flex; align-items: baseline; gap: 0.4rem;">
-                                <span id="livePesoValor">0</span>
-                                <span style="font-size: 1.35rem; font-weight: 700; color: #93c5fd;">lb</span>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.65rem; font-size: 0.76rem; color: #94a3b8;">
-                            <div>
-                                <span id="liveModoTexto">Conectando...</span>
-                                <div style="font-size: 0.68rem; color: #64748b;" id="liveUltimaLectura">Última lectura: --:--:--</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <span style="color: #cbd5e1;">Fuente &middot; Configurada</span>
-                            </div>
+                    <div style="text-align: center; padding: 0.45rem 0;">
+                        <div style="font-size: 3.1rem; font-weight: 900; line-height: 1; letter-spacing: -1px; display: inline-flex; align-items: baseline; gap: 0.4rem;">
+                            <span id="livePesoValor">0</span>
+                            <span style="font-size: 1.35rem; font-weight: 700; color: #93c5fd;">lb</span>
                         </div>
                     </div>
 
-                    <?php if (($notaSeleccionada['tipo_operacion'] ?? '') === 'VENTA'): ?>
-                    <!-- GUÍA DE REMISIÓN (SOLO VENTAS) -->
-                    <div class="card" style="padding: 0.95rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin: 0;">
-                        <h3 style="margin: 0 0 0.65rem 0; font-size: 0.95rem; font-weight: 800; color: #047857;">
-                            Guía de Remisión (Venta)
-                        </h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem;">
-                            <div>
-                                <label for="guia_remision" class="form-label" style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                                    N° Guía de Remisión
-                                </label>
-                                <input type="text" id="guia_remision" name="guia_remision" class="form-control" style="height: 36px; font-size: 0.86rem;" maxlength="30" placeholder="Ej. 002861">
-                            </div>
-                            <div>
-                                <label for="motivo_traslado" class="form-label" style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                                    Motivo de Traslado
-                                </label>
-                                <select id="motivo_traslado" name="motivo_traslado" class="form-control" style="height: 36px; font-size: 0.86rem;" onchange="document.getElementById('boxMotivoOtro').style.display = (this.value === 'Otros (especificar)') ? 'block' : 'none';">
-                                    <option value="Venta" selected>Venta</option>
-                                    <option value="Compra">Compra</option>
-                                    <option value="Consignación">Consignación</option>
-                                    <option value="Venta con entrega a terceros">Venta con entrega a terceros</option>
-                                    <option value="Venta sujeta a confirmación por el comprador">Venta sujeta a confirmación por el comprador</option>
-                                    <option value="Traslado entre establecimientos de la misma Empresa">Traslado entre establecimientos de la misma Empresa</option>
-                                    <option value="Devolución">Devolución</option>
-                                    <option value="Otros (especificar)">Otros (especificar)</option>
-                                    <option value="Recojo de bienes">Recojo de bienes</option>
-                                    <option value="Importación">Importación</option>
-                                    <option value="Exportación">Exportación</option>
-                                    <option value="Traslado zona primaria">Traslado zona primaria</option>
-                                    <option value="Traslado por emisor itinerante de comprobantes de pago">Traslado por emisor itinerante de comprobantes de pago</option>
-                                    <option value="Traslado de bienes para transformación">Traslado de bienes para transformación</option>
-                                    <option value="Transformación">Transformación</option>
-                                </select>
-                            </div>
-                            <div id="boxMotivoOtro" style="display: none; grid-column: 1 / -1;">
-                                <label for="motivo_traslado_otro" class="form-label" style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                                    Especificar otro motivo
-                                </label>
-                                <input type="text" id="motivo_traslado_otro" name="motivo_traslado_otro" class="form-control" style="height: 36px; font-size: 0.86rem;" maxlength="120" placeholder="Detalle del motivo">
-                            </div>
-                            <div>
-                                <label for="marca_vehiculo" class="form-label" style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                                    Marca del Vehículo
-                                </label>
-                                <input type="text" id="marca_vehiculo" name="marca_vehiculo" class="form-control" style="height: 36px; font-size: 0.86rem;" maxlength="60" placeholder="Ej. Freightliner">
-                            </div>
-                            <div>
-                                <label for="transportista_rtn" class="form-label" style="font-size: 0.75rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
-                                    R.T.N. Transportista
-                                </label>
-                                <input type="text" id="transportista_rtn" name="transportista_rtn" class="form-control" style="height: 36px; font-size: 0.86rem;" maxlength="20" placeholder="Opcional">
-                            </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 0.6rem; font-size: 0.76rem; color: #94a3b8;">
+                        <div>
+                            <span id="liveModoTexto">Conectando...</span>
+                            <div style="font-size: 0.68rem; color: #64748b;" id="liveUltimaLectura">Última lectura: --:--:--</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="color: #cbd5e1;">Fuente &middot; Configurada</span>
                         </div>
                     </div>
-                    <?php endif; ?>
+                </div>
+            </div>
 
-                    <!-- OBSERVACIONES + ACCIÓN DE CIERRE -->
-                    <div class="card" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin: 0;">
-                        <label for="observaciones_segunda" class="form-label" style="font-size: 0.8rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
+            <!-- FILA 3: TARA DE EMPAQUE, DESCUENTOS DETALLADOS, OBSERVACIONES Y CIERRE -->
+            <div class="card" style="padding: 1.1rem 1.35rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.25rem;">
+                <h3 style="font-size: 1.02rem; font-weight: 800; margin: 0 0 0.75rem 0; color: var(--text-main);">
+                    Tara de empaque y descuentos
+                </h3>
+
+                <!-- 4 CONTROLES EN UNA SOLA FILA BALANCEADA -->
+                <div style="display: grid; grid-template-columns: 1.2fr 0.9fr 0.95fr 0.95fr; gap: 0.85rem; margin-bottom: 0.9rem;">
+                    <div>
+                        <label for="idempaque" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
+                            Empaque o saco
+                        </label>
+                        <select id="idempaque" name="idempaque" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" onchange="calcularTotales()">
+                            <option value="0" data-peso="0">Sin empaques (A granel)</option>
+                            <?php foreach ($tarasEmpaque as $t): ?>
+                                <option value="<?= (int)$t['idempaque'] ?>" data-peso="<?= (float)$t['taralbs'] ?>">
+                                    <?= htmlspecialchars($t['nombre'], ENT_QUOTES, 'UTF-8') ?> (<?= number_format((float)$t['taralbs'], 3) ?> lb)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="cantidad_empaques" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
+                            Cantidad de sacos / empaques
+                        </label>
+                        <input type="number" min="0" step="1" id="cantidad_empaques" name="cantidad_empaques" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" value="0" oninput="calcularTotales()">
+                    </div>
+                    <div>
+                        <label for="ajuste_humedad_pct" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
+                            Descuento humedad (%)
+                        </label>
+                        <input type="number" min="0" max="100" step="0.1" id="ajuste_humedad_pct" name="ajuste_humedad_pct" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" value="0" oninput="calcularTotales()">
+                    </div>
+                    <div>
+                        <label for="descuento_calidad_pct" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
+                            Descuento calidad / defectos (%)
+                        </label>
+                        <input type="number" min="0" max="100" step="0.1" id="descuento_calidad_pct" name="descuento_calidad_pct" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" value="0" oninput="calcularTotales()">
+                    </div>
+                </div>
+
+                <?php if (($notaSeleccionada['tipo_operacion'] ?? '') === 'VENTA'): ?>
+                <!-- GUÍA DE REMISIÓN COMPACTA (SOLO VENTAS) -->
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.9rem;">
+                    <div style="font-size: 0.8rem; font-weight: 800; color: #047857; margin-bottom: 0.5rem; text-transform: uppercase;">
+                        Guía de Remisión (Venta)
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem;">
+                        <div>
+                            <label for="guia_remision" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                                N° Guía de Remisión
+                            </label>
+                            <input type="text" id="guia_remision" name="guia_remision" class="form-control" style="height: 34px; font-size: 0.85rem;" maxlength="30" placeholder="Ej. 002861">
+                        </div>
+                        <div>
+                            <label for="motivo_traslado" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                                Motivo de Traslado
+                            </label>
+                            <select id="motivo_traslado" name="motivo_traslado" class="form-control" style="height: 34px; font-size: 0.85rem;" onchange="document.getElementById('boxMotivoOtro').style.display = (this.value === 'Otros (especificar)') ? 'block' : 'none';">
+                                <option value="Venta" selected>Venta</option>
+                                <option value="Compra">Compra</option>
+                                <option value="Consignación">Consignación</option>
+                                <option value="Venta con entrega a terceros">Venta con entrega a terceros</option>
+                                <option value="Venta sujeta a confirmación por el comprador">Venta sujeta a confirmación por el comprador</option>
+                                <option value="Traslado entre establecimientos de la misma Empresa">Traslado entre establecimientos de la misma Empresa</option>
+                                <option value="Devolución">Devolución</option>
+                                <option value="Otros (especificar)">Otros (especificar)</option>
+                                <option value="Recojo de bienes">Recojo de bienes</option>
+                                <option value="Importación">Importación</option>
+                                <option value="Exportación">Exportación</option>
+                                <option value="Traslado zona primaria">Traslado zona primaria</option>
+                                <option value="Traslado por emisor itinerante de comprobantes de pago">Traslado por emisor itinerante de comprobantes de pago</option>
+                                <option value="Traslado de bienes para transformación">Traslado de bienes para transformación</option>
+                                <option value="Transformación">Transformación</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="marca_vehiculo" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                                Marca del Vehículo
+                            </label>
+                            <input type="text" id="marca_vehiculo" name="marca_vehiculo" class="form-control" style="height: 34px; font-size: 0.85rem;" maxlength="60" placeholder="Ej. Freightliner">
+                        </div>
+                        <div>
+                            <label for="transportista_rtn" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                                R.T.N. Transportista
+                            </label>
+                            <input type="text" id="transportista_rtn" name="transportista_rtn" class="form-control" style="height: 34px; font-size: 0.85rem;" maxlength="20" placeholder="Opcional">
+                        </div>
+                        <div id="boxMotivoOtro" style="display: none; grid-column: 1 / -1;">
+                            <label for="motivo_traslado_otro" class="form-label" style="font-size: 0.74rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
+                                Especificar otro motivo
+                            </label>
+                            <input type="text" id="motivo_traslado_otro" name="motivo_traslado_otro" class="form-control" style="height: 34px; font-size: 0.85rem;" maxlength="120" placeholder="Detalle del motivo">
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <div id="avisoPesoInvalido" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 8px; padding: 0.6rem 0.85rem; margin-bottom: 0.75rem; font-size: 0.84rem; font-weight: 600;"></div>
+
+                <!-- BLOQUE INFERIOR BALANCEADO: LIQUIDACIÓN DETALLADA (IZQUIERDA) + OBSERVACIONES (DERECHA) -->
+                <div style="display: grid; grid-template-columns: 1.35fr 0.85fr; gap: 1rem; align-items: stretch; margin-bottom: 0.9rem;">
+                    <!-- IZQUIERDA: LIQUIDACIÓN CON CADA DESCUENTO DETALLADO -->
+                    <div style="background: #f8fafc; padding: 0.85rem 1.1rem; border-radius: 10px; border: 1px solid #cbd5e1; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr) 1.25fr; gap: 0.6rem; align-items: center; margin-bottom: 0.55rem;">
+                            <div>
+                                <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Neto Inicial</span>
+                                <div id="resNetoInicial" style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);">0 lb</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Tara Sacos</span>
+                                <div id="resTaraSacos" style="font-size: 1.1rem; font-weight: 800; color: #475569;">0 lb</div>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Desc. Humedad</span>
+                                <div id="resDescHumedadLb" style="font-size: 1.1rem; font-weight: 800; color: #b91c1c;">0 lb</div>
+                                <small id="resDescHumedadPct" style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">0%</small>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Desc. Calidad</span>
+                                <div id="resDescCalidadLb" style="font-size: 1.1rem; font-weight: 800; color: #b91c1c;">0 lb</div>
+                                <small id="resDescCalidadPct" style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">0%</small>
+                            </div>
+                            <div style="background: #eff6ff; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #bfdbfe; text-align: right;">
+                                <span style="font-size: 0.68rem; color: #1e40af; font-weight: 800; text-transform: uppercase; display: block;">Peso Final</span>
+                                <div id="resPesoFinal" style="font-size: 1.35rem; font-weight: 900; color: #1e40af; line-height: 1.05;">0 lb</div>
+                                <small id="resQuintales" style="font-weight: 800; color: #1e3a8a; font-size: 0.82rem;">0.00 QQ</small>
+                            </div>
+                        </div>
+                        <div id="resDesgloseTexto" style="font-size: 0.76rem; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 0.45rem; line-height: 1.35;">
+                            Fija el peso complementario para ver la liquidación en vivo.
+                        </div>
+                    </div>
+
+                    <!-- DERECHA: OBSERVACIONES DE SALIDA -->
+                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; display: flex; flex-direction: column;">
+                        <label for="observaciones_segunda" class="form-label" style="font-size: 0.76rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
                             Observaciones de salida
                         </label>
-                        <textarea id="observaciones_segunda" name="observaciones_segunda" class="form-control" rows="2" style="font-size: 0.88rem; margin-bottom: 0.85rem;" placeholder="Notas sobre el estado de la carga o cierre"></textarea>
-
-                        <div id="avisoFaltanteGuardar" style="display: none; margin-bottom: 0.85rem; padding: 0.75rem 0.95rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; font-size: 0.86rem; font-weight: 600;"></div>
-
-                        <div style="display: flex; gap: 1rem; align-items: center;">
-                            <button type="submit" id="btnCerrarPesada" class="btn btn-primary" style="background: #0b57d0; padding: 0.65rem 1.5rem; font-weight: 700; border-radius: 6px; font-size: 0.95rem;">
-                                Guardar y cerrar nota
-                            </button>
-                            <a href="segunda_pesada.php" style="color: #64748b; font-size: 0.9rem; font-weight: 600; text-decoration: none;">
-                                Cancelar
-                            </a>
-                        </div>
+                        <textarea id="observaciones_segunda" name="observaciones_segunda" class="form-control" rows="2" style="font-size: 0.86rem; flex: 1; resize: none;" placeholder="Notas sobre el estado de la carga o cierre"></textarea>
                     </div>
+                </div>
+
+                <div id="avisoFaltanteGuardar" style="display: none; margin-bottom: 0.75rem; padding: 0.75rem 0.95rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; font-size: 0.86rem; font-weight: 600;"></div>
+
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <button type="submit" id="btnCerrarPesada" class="btn btn-primary" style="background: #0b57d0; padding: 0.65rem 1.65rem; font-weight: 700; border-radius: 6px; font-size: 0.95rem;">
+                        Guardar y cerrar nota
+                    </button>
+                    <a href="segunda_pesada.php" style="color: #64748b; font-size: 0.9rem; font-weight: 600; text-decoration: none;">
+                        Cancelar
+                    </a>
                 </div>
             </div>
         </form>
@@ -872,14 +880,21 @@ function calcularTotales() {
     // Base de descuentos
     const baseDesc = Math.max(0, netoInicial - taraSacos);
 
-    // Descuentos porcentuales
+    // Descuentos porcentuales detallados
     const pctHum = parseFloat(document.getElementById('ajuste_humedad_pct').value || '0');
     const pctDef = parseFloat(document.getElementById('descuento_calidad_pct').value || '0');
     const descHum = Math.round(baseDesc * (pctHum / 100.0));
     const descDef = Math.round(baseDesc * (pctDef / 100.0));
     const totalDesc = descHum + descDef;
 
-    document.getElementById('resDescuentosLb').innerText = totalDesc.toLocaleString('en-US') + ' lb';
+    const elHumLb = document.getElementById('resDescHumedadLb');
+    const elHumPct = document.getElementById('resDescHumedadPct');
+    const elCalLb = document.getElementById('resDescCalidadLb');
+    const elCalPct = document.getElementById('resDescCalidadPct');
+    if (elHumLb) elHumLb.innerText = descHum.toLocaleString('en-US') + ' lb';
+    if (elHumPct) elHumPct.innerText = pctHum + '%';
+    if (elCalLb) elCalLb.innerText = descDef.toLocaleString('en-US') + ' lb';
+    if (elCalPct) elCalPct.innerText = pctDef + '%';
 
     const pesoFinal = Math.max(0, baseDesc - totalDesc);
     document.getElementById('resPesoFinal').innerText = pesoFinal.toLocaleString('en-US') + ' lb';
