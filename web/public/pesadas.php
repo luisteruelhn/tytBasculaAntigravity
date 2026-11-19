@@ -180,14 +180,14 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                                     <?= $fechaFmt ?>
                                 </td>
                                 <td style="padding: 1rem 0.5rem; font-weight: 800; font-family: monospace; font-size: 0.95rem; color: var(--text-main);">
-                                    <?= htmlspecialchars($b['placa'], ENT_QUOTES, 'UTF-8') ?>
+                                    <?= htmlspecialchars((string)($b['placa'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>
                                 </td>
                                 <td style="padding: 1rem 0.5rem; font-weight: 600; color: var(--text-main); font-size: 0.92rem;">
-                                    <?= htmlspecialchars($b['persona_nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                    <?= htmlspecialchars((string)($b['persona_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>
                                 </td>
                                 <td style="padding: 1rem 0.5rem; font-size: 0.88rem; color: var(--text-muted);">
-                                    <?= htmlspecialchars($b['producto_nombre'], ENT_QUOTES, 'UTF-8') ?>
-                                    <div style="font-size: 0.75rem; color: #64748b;"><?= htmlspecialchars($b['presentacion_nombre'], ENT_QUOTES, 'UTF-8') ?></div>
+                                    <?= htmlspecialchars((string)($b['producto_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>
+                                    <div style="font-size: 0.75rem; color: #64748b;"><?= htmlspecialchars((string)($b['presentacion_nombre'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
                                 </td>
                                 <td style="padding: 1rem 0.5rem; text-align: right; font-weight: 800; font-size: 1rem; color: var(--text-main);">
                                     <?php if ($esCerrada): ?>

@@ -349,15 +349,15 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                         <?= ($pesadaActiva['tipo_operacion'] === 'COMPRA' ? 'COMPRA #' . $pesadaActiva['id_compra'] : 'VENTA #' . $pesadaActiva['id_venta']) ?>
                     </span>
                     <h2 style="font-size: 1.5rem; font-weight: 900; margin: 0; color: var(--text-main); line-height: 1.1;">
-                        <?= htmlspecialchars($pesadaActiva['persona_nombre'], ENT_QUOTES, 'UTF-8') ?>
+                        <?= htmlspecialchars((string)($pesadaActiva['persona_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>
                     </h2>
                 </div>
                 <div style="display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; font-size: 0.96rem; font-weight: 600; color: var(--text-muted);">
-                    <span>Producto: <strong style="color: var(--text-main);"><?= htmlspecialchars($pesadaActiva['producto_nombre'], ENT_QUOTES, 'UTF-8') ?></strong></span>
+                    <span>Producto: <strong style="color: var(--text-main);"><?= htmlspecialchars((string)($pesadaActiva['producto_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></strong></span>
                     <span>&middot;</span>
-                    <span>Presentación: <strong style="color: var(--text-main);"><?= htmlspecialchars($pesadaActiva['presentacion_nombre'], ENT_QUOTES, 'UTF-8') ?></strong></span>
+                    <span>Presentación: <strong style="color: var(--text-main);"><?= htmlspecialchars((string)($pesadaActiva['presentacion_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></strong></span>
                     <span>&middot;</span>
-                    <span>Placa: <strong style="color: var(--text-main); font-size: 1.05rem;"><?= htmlspecialchars($pesadaActiva['placa'], ENT_QUOTES, 'UTF-8') ?></strong></span>
+                    <span>Placa: <strong style="color: var(--text-main); font-size: 1.05rem;"><?= htmlspecialchars((string)($pesadaActiva['placa'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></strong></span>
                 </div>
             </div>
 
@@ -668,13 +668,13 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                                         <?= ($pend['tipo_operacion'] === 'COMPRA' ? 'Compra #' . $pend['id_compra'] : 'Venta #' . $pend['id_venta']) ?>
                                     </td>
                                     <td style="padding: 1.15rem 0.5rem; font-weight: 800; font-family: monospace; font-size: 1rem; color: var(--text-main);">
-                                        <?= htmlspecialchars($pend['placa'], ENT_QUOTES, 'UTF-8') ?>
+                                        <?= htmlspecialchars((string)($pend['placa'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>
                                     </td>
                                     <td style="padding: 1.15rem 0.5rem; font-weight: 600; color: var(--text-main);">
-                                        <?= htmlspecialchars($pend['persona_nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                        <?= htmlspecialchars((string)($pend['persona_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>
                                     </td>
                                     <td style="padding: 1.15rem 0.5rem; font-size: 0.92rem; color: var(--text-muted);">
-                                        <?= htmlspecialchars($pend['producto_nombre'], ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($pend['presentacion_nombre'], ENT_QUOTES, 'UTF-8') ?>)
+                                        <?= htmlspecialchars((string)($pend['producto_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars((string)($pend['presentacion_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>)
                                     </td>
                                     <td style="padding: 1.15rem 0.5rem; font-weight: 700; color: #701a2b;">
                                         <?= number_format((float)($pend['peso_bruto_lb'] ?? $pend['tara_vehiculo_lb']), 0) ?> lb

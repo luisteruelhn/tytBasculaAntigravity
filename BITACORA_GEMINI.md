@@ -209,6 +209,8 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Segunda Pesada (`web/public/segunda_pesada.php`)**:
   - Resaltado el encabezado de la nota abierta con tipografía más grande y tarjeta de **Primera Pesada** con fondo celeste difuminado unificada al ancho exacto del cuadro del indicador (`1.1fr / 1fr`).
   - Agregada retroalimentación visual explícita (`#avisoFaltanteGuardar`) al intentar guardar sin haber fijado un peso complementario válido, cuando Bruto ≤ Tara o si falta especificar el motivo de traslado `"Otros (especificar)"`.
-  - Redistribuida la vista de cierre de `segunda_pesada.php` en un cockpit compacto de 2 columnas (`1.1fr / 1fr`) para que todos los controles, lectura en vivo, liquidación, observaciones y botón de cierre quepan en una sola pantalla sin scroll.
+  - Redistribuida la vista de cierre de `segunda_pesada.php` en un cockpit compacto de 2 columnas (`1.1fr / 1fr`) con desglose individual de descuentos (Humedad y Calidad) y primera pesada apilada bajo tara fijada.
+* **Boletas e Historial (`web/public/pesadas.php` y `segunda_pesada.php`)**:
+  - Corregido `TypeError: htmlspecialchars(): Argument #1 ($string) must be of type string, null given` en registros con `placa`, `persona_nombre`, `producto_nombre` o `presentacion_nombre` en `NULL`.
 * **Indicador de Modo en Vivo (`primera_pesada.php`, `segunda_pesada.php`, `layout.php`)**:
   - Corregido `#liveModoTexto` para reflejar dinámicamente `Modo real` o `Modo simulado` según `data.origen` de FastAPI (`:8018`), e incluida la sincronización automática al cargar `primera_pesada.php` y `segunda_pesada.php`.
