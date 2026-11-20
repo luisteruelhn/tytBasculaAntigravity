@@ -11,6 +11,8 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
 
+$usuario = requerirAutenticacion();
+
 // Verificar estado de conexión con la base de datos MariaDB
 $estadoDB = false;
 $errorDB = null;
@@ -18,16 +20,13 @@ $totalPendientes = 0;
 $ultimaPesada = null;
 $hostActual = strtolower((string)($_SERVER['SERVER_NAME'] ?? ''));
 $esEntornoRemoto = ($hostActual !== '' && !in_array($hostActual, ['localhost', '127.0.0.1', '::1'], true));
-$esRemoto = false;
-$mostrarModoUltimoPeso = $esEntornoRemoto;
+$esRemoto = tieneRol($usuario, ['REMOTO']);
+$mostrarModoUltimoPeso = $esEntornoRemoto || $esRemoto;
 
 try {
     $pdo = obtenerDB();
     $estadoDB = true;
-    $usuario = obtenerUsuarioActual();
-    $esRemoto = $usuario && tieneRol($usuario, ['REMOTO']);
-    $mostrarModoUltimoPeso = $esEntornoRemoto || $esRemoto;
-    $empresaId = (int)($usuario['empresa_id'] ?? 1);
+    $empresaId = (int)$usuario['empresa_id'];
 
     // Consultar pesadas pendientes de segunda pesada (estado ABIERTA)
     $stmtPendientes = $pdo->prepare(
