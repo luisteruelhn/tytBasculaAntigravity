@@ -90,3 +90,11 @@ Esta skill contiene las directivas obligatorias para garantizar código 100% res
 - Validar tipos MIME reales (usando `finfo_file` o `mime_content_type`), no confiar únicamente en la extensión del archivo.
 - Generar nombres de archivo aleatorios o hasheados (evitar guardar nombres originales para prevenir `Path Traversal` como `../../archivo.php`).
 - Guardar archivos fuera del directorio raíz ejecutable o configurar el servidor para denegar ejecución de scripts en carpetas de uploads.
+
+---
+
+## 7. Autenticación Obligatoria en Todas las Vistas y Endpoints Privados (Cero Bypass de Login)
+- **Regla mandatoria (Default-Deny):** **Toda vista o página interna** (incluyendo `index.php`, tableros, reportes, catálogos y utilidades) **DEBE** exigir autenticación desde la primera línea de ejecución (`$usuario = requerirAutenticacion();` o `requerirRol(...)`) antes de consultar la base de datos o renderizar HTML.
+- **Prohibido depender de `obtenerUsuarioActual()` sin redirección:** Nunca usar `obtenerUsuarioActual()` con respaldos como `$usuario['empresa_id'] ?? 1` en páginas privadas; si no hay sesión válida, debe redirigir de inmediato a `login.php` y hacer `exit`.
+- **Verificación en APIs / Endpoints JSON:** Todo endpoint interno (`api_*.php`) debe validar sesión activa + rol autorizado (`401`/`403`) o token/firma HMAC explícita en el servidor antes de ejecutar consultas.
+- **Auditoría obligatoria antes de liberar:** Antes de cerrar cambios o pasar a `produccion`, verificar que ningún archivo público nuevo o editado en `web/public/` (salvo `login.php`, `logout.php` o landings explícitamente públicas) carezca de control de acceso.
