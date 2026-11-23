@@ -142,21 +142,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// 3. DETECCIÓN DE PUERTOS EN WINDOWS
+// 3. DETECCIÓN DE PUERTOS EN WINDOWS (Solo si es Windows y shell_exec está habilitado)
 $puertosDetectados = [];
-try {
-    $salidaPuertos = @shell_exec('powershell -NoProfile -Command "[System.IO.Ports.SerialPort]::GetPortNames()"');
-    if ($salidaPuertos) {
-        $lineas = explode("\n", trim($salidaPuertos));
-        foreach ($lineas as $lp) {
-            $lp = trim($lp);
-            if ($lp !== '' && !in_array($lp, $puertosDetectados, true)) {
-                $puertosDetectados[] = $lp;
+if (PHP_OS_FAMILY === 'Windows' && function_exists('shell_exec')) {
+    try {
+        $salidaPuertos = @shell_exec('powershell -NoProfile -Command "[System.IO.Ports.SerialPort]::GetPortNames()"');
+        if ($salidaPuertos) {
+            $lineas = explode("\n", trim($salidaPuertos));
+            foreach ($lineas as $lp) {
+                $lp = trim($lp);
+                if ($lp !== '' && !in_array($lp, $puertosDetectados, true)) {
+                    $puertosDetectados[] = $lp;
+                }
             }
         }
+    } catch (Throwable $e) {
+        // Si falla la llamada powershell, continúa
     }
-} catch (Exception $e) {
-    // Si falla la llamada powershell, continúa
 }
 
 $modoActual = ($config['modo'] ?? 'SERIAL') === 'SERIAL' ? 'REAL' : 'SIMULADO';
