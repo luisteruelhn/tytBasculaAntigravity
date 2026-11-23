@@ -36,6 +36,9 @@ $stmtCfg->execute([':empresa_id' => $empresaId]);
 $cfg = $stmtCfg->fetch(PDO::FETCH_ASSOC);
 
 $apiKey = trim((string)($cfg['gemini_api_key'] ?? ''));
+if ($apiKey === '' && defined('GEMINI_API_KEY')) {
+    $apiKey = trim((string)GEMINI_API_KEY);
+}
 if ($apiKey === '') {
     $apiKey = trim((string)(getenv('GEMINI_API_KEY') ?: ''));
 }

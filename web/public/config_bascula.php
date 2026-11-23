@@ -29,9 +29,9 @@ if (!$config) {
     // Si no existe, inicializar con valores predeterminados
     $pdo->prepare("
         INSERT INTO t_configuracion_bascula 
-        (empresa_id, estacion, modo, puerto_com, baudios, bits_datos, paridad, bits_parada, control_flujo, protocolo, unidad_indicador, timeout_lectura_ms, intervalo_lectura_ms, max_trama_bytes, parametros_confirmados, creado_por, actualizado_por)
+        (empresa_id, estacion, modo, puerto_com, baudios, bits_datos, paridad, bits_parada, control_flujo, protocolo, unidad_indicador, timeout_lectura_ms, intervalo_lectura_ms, max_trama_bytes, parametros_confirmados, actualizado_por)
         VALUES 
-        (:empresa_id, 'PRINCIPAL', 'SERIAL', 'COM9', 9600, 8, 'N', 1.0, 'NINGUNO', 'C18 = 4', 'lb', 1000, 500, 512, 1, :uid, :uid)
+        (:empresa_id, 'PRINCIPAL', 'SERIAL', 'COM9', 9600, 8, 'N', 1.0, 'NINGUNO', 'C18 = 4', 'lb', 1000, 500, 512, 1, :uid)
     ")->execute([':empresa_id' => $empresaId, ':uid' => (int)$usuarioActual['id']]);
 
     $stmt->execute([':empresa_id' => $empresaId]);
