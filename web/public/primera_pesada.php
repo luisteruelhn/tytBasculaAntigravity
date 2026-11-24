@@ -1321,13 +1321,20 @@ function filtrarPresentaciones(productoId) {
         selPres.appendChild(opt);
     });
 
+    const selProd = document.getElementById('producto_id');
+    const nombreProd = (selProd && selProd.selectedIndex >= 0) ? selProd.options[selProd.selectedIndex].text.toUpperCase() : '';
+
     if (filtradas.length === 1) {
         selPres.value = filtradas[0].id;
+    } else if (nombreProd.includes('CAFE')) {
+        const optSacos = filtradas.find(p => String(p.nombre || '').toUpperCase().includes('SACOS'));
+        if (optSacos) selPres.value = optSacos.id;
+    } else if (nombreProd.includes('ACEITE')) {
+        const optGranel = filtradas.find(p => String(p.nombre || '').toUpperCase().includes('GRANEL'));
+        if (optGranel) selPres.value = optGranel.id;
     }
 
     // Sugerir Pesada Única automáticamente cuando el producto seleccionado sea ACEITE
-    const selProd = document.getElementById('producto_id');
-    const nombreProd = (selProd && selProd.selectedIndex >= 0) ? selProd.options[selProd.selectedIndex].text.toUpperCase() : '';
     const chkUnica = document.getElementById('chkPesadaUnica');
     const avisoAceite = document.getElementById('avisoSugerenciaAceite');
 
