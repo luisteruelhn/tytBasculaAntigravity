@@ -150,21 +150,51 @@ foreach ($todasBoletas as $b) {
     $grupos[$op]['items'][] = $b;
 }
 
+// Función helper para calcular métricas exactas de una fila del reporte
+function calcularMetricasFilaReporte(array $r): array {
+    $bruto = (float)$r['peso_bruto_lb'];
+    $taraV = (float)$r['tara_vehiculo_lb'];
+    $neto  = max(0.0, $bruto - $taraV);
+    $cant  = (int)$r['cantidad_empaques'];
+    $taraCalc = ceil(round((float)($r['tara_unitaria_aplicada_lb'] ?? 0) * $cant, 4));
+    $baseNeto = ($r['base_descuentos_lb'] !== null) ? (float)$r['base_descuentos_lb'] : max(0.0, $neto - $taraCalc);
+    $taraE    = ($r['base_descuentos_lb'] !== null) ? max(0.0, $neto - $baseNeto) : $taraCalc;
+    $pctH     = (float)($r['ajuste_humedad_pct'] ?? 0);
+    $pctD     = (float)($r['descuento_calidad_pct'] ?? 0);
+    $finalLb  = (float)$r['peso_final_lb'];
+    $qq       = round($finalLb / 100.0, 2);
+
+    return [
+        'bruto'     => $bruto,
+        'tara'      => $taraV,
+        'neto'      => $neto,
+        'empaques'  => $cant,
+        'tara_emp'  => $taraE,
+        'base_neto' => $baseNeto,
+        'pct_h'     => $pctH,
+        'pct_d'     => $pctD,
+        'final'     => $finalLb,
+        'qq'        => $qq,
+    ];
+}
+
+function formatearPorcentajeReporte(float $pct): string {
+    return $pct > 0 ? rtrim(rtrim(number_format($pct, 2), '0'), '.') . '%' : '';
+}
+
 // Función helper para calcular totales de un conjunto de filas
 function sumarTotales(array $items): array {
-    $t = ['bruto' => 0.0, 'neto' => 0.0, 'tara' => 0.0, 'empaques' => 0, 'tara_emp' => 0.0];
+    $t = ['bruto' => 0.0, 'tara' => 0.0, 'neto' => 0.0, 'empaques' => 0, 'tara_emp' => 0.0, 'base_neto' => 0.0, 'final' => 0.0, 'qq' => 0.0];
     foreach ($items as $r) {
-        $bruto = (float)$r['peso_bruto_lb'];
-        $taraV = (float)$r['tara_vehiculo_lb'];
-        $neto  = max(0.0, $bruto - $taraV);
-        $cant  = (int)$r['cantidad_empaques'];
-        $taraE = round((float)($r['tara_unitaria_aplicada_lb'] ?? 0) * $cant);
-
-        $t['bruto'] += $bruto;
-        $t['tara'] += $taraV;
-        $t['neto'] += $neto;
-        $t['empaques'] += $cant;
-        $t['tara_emp'] += $taraE;
+        $m = calcularMetricasFilaReporte($r);
+        $t['bruto']     += $m['bruto'];
+        $t['tara']      += $m['tara'];
+        $t['neto']      += $m['neto'];
+        $t['empaques']  += $m['empaques'];
+        $t['tara_emp']  += $m['tara_emp'];
+        $t['base_neto'] += $m['base_neto'];
+        $t['final']     += $m['final'];
+        $t['qq']        += $m['qq'];
     }
     return $t;
 }
@@ -191,15 +221,16 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     echo '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse; font-family: Calibri, sans-serif; font-size: 11pt;">';
 
     // Título Principal
-    echo '<tr><th colspan="14" style="background-color: #0f172a; color: #ffffff; font-size: 14pt; padding: 10px; text-align: center;">REPORTE DE BOLETAS DE PESAJE</th></tr>';
-    echo '<tr><td colspan="14" style="text-align: center; color: #475569; font-size: 10pt;">Empresa: ' . htmlspecialchars($empresaNombre) . ' &middot; Del ' . date('d/m/Y', strtotime($fechaDesdeSql)) . ' al ' . date('d/m/Y', strtotime($fechaHastaSql)) . '</td></tr>';
-    echo '<tr><td colspan="14" style="height: 10px; background-color: #ffffff; border: none;"></td></tr>';
+    echo '<tr><th colspan="16" style="background-color: #0f172a; color: #ffffff; font-size: 14pt; padding: 10px; text-align: center;">REPORTE DE BOLETAS DE PESAJE</th></tr>';
+    echo '<tr><td colspan="16" style="text-align: center; color: #475569; font-size: 10pt;">Empresa: ' . htmlspecialchars($empresaNombre) . ' &middot; Del ' . date('d/m/Y', strtotime($fechaDesdeSql)) . ' al ' . date('d/m/Y', strtotime($fechaHastaSql)) . '</td></tr>';
+    echo '<tr><td colspan="16" style="height: 10px; background-color: #ffffff; border: none;"></td></tr>';
 
     $totGenBruto = 0.0;
     $totGenTara  = 0.0;
     $totGenNeto  = 0.0;
     $totGenEmp   = 0;
     $totGenTaraE = 0.0;
+    $totGenBase  = 0.0;
     $totGenFinal = 0.0;
     $totGenQQ    = 0.0;
     $totGenPesadas = 0;
@@ -208,20 +239,21 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         $tituloOp = ($op === 'COMPRA') ? 'COMPRAS' : 'VENTAS';
         $colorOpHeader = ($op === 'COMPRA') ? '#1e40af' : '#047857';
 
-        echo '<tr><th colspan="14" style="background-color: ' . $colorOpHeader . '; color: #ffffff; font-size: 12pt; text-align: left; padding: 6px 10px;">SECCIÓN: ' . $tituloOp . '</th></tr>';
+        echo '<tr><th colspan="16" style="background-color: ' . $colorOpHeader . '; color: #ffffff; font-size: 12pt; text-align: left; padding: 6px 10px;">SECCIÓN: ' . $tituloOp . '</th></tr>';
 
         $totOpBruto = 0.0;
         $totOpTara  = 0.0;
         $totOpNeto  = 0.0;
         $totOpEmp   = 0;
         $totOpTaraE = 0.0;
+        $totOpBase  = 0.0;
         $totOpFinal = 0.0;
         $totOpQQ    = 0.0;
         $totOpPesadas = 0;
 
         foreach ($categorias as $nombreCategoria => $productos) {
             echo '<tr style="background-color: #334155; color: #ffffff; font-weight: bold;">';
-            echo '<td colspan="14" style="padding: 5px 10px; font-size: 11pt;">CATEGORÍA: ' . htmlspecialchars($nombreCategoria) . '</td>';
+            echo '<td colspan="16" style="padding: 5px 10px; font-size: 11pt;">CATEGORÍA: ' . htmlspecialchars($nombreCategoria) . '</td>';
             echo '</tr>';
 
             $totCatBruto = 0.0;
@@ -229,13 +261,14 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
             $totCatNeto  = 0.0;
             $totCatEmp   = 0;
             $totCatTaraE = 0.0;
+            $totCatBase  = 0.0;
             $totCatFinal = 0.0;
             $totCatQQ    = 0.0;
             $totCatPesadas = 0;
 
             foreach ($productos as $nombreProducto => $boletasProducto) {
                 echo '<tr style="background-color: #f1f5f9; font-weight: bold;">';
-                echo '<td colspan="14" style="color: #0f172a; font-size: 10.5pt; padding-left: 15px;">Producto: ' . htmlspecialchars($nombreProducto) . '</td>';
+                echo '<td colspan="16" style="color: #0f172a; font-size: 10.5pt; padding-left: 15px;">Producto: ' . htmlspecialchars($nombreProducto) . '</td>';
                 echo '</tr>';
 
                 echo '<tr style="background-color: #e2e8f0; color: #1e293b; font-weight: bold; text-align: center; font-size: 9.5pt;">';
@@ -246,13 +279,15 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                 echo '<th>Cliente / Proveedor</th>';
                 echo '<th>Producto</th>';
                 echo '<th>Presentación</th>';
-                echo '<th>Bruto lb</th>';
-                echo '<th>Tara lb</th>';
-                echo '<th>Neto lb</th>';
-                echo '<th>Empaques</th>';
-                echo '<th>Tara Emp lb</th>';
-                echo '<th>Final lb</th>';
-                echo '<th>Total QQ</th>';
+                echo '<th>BRUTO</th>';
+                echo '<th>TARA</th>';
+                echo '<th>NETO</th>';
+                echo '<th>SACOS</th>';
+                echo '<th>TARA SACOS</th>';
+                echo '<th>NETO</th>';
+                echo '<th>%H</th>';
+                echo '<th>%D</th>';
+                echo '<th>TOTAL QQ</th>';
                 echo '</tr>';
 
                 $subBruto = 0.0;
@@ -260,27 +295,23 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                 $subNeto  = 0.0;
                 $subEmp   = 0;
                 $subTaraE = 0.0;
+                $subBase  = 0.0;
                 $subFinal = 0.0;
                 $subQQ    = 0.0;
                 $subPesadas = count($boletasProducto);
 
                 foreach ($boletasProducto as $b) {
-                    $numB  = ($b['tipo_operacion'] === 'COMPRA') ? '#' . sprintf('%07d', $b['id_compra']) : '#' . sprintf('%07d', $b['id_venta']);
-                    $bruto = (float)$b['peso_bruto_lb'];
-                    $tara  = (float)$b['tara_vehiculo_lb'];
-                    $neto  = max(0.0, $bruto - $tara);
-                    $cantE = (int)$b['cantidad_empaques'];
-                    $taraE = round((float)($b['tara_unitaria_aplicada_lb'] ?? 0) * $cantE);
-                    $final = (float)$b['peso_final_lb'];
-                    $qq    = round($final / 100.0, 2);
+                    $numB = ($b['tipo_operacion'] === 'COMPRA') ? '#' . sprintf('%07d', $b['id_compra']) : '#' . sprintf('%07d', $b['id_venta']);
+                    $m    = calcularMetricasFilaReporte($b);
 
-                    $subBruto += $bruto;
-                    $subTara  += $tara;
-                    $subNeto  += $neto;
-                    $subEmp   += $cantE;
-                    $subTaraE += $taraE;
-                    $subFinal += $final;
-                    $subQQ    += $qq;
+                    $subBruto += $m['bruto'];
+                    $subTara  += $m['tara'];
+                    $subNeto  += $m['neto'];
+                    $subEmp   += $m['empaques'];
+                    $subTaraE += $m['tara_emp'];
+                    $subBase  += $m['base_neto'];
+                    $subFinal += $m['final'];
+                    $subQQ    += $m['qq'];
 
                     echo '<tr>';
                     echo '<td align="center">' . htmlspecialchars($b['tipo_operacion']) . '</td>';
@@ -290,25 +321,29 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                     echo '<td>' . htmlspecialchars((string)$b['persona_nombre']) . '</td>';
                     echo '<td>' . htmlspecialchars((string)$b['producto_nombre']) . '</td>';
                     echo '<td>' . htmlspecialchars((string)$b['presentacion_nombre']) . '</td>';
-                    echo '<td align="right">' . number_format($bruto) . '</td>';
-                    echo '<td align="right">' . number_format($tara) . '</td>';
-                    echo '<td align="right">' . number_format($neto) . '</td>';
-                    echo '<td align="center">' . $cantE . '</td>';
-                    echo '<td align="right">' . number_format($taraE) . '</td>';
-                    echo '<td align="right" style="font-weight: bold;">' . number_format($final) . '</td>';
-                    echo '<td align="right" style="font-weight: bold;">' . number_format($qq, 2) . '</td>';
+                    echo '<td align="right">' . number_format($m['bruto'], 0) . '</td>';
+                    echo '<td align="right">' . number_format($m['tara'], 0) . '</td>';
+                    echo '<td align="right">' . number_format($m['neto'], 0) . '</td>';
+                    echo '<td align="right">' . $m['empaques'] . '</td>';
+                    echo '<td align="right">' . number_format($m['tara_emp'], 2) . '</td>';
+                    echo '<td align="right">' . number_format($m['base_neto'], 0) . '<br><span style="font-size: 8.5pt; color: #475569;">' . number_format($m['base_neto'] / 100.0, 2) . '</span></td>';
+                    echo '<td align="right">' . formatearPorcentajeReporte($m['pct_h']) . '</td>';
+                    echo '<td align="right">' . formatearPorcentajeReporte($m['pct_d']) . '</td>';
+                    echo '<td align="right" style="font-weight: bold;">' . number_format($m['qq'], 2) . '</td>';
                     echo '</tr>';
                 }
 
                 // Fila de Subtotal por Producto con conteo de pesadas
                 echo '<tr style="background-color: #f8fafc; font-weight: bold; border-top: 1px solid #94a3b8;">';
                 echo '<td colspan="7" align="right" style="color: #475569;">SUBTOTAL (' . htmlspecialchars($nombreProducto) . ' &middot; ' . $subPesadas . ' pesadas):</td>';
-                echo '<td align="right">' . number_format($subBruto) . '</td>';
-                echo '<td align="right">' . number_format($subTara) . '</td>';
-                echo '<td align="right">' . number_format($subNeto) . '</td>';
-                echo '<td align="center">' . $subEmp . '</td>';
-                echo '<td align="right">' . number_format($subTaraE) . '</td>';
-                echo '<td align="right" style="color: #0b57d0;">' . number_format($subFinal) . '</td>';
+                echo '<td align="right">' . number_format($subBruto, 0) . '</td>';
+                echo '<td align="right">' . number_format($subTara, 0) . '</td>';
+                echo '<td align="right">' . number_format($subNeto, 0) . '</td>';
+                echo '<td align="right">' . $subEmp . '</td>';
+                echo '<td align="right">' . number_format($subTaraE, 2) . '</td>';
+                echo '<td align="right">' . number_format($subBase, 0) . '<br><span style="font-size: 8.5pt; color: #475569;">' . number_format($subBase / 100.0, 2) . '</span></td>';
+                echo '<td></td>';
+                echo '<td></td>';
                 echo '<td align="right" style="color: #0b57d0;">' . number_format($subQQ, 2) . '</td>';
                 echo '</tr>';
 
@@ -317,6 +352,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
                 $totCatNeto  += $subNeto;
                 $totCatEmp   += $subEmp;
                 $totCatTaraE += $subTaraE;
+                $totCatBase  += $subBase;
                 $totCatFinal += $subFinal;
                 $totCatQQ    += $subQQ;
                 $totCatPesadas += $subPesadas;
@@ -325,21 +361,24 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
             // Fila de Subtotal por Categoría con conteo de pesadas
             echo '<tr style="background-color: #e2e8f0; font-weight: bold; font-size: 10.5pt;">';
             echo '<td colspan="7" align="right" style="color: #1e293b;">SUBTOTAL CATEGORÍA ' . htmlspecialchars($nombreCategoria) . ' (' . $totCatPesadas . ' pesadas):</td>';
-            echo '<td align="right">' . number_format($totCatBruto) . '</td>';
-            echo '<td align="right">' . number_format($totCatTara) . '</td>';
-            echo '<td align="right">' . number_format($totCatNeto) . '</td>';
-            echo '<td align="center">' . $totCatEmp . '</td>';
-            echo '<td align="right">' . number_format($totCatTaraE) . '</td>';
-            echo '<td align="right" style="color: #1e293b;">' . number_format($totCatFinal) . '</td>';
+            echo '<td align="right">' . number_format($totCatBruto, 0) . '</td>';
+            echo '<td align="right">' . number_format($totCatTara, 0) . '</td>';
+            echo '<td align="right">' . number_format($totCatNeto, 0) . '</td>';
+            echo '<td align="right">' . $totCatEmp . '</td>';
+            echo '<td align="right">' . number_format($totCatTaraE, 2) . '</td>';
+            echo '<td align="right">' . number_format($totCatBase, 0) . '<br><span style="font-size: 8.5pt; color: #475569;">' . number_format($totCatBase / 100.0, 2) . '</span></td>';
+            echo '<td></td>';
+            echo '<td></td>';
             echo '<td align="right" style="color: #1e293b;">' . number_format($totCatQQ, 2) . '</td>';
             echo '</tr>';
-            echo '<tr><td colspan="14" style="height: 6px; background-color: #ffffff; border: none;"></td></tr>';
+            echo '<tr><td colspan="16" style="height: 6px; background-color: #ffffff; border: none;"></td></tr>';
 
             $totOpBruto += $totCatBruto;
             $totOpTara  += $totCatTara;
             $totOpNeto  += $totCatNeto;
             $totOpEmp   += $totCatEmp;
             $totOpTaraE += $totCatTaraE;
+            $totOpBase  += $totCatBase;
             $totOpFinal += $totCatFinal;
             $totOpQQ    += $totCatQQ;
             $totOpPesadas += $totCatPesadas;
@@ -348,15 +387,17 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         // Fila de Subtotal de Toda la Operación (Total Compras o Total Ventas)
         echo '<tr style="background-color: #dbeafe; font-weight: bold; font-size: 11pt;">';
         echo '<td colspan="7" align="right" style="color: #1e3a8a;">SUBTOTAL ' . $tituloOp . ' (' . $totOpPesadas . ' pesadas):</td>';
-        echo '<td align="right">' . number_format($totOpBruto) . '</td>';
-        echo '<td align="right">' . number_format($totOpTara) . '</td>';
-        echo '<td align="right">' . number_format($totOpNeto) . '</td>';
-        echo '<td align="center">' . $totOpEmp . '</td>';
-        echo '<td align="right">' . number_format($totOpTaraE) . '</td>';
-        echo '<td align="right" style="color: #1e3a8a;">' . number_format($totOpFinal) . '</td>';
+        echo '<td align="right">' . number_format($totOpBruto, 0) . '</td>';
+        echo '<td align="right">' . number_format($totOpTara, 0) . '</td>';
+        echo '<td align="right">' . number_format($totOpNeto, 0) . '</td>';
+        echo '<td align="right">' . $totOpEmp . '</td>';
+        echo '<td align="right">' . number_format($totOpTaraE, 2) . '</td>';
+        echo '<td align="right">' . number_format($totOpBase, 0) . '<br><span style="font-size: 8.5pt; color: #1e3a8a;">' . number_format($totOpBase / 100.0, 2) . '</span></td>';
+        echo '<td></td>';
+        echo '<td></td>';
         echo '<td align="right" style="color: #1e3a8a;">' . number_format($totOpQQ, 2) . '</td>';
         echo '</tr>';
-        echo '<tr><td colspan="14" style="height: 12px; background-color: #ffffff; border: none;"></td></tr>';
+        echo '<tr><td colspan="16" style="height: 12px; background-color: #ffffff; border: none;"></td></tr>';
 
         // Acumular a totales Generales
         $totGenBruto += $totOpBruto;
@@ -364,6 +405,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
         $totGenNeto  += $totOpNeto;
         $totGenEmp   += $totOpEmp;
         $totGenTaraE += $totOpTaraE;
+        $totGenBase  += $totOpBase;
         $totGenFinal += $totOpFinal;
         $totGenQQ    += $totOpQQ;
         $totGenPesadas += $totOpPesadas;
@@ -374,57 +416,52 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     foreach ($todasBoletas as $b) {
         $pNom = $b['producto_nombre'] ?: 'SIN PRODUCTO';
         if (!isset($totalesPorProducto[$pNom])) {
-            $totalesPorProducto[$pNom] = ['bruto' => 0.0, 'tara' => 0.0, 'neto' => 0.0, 'empaques' => 0, 'tara_emp' => 0.0, 'final' => 0.0, 'qq' => 0.0, 'boletas' => 0];
+            $totalesPorProducto[$pNom] = ['bruto' => 0.0, 'tara' => 0.0, 'neto' => 0.0, 'empaques' => 0, 'tara_emp' => 0.0, 'base_neto' => 0.0, 'final' => 0.0, 'qq' => 0.0, 'boletas' => 0];
         }
-        $b_bruto = (float)$b['peso_bruto_lb'];
-        $b_tara  = (float)$b['tara_vehiculo_lb'];
-        $b_neto  = max(0.0, $b_bruto - $b_tara);
-        $b_cantE = (int)$b['cantidad_empaques'];
-        $b_taraE = round((float)($b['tara_unitaria_aplicada_lb'] ?? 0) * $b_cantE);
-        $b_final = (float)$b['peso_final_lb'];
-        $b_qq    = round($b_final / 100.0, 2);
+        $m = calcularMetricasFilaReporte($b);
 
-        $totalesPorProducto[$pNom]['bruto']    += $b_bruto;
-        $totalesPorProducto[$pNom]['tara']     += $b_tara;
-        $totalesPorProducto[$pNom]['neto']     += $b_neto;
-        $totalesPorProducto[$pNom]['empaques'] += $b_cantE;
-        $totalesPorProducto[$pNom]['tara_emp'] += $b_taraE;
-        $totalesPorProducto[$pNom]['final']    += $b_final;
-        $totalesPorProducto[$pNom]['qq']       += $b_qq;
+        $totalesPorProducto[$pNom]['bruto']     += $m['bruto'];
+        $totalesPorProducto[$pNom]['tara']      += $m['tara'];
+        $totalesPorProducto[$pNom]['neto']      += $m['neto'];
+        $totalesPorProducto[$pNom]['empaques']  += $m['empaques'];
+        $totalesPorProducto[$pNom]['tara_emp']  += $m['tara_emp'];
+        $totalesPorProducto[$pNom]['base_neto'] += $m['base_neto'];
+        $totalesPorProducto[$pNom]['final']     += $m['final'];
+        $totalesPorProducto[$pNom]['qq']        += $m['qq'];
         $totalesPorProducto[$pNom]['boletas']++;
     }
 
     // SECCIÓN: RESUMEN Y SUBTOTAL GENERAL POR PRODUCTO
-    echo '<tr><td colspan="14" style="height: 16px; background-color: #ffffff; border: none;"></td></tr>';
-    echo '<tr><th colspan="14" style="background-color: #334155; color: #ffffff; font-size: 11pt; text-align: left; padding: 6px 10px;">RESUMEN DE SUBTOTALES GENERALES POR PRODUCTO (COMPRAS Y VENTAS)</th></tr>';
+    echo '<tr><td colspan="16" style="height: 16px; background-color: #ffffff; border: none;"></td></tr>';
+    echo '<tr><th colspan="16" style="background-color: #334155; color: #ffffff; font-size: 11pt; text-align: left; padding: 6px 10px;">RESUMEN DE SUBTOTALES GENERALES POR PRODUCTO (COMPRAS Y VENTAS)</th></tr>';
     echo '<tr style="background-color: #e2e8f0; color: #0f172a; font-weight: bold; text-align: center; font-size: 10pt;">';
-    echo '<th colspan="2">Boletas</th><th colspan="5">Producto</th><th>Bruto lb</th><th>Tara lb</th><th>Neto lb</th><th>Empaques</th><th>Tara Emp lb</th><th>Final lb</th><th>Total QQ</th>';
+    echo '<th colspan="2">Boletas</th><th colspan="5">Producto</th><th>BRUTO</th><th>TARA</th><th>NETO</th><th>SACOS</th><th>TARA SACOS</th><th colspan="3">NETO</th><th>TOTAL QQ</th>';
     echo '</tr>';
 
     foreach ($totalesPorProducto as $pNom => $tProd) {
         echo '<tr style="background-color: #f8fafc; font-weight: bold;">';
         echo '<td colspan="2" align="center">' . $tProd['boletas'] . ' boletas</td>';
         echo '<td colspan="5" style="color: #0f172a; padding-left: 10px;">' . htmlspecialchars($pNom) . '</td>';
-        echo '<td align="right">' . number_format($tProd['bruto']) . '</td>';
-        echo '<td align="right">' . number_format($tProd['tara']) . '</td>';
-        echo '<td align="right">' . number_format($tProd['neto']) . '</td>';
-        echo '<td align="center">' . $tProd['empaques'] . '</td>';
-        echo '<td align="right">' . number_format($tProd['tara_emp']) . '</td>';
-        echo '<td align="right" style="color: #0b57d0;">' . number_format($tProd['final']) . '</td>';
+        echo '<td align="right">' . number_format($tProd['bruto'], 0) . '</td>';
+        echo '<td align="right">' . number_format($tProd['tara'], 0) . '</td>';
+        echo '<td align="right">' . number_format($tProd['neto'], 0) . '</td>';
+        echo '<td align="right">' . $tProd['empaques'] . '</td>';
+        echo '<td align="right">' . number_format($tProd['tara_emp'], 2) . '</td>';
+        echo '<td colspan="3" align="right">' . number_format($tProd['base_neto'], 0) . ' (' . number_format($tProd['base_neto'] / 100.0, 2) . ')</td>';
         echo '<td align="right" style="color: #0b57d0;">' . number_format($tProd['qq'], 2) . '</td>';
         echo '</tr>';
     }
-    echo '<tr><td colspan="14" style="height: 14px; background-color: #ffffff; border: none;"></td></tr>';
+    echo '<tr><td colspan="16" style="height: 14px; background-color: #ffffff; border: none;"></td></tr>';
 
     // Fila de TOTAL GENERAL CONSOLIDADO
     echo '<tr style="background-color: #0f172a; color: #ffffff; font-weight: bold; font-size: 12pt;">';
     echo '<td colspan="7" align="right" style="padding: 8px;">TOTAL GENERAL CONSOLIDADO:</td>';
-    echo '<td align="right">' . number_format($totGenBruto) . '</td>';
-    echo '<td align="right">' . number_format($totGenTara) . '</td>';
-    echo '<td align="right">' . number_format($totGenNeto) . '</td>';
-    echo '<td align="center">' . $totGenEmp . '</td>';
-    echo '<td align="right">' . number_format($totGenTaraE) . '</td>';
-    echo '<td align="right" style="color: #60a5fa;">' . number_format($totGenFinal) . '</td>';
+    echo '<td align="right">' . number_format($totGenBruto, 0) . '</td>';
+    echo '<td align="right">' . number_format($totGenTara, 0) . '</td>';
+    echo '<td align="right">' . number_format($totGenNeto, 0) . '</td>';
+    echo '<td align="right">' . $totGenEmp . '</td>';
+    echo '<td align="right">' . number_format($totGenTaraE, 2) . '</td>';
+    echo '<td colspan="3" align="right">' . number_format($totGenBase, 0) . ' (' . number_format($totGenBase / 100.0, 2) . ')</td>';
     echo '<td align="right" style="color: #60a5fa;">' . number_format($totGenQQ, 2) . '</td>';
     echo '</tr>';
 
@@ -639,7 +676,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                 $tituloGrupo = ($tipoClave === 'COMPRA') ? 'COMPRAS' : 'VENTAS';
                 $colorGrupo = ($tipoClave === 'COMPRA') ? '#1e40af' : '#047857';
 
-                $totOpBruto = 0.0; $totOpTara = 0.0; $totOpNeto = 0.0; $totOpEmp = 0; $totOpTaraE = 0.0; $totOpPesadas = 0;
+                $totOpBruto = 0.0; $totOpTara = 0.0; $totOpNeto = 0.0; $totOpEmp = 0; $totOpTaraE = 0.0; $totOpBase = 0.0; $totOpFinal = 0.0; $totOpQQ = 0.0; $totOpPesadas = 0;
             ?>
                 <!-- ENCABEZADO DE SECCIÓN: COMPRAS O VENTAS -->
                 <div style="margin: 2.5rem 0 1rem 0; border-bottom: 2px solid <?= $colorGrupo ?>; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: baseline;">
@@ -652,7 +689,7 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                 </div>
 
                 <?php foreach ($categoriasWeb as $nombreCat => $productosWeb): 
-                    $totCatBruto = 0.0; $totCatTara = 0.0; $totCatNeto = 0.0; $totCatEmp = 0; $totCatTaraE = 0.0; $totCatPesadas = 0;
+                    $totCatBruto = 0.0; $totCatTara = 0.0; $totCatNeto = 0.0; $totCatEmp = 0; $totCatTaraE = 0.0; $totCatBase = 0.0; $totCatFinal = 0.0; $totCatQQ = 0.0; $totCatPesadas = 0;
                 ?>
                     <div style="background: #334155; color: #ffffff; padding: 0.45rem 0.85rem; border-radius: 6px; font-weight: 800; font-size: 0.92rem; margin: 1.5rem 0 0.75rem 0; letter-spacing: 0.5px;">
                         📁 CATEGORÍA: <?= htmlspecialchars($nombreCat, ENT_QUOTES, 'UTF-8') ?>
@@ -666,6 +703,9 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                         $totCatNeto  += $subP['neto'];
                         $totCatEmp   += $subP['empaques'];
                         $totCatTaraE += $subP['tara_emp'];
+                        $totCatBase  += $subP['base_neto'];
+                        $totCatFinal += $subP['final'];
+                        $totCatQQ    += $subP['qq'];
                         $totCatPesadas += $cantP;
                     ?>
                         <div style="background: #f1f5f9; border-left: 4px solid <?= $colorGrupo ?>; padding: 0.4rem 0.75rem; font-weight: 800; font-size: 0.88rem; color: #0f172a; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
@@ -677,28 +717,24 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                             <table class="table" style="border-collapse: collapse; min-width: 100%; font-size: 0.82rem;">
                                 <thead>
                                     <tr style="border-top: 1px solid #cbd5e1; border-bottom: 1px solid #cbd5e1; background: #ffffff;">
-                                        <th style="padding: 0.5rem 0.4rem; text-align: left; font-weight: 700; color: #475569;">Entrada</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: left; font-weight: 700; color: #475569;">Salida</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: left; font-weight: 700; color: #475569;">Boleta</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: left; font-weight: 700; color: #475569;">Cliente / proveedor</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 700; color: #475569;">Bruto lb</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 700; color: #475569;">Tara lb</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 700; color: #475569;">Neto lb</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 700; color: #475569;">Emp.</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 700; color: #475569;">Tara Emp.</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 700; color: #475569;">Final lb</th>
-                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 700; color: #475569;">QQ</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: left; font-weight: 800; color: #0f172a;">Entrada</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: left; font-weight: 800; color: #0f172a;">Salida</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: left; font-weight: 800; color: #0f172a;">Boleta</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: left; font-weight: 800; color: #0f172a;">Cliente / proveedor</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800; color: #0f172a;">BRUTO</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800; color: #0f172a;">TARA</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800; color: #0f172a;">NETO</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800; color: #0f172a;">SACOS</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800; color: #0f172a;">TARA SACOS</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800; color: #0f172a;">NETO</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800; color: #0f172a;">%H</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800; color: #0f172a;">%D</th>
+                                        <th style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800; color: #0f172a;">TOTAL QQ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($itemsProd as $row): 
-                                        $bruto = (float)$row['peso_bruto_lb'];
-                                        $taraV = (float)$row['tara_vehiculo_lb'];
-                                        $neto  = max(0.0, $bruto - $taraV);
-                                        $cantEmp = (int)$row['cantidad_empaques'];
-                                        $taraEmp = round((float)($row['tara_unitaria_aplicada_lb'] ?? 0) * $cantEmp);
-                                        $finalLb = (float)$row['peso_final_lb'];
-                                        $qqTot   = round($finalLb / 100.0, 2);
+                                        $m = calcularMetricasFilaReporte($row);
 
                                         $numBoleta = ($row['tipo_operacion'] === 'COMPRA') 
                                             ? '#' . sprintf('%07d', $row['id_compra']) 
@@ -707,23 +743,28 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                                         $fEntrada = !empty($row['primera_pesada_at']) ? date('d/m/Y H:i', strtotime($row['primera_pesada_at'])) : '—';
                                         $fSalida  = !empty($row['segunda_pesada_at']) ? date('d/m/Y H:i', strtotime($row['segunda_pesada_at'])) : '—';
                                     ?>
-                                        <tr style="border-bottom: 1px dotted #e2e8f0;">
+                                        <tr style="border-bottom: 1px dotted #e2e8f0; vertical-align: top;">
                                             <td style="padding: 0.5rem 0.4rem;"><?= $fEntrada ?></td>
                                             <td style="padding: 0.5rem 0.4rem;"><?= $fSalida ?></td>
                                             <td style="padding: 0.5rem 0.4rem; font-weight: 800; font-family: monospace; color: <?= $colorGrupo ?>;"><?= htmlspecialchars($numBoleta, ENT_QUOTES, 'UTF-8') ?></td>
-                                            <td style="padding: 0.5rem 0.4rem; font-weight: 600;"><?= htmlspecialchars($row['persona_nombre'], ENT_QUOTES, 'UTF-8') ?></td>
-                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= number_format($bruto, 0) ?></td>
-                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= number_format($taraV, 0) ?></td>
-                                            <td style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 600;"><?= number_format($neto, 0) ?></td>
-                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= $cantEmp ?></td>
-                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= number_format($taraEmp, 0) ?></td>
-                                            <td style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800;"><?= number_format($finalLb, 0) ?></td>
-                                            <td style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800;"><?= number_format($qqTot, 2) ?></td>
+                                            <td style="padding: 0.5rem 0.4rem; font-weight: 600;"><?= htmlspecialchars((string)($row['persona_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?></td>
+                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= number_format($m['bruto'], 0) ?></td>
+                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= number_format($m['tara'], 0) ?></td>
+                                            <td style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 600;"><?= number_format($m['neto'], 0) ?></td>
+                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= $m['empaques'] ?></td>
+                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= number_format($m['tara_emp'], 2) ?></td>
+                                            <td style="padding: 0.5rem 0.4rem; text-align: right; line-height: 1.15;">
+                                                <div><?= number_format($m['base_neto'], 0) ?></div>
+                                                <div style="font-size: 0.72rem; color: #475569;"><?= number_format($m['base_neto'] / 100.0, 2) ?></div>
+                                            </td>
+                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= formatearPorcentajeReporte($m['pct_h']) ?></td>
+                                            <td style="padding: 0.5rem 0.4rem; text-align: right;"><?= formatearPorcentajeReporte($m['pct_d']) ?></td>
+                                            <td style="padding: 0.5rem 0.4rem; text-align: right; font-weight: 800;"><?= number_format($m['qq'], 2) ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                     
                                     <!-- SUB-TOTAL POR PRODUCTO -->
-                                    <tr style="border-top: 1px solid #94a3b8; font-weight: 800; background: #f8fafc;">
+                                    <tr style="border-top: 1px solid #94a3b8; font-weight: 800; background: #f8fafc; vertical-align: top;">
                                         <td colspan="4" style="padding: 0.6rem 0.4rem; text-align: right; color: #475569;">
                                             SUBTOTAL <?= htmlspecialchars($nombreProd) ?> (<?= $cantP ?> pesadas):
                                         </td>
@@ -731,9 +772,14 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                                         <td style="padding: 0.6rem 0.4rem; text-align: right;"><?= number_format($subP['tara'], 0) ?></td>
                                         <td style="padding: 0.6rem 0.4rem; text-align: right;"><?= number_format($subP['neto'], 0) ?></td>
                                         <td style="padding: 0.6rem 0.4rem; text-align: right;"><?= $subP['empaques'] ?></td>
-                                        <td style="padding: 0.6rem 0.4rem; text-align: right;"><?= number_format($subP['tara_emp'], 0) ?></td>
-                                        <td style="padding: 0.6rem 0.4rem; text-align: right; color: #0b57d0;"><?= number_format(array_sum(array_column($itemsProd, 'peso_final_lb')), 0) ?></td>
-                                        <td style="padding: 0.6rem 0.4rem; text-align: right; color: #0b57d0;"><?= number_format(array_sum(array_column($itemsProd, 'peso_final_lb')) / 100.0, 2) ?></td>
+                                        <td style="padding: 0.6rem 0.4rem; text-align: right;"><?= number_format($subP['tara_emp'], 2) ?></td>
+                                        <td style="padding: 0.6rem 0.4rem; text-align: right; line-height: 1.15;">
+                                            <div><?= number_format($subP['base_neto'], 0) ?></div>
+                                            <div style="font-size: 0.72rem; color: #475569;"><?= number_format($subP['base_neto'] / 100.0, 2) ?></div>
+                                        </td>
+                                        <td style="padding: 0.6rem 0.4rem;"></td>
+                                        <td style="padding: 0.6rem 0.4rem;"></td>
+                                        <td style="padding: 0.6rem 0.4rem; text-align: right; color: #0b57d0;"><?= number_format($subP['qq'], 2) ?></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -744,9 +790,8 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                     <div style="background: #e2e8f0; border-radius: 6px; padding: 0.6rem 1rem; margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center; font-weight: 800; font-size: 0.88rem; color: #1e293b;">
                         <span>SUBTOTAL CATEGORÍA <?= htmlspecialchars($nombreCat) ?> (<?= $totCatPesadas ?> pesadas)</span>
                         <div style="display: flex; gap: 1.5rem;">
-                            <span>Neto: <?= number_format($totCatNeto, 0) ?> lb</span>
-                            <span style="color: <?= $colorGrupo ?>;">Final: <?= number_format(array_sum(array_map(fn($prodItems) => array_sum(array_column($prodItems, 'peso_final_lb')), $productosWeb)), 0) ?> lb</span>
-                            <span style="color: <?= $colorGrupo ?>;">QQ: <?= number_format(array_sum(array_map(fn($prodItems) => array_sum(array_column($prodItems, 'peso_final_lb')), $productosWeb)) / 100.0, 2) ?></span>
+                            <span>Neto: <?= number_format($totCatBase, 0) ?> lb (<?= number_format($totCatBase / 100.0, 2) ?>)</span>
+                            <span style="color: <?= $colorGrupo ?>;">TOTAL QQ: <?= number_format($totCatQQ, 2) ?></span>
                         </div>
                     </div>
 
@@ -756,6 +801,9 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                     $totOpNeto  += $totCatNeto;
                     $totOpEmp   += $totCatEmp;
                     $totOpTaraE += $totCatTaraE;
+                    $totOpBase  += $totCatBase;
+                    $totOpFinal += $totCatFinal;
+                    $totOpQQ    += $totCatQQ;
                     $totOpPesadas += $totCatPesadas;
                     ?>
                 <?php endforeach; ?>
@@ -764,10 +812,10 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                 <div style="background: #dbeafe; border-left: 5px solid <?= $colorGrupo ?>; border-radius: 6px; padding: 0.85rem 1.25rem; margin-bottom: 2.5rem; display: flex; justify-content: space-between; align-items: center; font-weight: 900; font-size: 0.95rem; color: #1e3a8a;">
                     <span>SUBTOTAL <?= $tituloGrupo ?> (<?= $totOpPesadas ?> pesadas cerradas)</span>
                     <div style="display: flex; gap: 1.75rem;">
-                        <span>Bruto: <?= number_format($totOpBruto, 0) ?> lb</span>
-                        <span>Tara: <?= number_format($totOpTara, 0) ?> lb</span>
-                        <span>Neto: <?= number_format($totOpNeto, 0) ?> lb</span>
-                        <span style="color: <?= $colorGrupo ?>;">Final: <?= number_format(max(0.0, $totOpNeto - $totOpTaraE), 0) ?> lb</span>
+                        <span>Bruto: <?= number_format($totOpBruto, 0) ?></span>
+                        <span>Tara: <?= number_format($totOpTara, 0) ?></span>
+                        <span>Neto: <?= number_format($totOpBase, 0) ?> (<?= number_format($totOpBase / 100.0, 2) ?>)</span>
+                        <span style="color: <?= $colorGrupo ?>;">TOTAL QQ: <?= number_format($totOpQQ, 2) ?></span>
                     </div>
                 </div>
 
@@ -790,12 +838,12 @@ renderizarEncabezado('Reporte de Boletas', 'reportes');
                             <strong style="font-size: 1.15rem;"><?= number_format($totalesGenerales['tara'], 0) ?> lb</strong>
                         </div>
                         <div>
-                            <span style="font-size: 0.75rem; color: #94a3b8; display: block;">Total Neto Final</span>
-                            <strong style="font-size: 1.35rem; color: #60a5fa;"><?= number_format($totalesGenerales['neto'], 0) ?> lb</strong>
+                            <span style="font-size: 0.75rem; color: #94a3b8; display: block;">Total Neto</span>
+                            <strong style="font-size: 1.35rem; color: #60a5fa;"><?= number_format($totalesGenerales['base_neto'], 0) ?> lb</strong>
                         </div>
                         <div>
-                            <span style="font-size: 0.75rem; color: #94a3b8; display: block;">Total QQ</span>
-                            <strong style="font-size: 1.35rem; color: #60a5fa;"><?= number_format($totalesGenerales['neto'] / 100.0, 2) ?></strong>
+                            <span style="font-size: 0.75rem; color: #94a3b8; display: block;">TOTAL QQ</span>
+                            <strong style="font-size: 1.35rem; color: #60a5fa;"><?= number_format($totalesGenerales['qq'], 2) ?></strong>
                         </div>
                     </div>
                 </div>
