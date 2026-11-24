@@ -101,16 +101,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                     $rowTara = $stmtTara->fetch(PDO::FETCH_ASSOC);
                     if ($rowTara) {
                         $taraUnitaria = (float)$rowTara['taralbs'];
-                        $taraTotalEmpaques = round($taraUnitaria * $cantEmpaques); // Redondeo a libras enteras
+                        $taraTotalEmpaques = ceil(round($taraUnitaria * $cantEmpaques, 4)); // Redondeo hacia arriba
                     }
                 }
 
                 // Base de descuentos (Neto sin sacos)
                 $baseDescuentos = max(0.0, $pesoNetoSinDescuentos - $taraTotalEmpaques);
 
-                // Descuentos por porcentaje
-                $descHumedadLb = round($baseDescuentos * ($pctHumedad / 100.0));
-                $descDefectosLb = round($baseDescuentos * ($pctDefectos / 100.0));
+                // Descuentos por porcentaje (redondeo hacia arriba)
+                $descHumedadLb = ceil(round($baseDescuentos * ($pctHumedad / 100.0), 4));
+                $descDefectosLb = ceil(round($baseDescuentos * ($pctDefectos / 100.0), 4));
                 $totalDescuentosLb = $descHumedadLb + $descDefectosLb;
 
                 $pesoFinalLb = max(0.0, $baseDescuentos - $totalDescuentosLb);
@@ -883,17 +883,17 @@ function calcularTotales() {
         empaqueNombre = optEmpaque.text;
     }
     const cantEmpaques = parseInt(document.getElementById('cantidad_empaques').value || '0', 10);
-    const taraSacos = Math.round(taraUnitaria * cantEmpaques);
+    const taraSacos = Math.ceil(Number((taraUnitaria * cantEmpaques).toFixed(4)));
     document.getElementById('resTaraSacos').innerText = taraSacos.toLocaleString('en-US') + ' lb';
 
     // Base de descuentos
     const baseDesc = Math.max(0, netoInicial - taraSacos);
 
-    // Descuentos porcentuales detallados
+    // Descuentos porcentuales detallados (redondeo hacia arriba)
     const pctHum = parseFloat(document.getElementById('ajuste_humedad_pct').value || '0');
     const pctDef = parseFloat(document.getElementById('descuento_calidad_pct').value || '0');
-    const descHum = Math.round(baseDesc * (pctHum / 100.0));
-    const descDef = Math.round(baseDesc * (pctDef / 100.0));
+    const descHum = Math.ceil(Number((baseDesc * (pctHum / 100.0)).toFixed(4)));
+    const descDef = Math.ceil(Number((baseDesc * (pctDef / 100.0)).toFixed(4)));
     const totalDesc = descHum + descDef;
 
     const elHumLb = document.getElementById('resDescHumedadLb');

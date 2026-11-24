@@ -109,13 +109,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                         $rowTara = $stmtTara->fetch(PDO::FETCH_ASSOC);
                         if ($rowTara) {
                             $taraUnitaria = (float)$rowTara['taralbs'];
-                            $taraTotalEmp = round($taraUnitaria * $cantEmpaques);
+                            $taraTotalEmp = ceil(round($taraUnitaria * $cantEmpaques, 4));
                         }
                     }
 
                     $baseDescuentos = max(0.0, $pesoNetoSinDesc - $taraTotalEmp);
-                    $descHumedadLb  = round($baseDescuentos * ($pctHumedad / 100.0));
-                    $descDefectosLb = round($baseDescuentos * ($pctDefectos / 100.0));
+                    $descHumedadLb  = ceil(round($baseDescuentos * ($pctHumedad / 100.0), 4));
+                    $descDefectosLb = ceil(round($baseDescuentos * ($pctDefectos / 100.0), 4));
                     $pesoFinalLb    = max(0.0, $baseDescuentos - $descHumedadLb - $descDefectosLb);
 
                     $sql = "INSERT INTO t_pesadas (
@@ -991,13 +991,13 @@ function recalcularPesadaUnica() {
     const optEmp = selEmp.options[selEmp.selectedIndex];
     const taraUnit = optEmp ? parseFloat(optEmp.getAttribute('data-tara') || '0') : 0;
     const cantEmp = parseInt(document.getElementById('cantidad_empaques_unica').value || '0', 10);
-    const taraEmp = Math.round(taraUnit * Math.max(0, cantEmp));
+    const taraEmp = Math.ceil(Number((taraUnit * Math.max(0, cantEmp)).toFixed(4)));
 
     const base = Math.max(0, netoVeh - taraEmp);
     const pctH = Math.max(0, parseFloat(document.getElementById('ajuste_humedad_unica').value || '0'));
     const pctD = Math.max(0, parseFloat(document.getElementById('descuento_calidad_unica').value || '0'));
-    const descH = Math.round(base * (pctH / 100));
-    const descD = Math.round(base * (pctD / 100));
+    const descH = Math.ceil(Number((base * (pctH / 100)).toFixed(4)));
+    const descD = Math.ceil(Number((base * (pctD / 100)).toFixed(4)));
     const finalLb = Math.max(0, base - descH - descD);
     const qq = finalLb / 100;
 
