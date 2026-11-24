@@ -103,9 +103,9 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
                 <div id="displayPesoUnidad" class="display-unidad">LB</div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;">
+            <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;">
                 <span>Lectura continua en vivo &bull; Microservicio en loopback (8018)</span>
-                <button type="button" id="btnToggleLecturaCom" onclick="alternarLecturaComInicio()" class="btn btn-primary" style="background: #1e40af; padding: 0.4rem 0.95rem; font-size: 0.84rem; font-weight: 700; border-radius: 6px;">
+                <button type="button" id="btnToggleLecturaCom" onclick="alternarLecturaComInicio()" class="btn btn-primary" style="margin-left: auto; background: #1e40af; padding: 0.4rem 0.95rem; font-size: 0.84rem; font-weight: 700; border-radius: 6px;">
                     ▶️ Arrancar Lectura
                 </button>
             </div>
