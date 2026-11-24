@@ -95,11 +95,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 // Descuento de Tara de Empaques (Sacos)
                 $taraUnitaria = 0.0;
                 $taraTotalEmpaques = 0.0;
+                $tieneEmpaque = false;
                 if ($idEmpaque > 0 && $cantEmpaques > 0) {
                     $stmtTara = $pdo->prepare("SELECT taralbs FROM t_taras WHERE idempaque = :id LIMIT 1");
                     $stmtTara->execute([':id' => $idEmpaque]);
                     $rowTara = $stmtTara->fetch(PDO::FETCH_ASSOC);
                     if ($rowTara) {
+                        $tieneEmpaque = true;
                         $taraUnitaria = (float)$rowTara['taralbs'];
                         $taraTotalEmpaques = ceil(round($taraUnitaria * $cantEmpaques, 4)); // Redondeo hacia arriba
                     }
@@ -155,9 +157,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                     ':tara_vehiculo'        => $taraVehiculo,
                     ':tara_por'             => $taraPor,
                     ':origen_tara'          => $origenTara,
-                    ':idempaque'            => ($idEmpaque > 0 ? $idEmpaque : null),
-                    ':cant_empaques'        => $cantEmpaques,
-                    ':tara_unitaria'        => ($taraUnitaria > 0 ? $taraUnitaria : null),
+                    ':idempaque'            => ($tieneEmpaque ? $idEmpaque : null),
+                    ':cant_empaques'        => ($tieneEmpaque ? $cantEmpaques : 0),
+                    ':tara_unitaria'        => ($tieneEmpaque ? $taraUnitaria : null),
                     ':base_descuentos'      => $baseDescuentos,
                     ':pct_humedad'          => $pctHumedad,
                     ':desc_humedad_lb'      => $descHumedadLb,
@@ -477,10 +479,19 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                         <label for="idempaque" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
                             Empaque o saco
                         </label>
+                        <?php
+                        $taraSugerida = (($pesadaActiva['tipo_operacion'] ?? '') === 'VENTA') ? 0.25 : 0.50;
+                        $empaqueYaSugerido = false;
+                        ?>
                         <select id="idempaque" name="idempaque" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" onchange="calcularTotales()">
                             <option value="0" data-peso="0">Sin empaques (A granel)</option>
-                            <?php foreach ($tarasEmpaque as $t): ?>
-                                <option value="<?= (int)$t['idempaque'] ?>" data-peso="<?= (float)$t['taralbs'] ?>">
+                            <?php foreach ($tarasEmpaque as $t):
+                                $seleccionarEmpaque = (!$empaqueYaSugerido && abs((float)$t['taralbs'] - $taraSugerida) < 0.0001);
+                                if ($seleccionarEmpaque) {
+                                    $empaqueYaSugerido = true;
+                                }
+                            ?>
+                                <option value="<?= (int)$t['idempaque'] ?>" data-peso="<?= (float)$t['taralbs'] ?>"<?= $seleccionarEmpaque ? ' selected' : '' ?>>
                                     <?= htmlspecialchars($t['nombre'], ENT_QUOTES, 'UTF-8') ?> (<?= number_format((float)$t['taralbs'], 3) ?> lb)
                                 </option>
                             <?php endforeach; ?>

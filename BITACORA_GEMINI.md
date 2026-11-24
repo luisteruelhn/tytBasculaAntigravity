@@ -231,3 +231,5 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Actualizados los constraints `chk_pesadas_pesos` y `chk_pesadas_descuentos` en `t_pesadas` (`scripts/actualizar_chk_redondeo_arriba.sql`, respaldo previo `dbbackup/respaldo_pre_chk_20261124.sql`) para validar con `CEILING(ROUND(..., 4))` en lugar de `ROUND(..., 0)`.
 * **Indicador de Modo en Vivo (`primera_pesada.php`, `segunda_pesada.php`, `layout.php`)**:
   - Corregido `#liveModoTexto` para reflejar dinámicamente `Modo real` o `Modo simulado` según `data.origen` de FastAPI (`:8018`), e incluida la sincronización automática al cargar `primera_pesada.php` y `segunda_pesada.php`.
+* **Sugerencia de Empaque en Segunda Pesada (`segunda_pesada.php`)**:
+  - Preseleccionado automáticamente el saco de `0.25 lb` en operaciones de `VENTA` y el saco de `0.50 lb` en operaciones de `COMPRA` dentro del selector `Empaque o saco`, asegurando consistencia con `chk_pesadas_empaque` cuando `cantidad_empaques` es `0`.
