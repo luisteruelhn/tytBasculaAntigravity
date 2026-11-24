@@ -227,7 +227,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Creado `web/public/api_bascula_control.php` y botón **▶️ Arrancar Lectura / ⏹️ Parar Lectura** en `web/public/index.php` para levantar `:8018` bajo demanda o liberar `COM4` al sistema anterior con un clic.
 * **Cálculos de Liquidación y Boleta (`primera_pesada.php`, `segunda_pesada.php`, `boleta.php`)**:
   - Aplicado redondeo hacia arriba (`ceil` / `Math.ceil`) en tara de sacos, descuento por humedad (`%H`) y descuento por defectos (`%D`).
-  - Ajustada la tabla de `boleta.php` al formato `Bruto | Tara | Neto | Sacos | Tara Sacos | Neto (con QQ) | %H (con lb abajo) | %D (con lb abajo) | Total lb | Total QQ`.
+  - Ajustada la tabla de `boleta.php` al formato `Bruto | Tara | Neto | Sacos | Tara Sacos | Neto (con QQ) | %H | %D | Total QQ` (sin columna `Total lb`, sin libras bajo `%H`/`%D` y sin leyendas fijas de descuento/tara al pie, manteniendo `reportes.php` en su formato original).
   - Actualizados los constraints `chk_pesadas_pesos` y `chk_pesadas_descuentos` en `t_pesadas` (`scripts/actualizar_chk_redondeo_arriba.sql`, respaldo previo `dbbackup/respaldo_pre_chk_20261124.sql`) para validar con `CEILING(ROUND(..., 4))` en lugar de `ROUND(..., 0)`.
 * **Indicador de Modo en Vivo (`primera_pesada.php`, `segunda_pesada.php`, `layout.php`)**:
   - Corregido `#liveModoTexto` para reflejar dinámicamente `Modo real` o `Modo simulado` según `data.origen` de FastAPI (`:8018`), e incluida la sincronización automática al cargar `primera_pesada.php` y `segunda_pesada.php`.

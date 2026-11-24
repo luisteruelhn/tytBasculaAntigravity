@@ -370,7 +370,6 @@ $renderizarBoleta = function(string $etiquetaCopia) use ($empresa, $tipoOp, $cor
                     <th>Neto</th>
                     <th>%H</th>
                     <th>%D</th>
-                    <th>Total lb</th>
                     <th style="background: #ffe4e6; color: #881337;">Total QQ</th>
                 </tr>
             </thead>
@@ -378,8 +377,6 @@ $renderizarBoleta = function(string $etiquetaCopia) use ($empresa, $tipoOp, $cor
                 <?php
                     $pctHumVal = (float)$pesada['ajuste_humedad_pct'];
                     $pctDefVal = (float)$pesada['descuento_calidad_pct'];
-                    $descHumLb = (float)$pesada['descuento_humedad_lb'];
-                    $descDefLb = (float)$pesada['descuento_defectos_lb'];
                     $baseQQ    = $baseDescuentos / 100.0;
                 ?>
                 <tr>
@@ -392,24 +389,15 @@ $renderizarBoleta = function(string $etiquetaCopia) use ($empresa, $tipoOp, $cor
                         <div><?= number_format($baseDescuentos, 0) ?></div>
                         <div style="font-size: 0.72rem; color: #475569; font-weight: 700;"><?= number_format($baseQQ, 2) ?> QQ</div>
                     </td>
-                    <td>
-                        <div><?= rtrim(rtrim(number_format($pctHumVal, 2), '0'), '.') ?>%</div>
-                        <div style="font-size: 0.72rem; color: #b91c1c; font-weight: 700;"><?= number_format($descHumLb, 0) ?> lb</div>
-                    </td>
-                    <td>
-                        <div><?= rtrim(rtrim(number_format($pctDefVal, 2), '0'), '.') ?>%</div>
-                        <div style="font-size: 0.72rem; color: #b91c1c; font-weight: 700;"><?= number_format($descDefLb, 0) ?> lb</div>
-                    </td>
-                    <td style="font-weight: 800;"><?= number_format($pesoFinal, 0) ?></td>
+                    <td><?= rtrim(rtrim(number_format($pctHumVal, 2), '0'), '.') ?>%</td>
+                    <td><?= rtrim(rtrim(number_format($pctDefVal, 2), '0'), '.') ?>%</td>
                     <td class="td-destacado"><?= number_format($quintales, 2) ?></td>
                 </tr>
             </tbody>
         </table>
 
-        <!-- 4. NOTAS DESCRIPTIVAS (SIN TEXTO DE COPIA NI FECHAS) -->
+        <!-- 4. OBSERVACIONES (SI EXISTEN) -->
         <div class="boleta-notas">
-            <div>Descuento humedad: <?= number_format((float)$pesada['descuento_humedad_lb'], 0) ?> lb. Descuento defectos: <?= number_format((float)$pesada['descuento_defectos_lb'], 0) ?> lb.</div>
-            <div>Tara unitaria aplicada: <?= number_format((float)($pesada['tara_unitaria_aplicada_lb'] ?? 0), 3) ?> lb. 1 QQ = 100 lb.</div>
             <?php if (!empty($pesada['observaciones'])): ?>
                 <div>Observaciones primera: <?= htmlspecialchars($pesada['observaciones'], ENT_QUOTES, 'UTF-8') ?></div>
             <?php endif; ?>
