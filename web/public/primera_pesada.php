@@ -480,7 +480,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
                 </div>
 
                 <!-- DISPLAY ROJO BURDEOS COMPACTO: PESO FIJADO -->
-                <div style="background: #701a2b; color: #ffffff; border-radius: 8px; padding: 0.75rem 1.15rem; display: flex; justify-content: space-between; align-items: center;">
+                <div id="cajaPesoFijadoPrimera" style="scroll-margin-top: 68px; background: #701a2b; color: #ffffff; border-radius: 8px; padding: 0.75rem 1.15rem; display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 0.75rem; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; opacity: 0.92;">
                         PESO FIJADO
                     </span>
@@ -1130,9 +1130,9 @@ function fijarPeso() {
     recalcularPesadaUnica();
 
     if (window.innerWidth <= 768) {
-        const seccionDatos = document.getElementById('seccionDatosPrimera');
-        if (seccionDatos) {
-            setTimeout(() => seccionDatos.scrollIntoView({ behavior: 'smooth', block: 'start' }), 180);
+        const cajaFijado = document.getElementById('cajaPesoFijadoPrimera');
+        if (cajaFijado) {
+            setTimeout(() => cajaFijado.scrollIntoView({ behavior: 'smooth', block: 'start' }), 180);
         }
     }
 }

@@ -409,7 +409,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                     </div>
 
                     <!-- DISPLAYS APILADOS: SEGUNDO PESO FIJADO (BURDEOS) + PRIMERA PESADA (PIZARRA CÁLIDA) -->
-                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <div id="cajaPesoFijadoSegunda" style="scroll-margin-top: 68px; display: flex; flex-direction: column; gap: 0.5rem;">
                         <div style="background: #701a2b; color: #ffffff; border-radius: 8px; padding: 0.65rem 1.15rem; display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-size: 0.75rem; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; opacity: 0.92;">
                                 <?= ($tipoFaltante === 'TARA' ? 'TARA FIJADA' : 'PESO BRUTO FIJADO') ?>
@@ -850,9 +850,9 @@ function fijarSegundoPeso() {
     calcularTotales();
 
     if (window.innerWidth <= 768) {
-        const seccionLiq = document.getElementById('seccionLiquidacionSegunda');
-        if (seccionLiq) {
-            setTimeout(() => seccionLiq.scrollIntoView({ behavior: 'smooth', block: 'start' }), 180);
+        const cajaFijado = document.getElementById('cajaPesoFijadoSegunda');
+        if (cajaFijado) {
+            setTimeout(() => cajaFijado.scrollIntoView({ behavior: 'smooth', block: 'start' }), 180);
         }
     }
 }
