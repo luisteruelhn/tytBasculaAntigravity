@@ -18,10 +18,10 @@ $estadoDB = false;
 $errorDB = null;
 $totalPendientes = 0;
 $ultimaPesada = null;
-$hostActual = strtolower((string)($_SERVER['SERVER_NAME'] ?? ''));
-$esEntornoRemoto = ($hostActual !== '' && !in_array($hostActual, ['localhost', '127.0.0.1', '::1'], true));
+$esEntornoRemoto = !esAccesoPlantaLocal();
 $esRemoto = tieneRol($usuario, ['REMOTO']);
 $mostrarModoUltimoPeso = $esEntornoRemoto || $esRemoto;
+$urlRedLocal = !$mostrarModoUltimoPeso ? obtenerUrlRedLocal() : '';
 
 try {
     $pdo = obtenerDB();
@@ -104,10 +104,15 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
             </div>
 
             <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;">
-                <span>Lectura continua en vivo &bull; Microservicio en loopback (8018)</span>
-                <button type="button" id="btnToggleLecturaCom" onclick="alternarLecturaComInicio()" class="btn btn-primary" style="margin-left: auto; background: #1e40af; padding: 0.4rem 0.95rem; font-size: 0.84rem; font-weight: 700; border-radius: 6px;">
-                    ▶️ Arrancar Lectura
-                </button>
+                <span>Lectura continua en vivo &bull; Red local habilitada</span>
+                <div style="margin-left: auto; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <button type="button" onclick="abrirModalQrLocal()" class="btn btn-secondary" style="padding: 0.38rem 0.8rem; font-size: 0.82rem; font-weight: 700; border-radius: 6px;">
+                        📱 Abrir en celular (QR)
+                    </button>
+                    <button type="button" id="btnToggleLecturaCom" onclick="alternarLecturaComInicio()" class="btn btn-primary" style="background: #1e40af; padding: 0.4rem 0.95rem; font-size: 0.84rem; font-weight: 700; border-radius: 6px;">
+                        ▶️ Arrancar Lectura
+                    </button>
+                </div>
             </div>
         <?php endif; ?>
     </div>
@@ -237,14 +242,70 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
 </div>
 
 <?php if (!$mostrarModoUltimoPeso): ?>
+<!-- Modal Ligero de Acceso Móvil por Red Local (QR Offline) -->
+<div id="modalQrLocal" onclick="if (event.target === this) cerrarModalQrLocal();" style="display: none; position: fixed; inset: 0; z-index: 9999; background: rgba(15, 23, 42, 0.65); align-items: center; justify-content: center; padding: 1rem;">
+    <div class="card" style="max-width: 390px; width: 100%; padding: 1.35rem 1.5rem; text-align: center; border-radius: 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.35);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.65rem;">
+            <span style="font-weight: 800; font-size: 1rem; color: var(--text-main);">📱 Acceso en Celular (Red Local)</span>
+            <button type="button" onclick="cerrarModalQrLocal()" style="background: transparent; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted); line-height: 1;">&times;</button>
+        </div>
+        <p style="font-size: 0.83rem; color: var(--text-muted); margin: 0 0 0.9rem 0; line-height: 1.45;">
+            Conecta tu celular al <strong>mismo Wi-Fi de la planta</strong> y escanea este código con la cámara para ver el peso en vivo y capturar pesadas:
+        </p>
+        <div id="contenedorQrInicio" style="width: 210px; height: 210px; margin: 0 auto 0.9rem auto; padding: 8px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px;"></div>
+        <div style="background: var(--bg-main, #f8fafc); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem 0.65rem; font-family: monospace; font-size: 0.84rem; font-weight: 700; color: var(--primary); word-break: break-all; margin-bottom: 0.85rem;" id="textoUrlQrInicio">
+            <?= htmlspecialchars($urlRedLocal, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+        <div style="display: flex; gap: 0.6rem; justify-content: center;">
+            <button type="button" class="btn btn-primary" onclick="copiarUrlQrInicio()" id="btnCopiarUrlQrInicio" style="font-size: 0.83rem; padding: 0.42rem 0.9rem;">
+                📋 Copiar enlace
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="cerrarModalQrLocal()" style="font-size: 0.83rem; padding: 0.42rem 0.9rem;">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="assets/js/qr_local.js"></script>
 <script>
+const URL_RED_LOCAL_INICIO = <?= json_encode($urlRedLocal, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+
+function abrirModalQrLocal() {
+    const modal = document.getElementById('modalQrLocal');
+    const caja = document.getElementById('contenedorQrInicio');
+    if (caja && !caja.dataset.listo && typeof window.generarQrSvg === 'function') {
+        caja.innerHTML = window.generarQrSvg(URL_RED_LOCAL_INICIO);
+        caja.dataset.listo = '1';
+    }
+    if (modal) modal.style.display = 'flex';
+}
+
+function cerrarModalQrLocal() {
+    const modal = document.getElementById('modalQrLocal');
+    if (modal) modal.style.display = 'none';
+}
+
+function copiarUrlQrInicio() {
+    const btn = document.getElementById('btnCopiarUrlQrInicio');
+    if (navigator.clipboard && URL_RED_LOCAL_INICIO) {
+        navigator.clipboard.writeText(URL_RED_LOCAL_INICIO).then(() => {
+            if (btn) {
+                const original = btn.textContent;
+                btn.textContent = '✅ Copiado';
+                setTimeout(() => { btn.textContent = original; }, 1800);
+            }
+        });
+    }
+}
+
 // Función para disparar eventos rápidos al microservicio en desarrollo
 async function simularEvento(accion) {
     try {
-        const url = accion === 'camion' 
-            ? 'http://127.0.0.1:8018/api/v1/simulador/camion?peso_bruto=38500'
-            : 'http://127.0.0.1:8018/api/v1/simulador/despejar';
-        await fetch(url, { method: 'POST' });
+        const url = accion === 'camion'
+            ? 'api_peso_local.php?accion=sim_camion'
+            : 'api_peso_local.php?accion=sim_despejar';
+        await fetch(url, { method: 'POST', credentials: 'same-origin' });
     } catch (e) {
         alert('No se pudo conectar con el microservicio FastAPI en el puerto 8018. ¿Está iniciado?');
     }
@@ -280,7 +341,7 @@ function actualizarBotonLecturaCom(activo, pausado, servicioArriba, puerto) {
 
 async function consultarEstadoMicroservicio() {
     try {
-        const resp = await fetch('http://127.0.0.1:8018/api/v1/salud');
+        const resp = await fetch('api_peso_local.php?accion=salud', { credentials: 'same-origin' });
         if (resp.ok) {
             const s = await resp.json();
             actualizarBotonLecturaCom(s.lector_activo, s.pausado_manual, true, s.puerto_com);

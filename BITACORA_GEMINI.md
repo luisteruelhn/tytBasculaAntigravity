@@ -233,3 +233,8 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Corregido `#liveModoTexto` para reflejar dinámicamente `Modo real` o `Modo simulado` según `data.origen` de FastAPI (`:8018`), e incluida la sincronización automática al cargar `primera_pesada.php` y `segunda_pesada.php`.
 * **Sugerencia de Empaque en Segunda Pesada (`segunda_pesada.php`)**:
   - Preseleccionado automáticamente el saco de `0.25 lb` en operaciones de `VENTA` y el saco de `0.50 lb` en operaciones de `COMPRA` dentro del selector `Empaque o saco`, asegurando consistencia con `chk_pesadas_empaque` cuando `cantidad_empaques` es `0`.
+* **Acceso Móvil por Red Local (LAN Wi-Fi) con Peso en Tiempo Real y Código QR Offline (`2026-11-24`)**:
+  - Agregadas `esAccesoPlantaLocal()` y `obtenerUrlRedLocal()` en `web/src/auth.php` para reconocer tanto `localhost`/`127.0.0.1` como IPs privadas RFC 1918 (`192.168.x.x`, `10.x.x.x`, `172.16-31.x.x`) como estación local de planta, preservando el modo solo consulta en dominios externos (Hostinger).
+  - Creado puente ligero `web/public/api_peso_local.php` (con autenticación obligatoria y `session_write_close()` inmediato) hacia `127.0.0.1:8018` sin abrir puertos adicionales en Windows ni alterar la configuración Real del indicador.
+  - Conectados `pesaje.js`, `index.php`, `primera_pesada.php`, `segunda_pesada.php`, `layout.php`, `api_bascula_control.php` y `api_sync_pendientes.php` al puente local para ver peso en vivo y capturar pesadas desde celulares/tablets en la red local.
+  - Incorporado generador SVG de Código QR 100% offline (`web/public/assets/js/qr_local.js`) con botón discreto **📱 Abrir en celular (QR)** en `index.php` y tarjeta de acceso LAN en `despliegue.php`.

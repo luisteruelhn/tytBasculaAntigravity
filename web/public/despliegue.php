@@ -442,6 +442,9 @@ try {
     $totalPendientesSync = 0;
 }
 
+$esPlantaLocalDeploy = esAccesoPlantaLocal();
+$urlRedLocalDeploy = $esPlantaLocalDeploy ? obtenerUrlRedLocal() : '';
+
 renderizarEncabezado('Despliegue / Nube', 'despliegue');
 ?>
 
@@ -468,6 +471,29 @@ renderizarEncabezado('Despliegue / Nube', 'despliegue');
     <?php endif; ?>
     <?php if ($mensajeError): ?>
         <div class="alert alert-danger" style="margin-bottom: 1rem;"><?= htmlspecialchars($mensajeError, ENT_QUOTES, 'UTF-8') ?></div>
+    <?php endif; ?>
+
+    <?php if ($esPlantaLocalDeploy && $urlRedLocalDeploy !== ''): ?>
+    <!-- ACCESO MÓVIL EN RED LOCAL (LAN WI-FI) CON QR OFFLINE -->
+    <div class="card" style="padding: 1.1rem 1.35rem; margin-bottom: 1rem; border-left: 4px solid #047857; display: flex; align-items: center; justify-content: space-between; gap: 1.25rem; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 240px;">
+            <div style="font-weight: 800; font-size: 0.98rem; color: var(--text-main); margin-bottom: 0.3rem;">
+                📱 Acceso desde Celular o Tablet (Red Local / Wi-Fi)
+            </div>
+            <p style="margin: 0 0 0.65rem 0; font-size: 0.84rem; color: var(--text-muted); line-height: 1.45;">
+                Escanea el código QR con la cámara de tu teléfono conectado al mismo Wi-Fi de esta PC para ver el <strong>peso real en vivo</strong> y capturar pesadas en patio sin usar internet:
+            </p>
+            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <code style="background: var(--bg-main, #f1f5f9); border: 1px solid var(--border-color); padding: 0.38rem 0.7rem; border-radius: 6px; font-size: 0.85rem; font-weight: 700; color: var(--primary);">
+                    <?= htmlspecialchars($urlRedLocalDeploy, ENT_QUOTES, 'UTF-8') ?>
+                </code>
+                <button type="button" class="btn btn-secondary" id="btnCopiarQrDeploy" onclick="copiarUrlQrDeploy()" style="padding: 0.38rem 0.8rem; font-size: 0.8rem; font-weight: 700;">
+                    📋 Copiar URL
+                </button>
+            </div>
+        </div>
+        <div id="cajaQrDeploy" style="width: 124px; height: 124px; padding: 6px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; flex-shrink: 0;"></div>
+    </div>
     <?php endif; ?>
 
     <!-- GUÍA RÁPIDA DE 3 PASOS PARA HOSTINGER -->
@@ -576,6 +602,31 @@ renderizarEncabezado('Despliegue / Nube', 'despliegue');
         </div>
     </form>
 </div>
+
+<?php if ($esPlantaLocalDeploy && $urlRedLocalDeploy !== ''): ?>
+<script src="assets/js/qr_local.js"></script>
+<script>
+const URL_RED_LOCAL_DEPLOY = <?= json_encode($urlRedLocalDeploy, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+document.addEventListener('DOMContentLoaded', () => {
+    const caja = document.getElementById('cajaQrDeploy');
+    if (caja && typeof window.generarQrSvg === 'function') {
+        caja.innerHTML = window.generarQrSvg(URL_RED_LOCAL_DEPLOY);
+    }
+});
+function copiarUrlQrDeploy() {
+    const btn = document.getElementById('btnCopiarQrDeploy');
+    if (navigator.clipboard && URL_RED_LOCAL_DEPLOY) {
+        navigator.clipboard.writeText(URL_RED_LOCAL_DEPLOY).then(() => {
+            if (btn) {
+                const orig = btn.textContent;
+                btn.textContent = '✅ Copiado';
+                setTimeout(() => { btn.textContent = orig; }, 1800);
+            }
+        });
+    }
+}
+</script>
+<?php endif; ?>
 
 <?php
 renderizarPie();

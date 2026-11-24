@@ -178,6 +178,76 @@ function tieneRol(array $usuario, array $rolesPermitidos): bool
 }
 
 /**
+ * Determina si el host actual corresponde a la estación local o a su Red Local (LAN Wi-Fi/Ethernet).
+ * En dominios públicos (como Hostinger) retorna false para forzar el modo remoto de solo consulta.
+ */
+function esAccesoPlantaLocal(?string $host = null): bool
+{
+    $h = strtolower(trim((string)($host ?? ($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? ''))));
+    if ($h === '') {
+        return true;
+    }
+    // Retirar puerto si viene en HTTP_HOST (ej. 192.168.2.20:8080) salvo IPv6 en corchetes
+    if (str_starts_with($h, '[')) {
+        $h = trim((string)preg_replace('/\]:\d+$/', ']', $h), '[]');
+    } elseif (substr_count($h, ':') === 1) {
+        $h = explode(':', $h)[0];
+    }
+
+    if (in_array($h, ['localhost', '127.0.0.1', '::1'], true) || str_ends_with($h, '.local')) {
+        return true;
+    }
+
+    // IPs privadas RFC 1918 (10.x.x.x, 172.16-31.x.x, 192.168.x.x)
+    if (filter_var($h, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        return filter_var($h, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_PRIV_RANGE) === false;
+    }
+
+    return false;
+}
+
+/**
+ * Obtiene la URL de acceso en la Red Local (LAN) para dispositivos móviles conectados al mismo Wi-Fi.
+ */
+function obtenerUrlRedLocal(): string
+{
+    $ipLan = '';
+    $hostActual = strtolower(trim((string)($_SERVER['SERVER_ADDR'] ?? '')));
+    if (filter_var($hostActual, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+        && !str_starts_with($hostActual, '127.')
+        && !str_starts_with($hostActual, '169.254.')
+    ) {
+        $ipLan = $hostActual;
+    }
+
+    if ($ipLan === '') {
+        $ips = @gethostbynamel((string)@gethostname()) ?: [];
+        foreach ($ips as $ip) {
+            if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+                && !str_starts_with($ip, '127.')
+                && !str_starts_with($ip, '169.254.')
+            ) {
+                $ipLan = $ip;
+                break;
+            }
+        }
+    }
+
+    if ($ipLan === '') {
+        $ipLan = '127.0.0.1';
+    }
+
+    $esquema = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $puerto = (int)($_SERVER['SERVER_PORT'] ?? 80);
+    $sufijoPuerto = (($esquema === 'http' && $puerto !== 80) || ($esquema === 'https' && $puerto !== 443))
+        ? ':' . $puerto
+        : '';
+
+    $dirBase = rtrim(str_replace('\\', '/', dirname((string)($_SERVER['SCRIPT_NAME'] ?? '/bascula/index.php'))), '/');
+    return $esquema . '://' . $ipLan . $sufijoPuerto . $dirBase . '/';
+}
+
+/**
  * Cierra la sesión activa y limpia todas las variables.
  */
 function cerrarSesion(): void

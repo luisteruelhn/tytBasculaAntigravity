@@ -8,7 +8,7 @@
 
 class MonitorBascula {
     constructor(opciones = {}) {
-        this.apiUrl = opciones.apiUrl || 'http://127.0.0.1:8018/api/v1/peso';
+        this.apiUrl = opciones.apiUrl || 'api_peso_local.php?accion=peso';
         this.intervaloMs = opciones.intervaloMs || 350;
         this.temporizador = null;
         this.pesoActual = 0;
@@ -41,6 +41,7 @@ class MonitorBascula {
         try {
             const respuesta = await fetch(this.apiUrl, {
                 method: 'GET',
+                credentials: 'same-origin',
                 headers: { 'Accept': 'application/json' },
             });
 

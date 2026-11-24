@@ -26,8 +26,7 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
 
     // Consultar pesadas pendientes de segunda pesada para el badge dinámico
     $totalPendientes = 0;
-    $hostActual = strtolower((string)($_SERVER['SERVER_NAME'] ?? ''));
-    $esModoUltimoPeso = ($rolUsuario === 'REMOTO') || ($hostActual !== '' && !in_array($hostActual, ['localhost', '127.0.0.1', '::1'], true));
+    $esModoUltimoPeso = ($rolUsuario === 'REMOTO') || !esAccesoPlantaLocal();
     $ultimoPesoSidebar = 0.0;
 
     try {
@@ -344,8 +343,7 @@ function renderizarPie(): void
     $usuario = obtenerUsuarioActual();
     $esAdmin = $usuario && tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'ADMIN', 'REMOTO']);
     $rolUsuario = $usuario['rol'] ?? '';
-    $hostActual = strtolower((string)($_SERVER['SERVER_NAME'] ?? ''));
-    $esModoRemoto = ($rolUsuario === 'REMOTO') || ($hostActual !== '' && !in_array($hostActual, ['localhost', '127.0.0.1', '::1'], true));
+    $esModoRemoto = ($rolUsuario === 'REMOTO') || !esAccesoPlantaLocal();
     $configBasculaSync = null;
 
     if ($usuario && !$esModoRemoto) {
@@ -511,18 +509,19 @@ function escapeHtml(text) {
 const BASCULA_DB_SYNC = <?= json_encode($configBasculaSync, JSON_UNESCAPED_UNICODE) ?>;
 
 async function notificarApiBascula(cfg) {
-    const base = 'http://127.0.0.1:8018/api/v1';
     try {
         if (cfg.puerto_com) {
-            await fetch(base + '/configurar_serial', {
+            await fetch('api_peso_local.php?accion=configurar_serial', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ puerto_com: cfg.puerto_com, baudios: Number(cfg.baudios || 9600) })
             });
         }
         if (cfg.modo) {
-            await fetch(base + '/modo', {
+            await fetch('api_peso_local.php?accion=modo', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ modo: cfg.modo })
             });
@@ -535,7 +534,7 @@ async function notificarApiBascula(cfg) {
 async function sincronizarBasculaApi() {
     if (!document.getElementById('displayPesoValor') && !document.getElementById('livePesoValor')) return;
     try {
-        const resp = await fetch('http://127.0.0.1:8018/api/v1/salud');
+        const resp = await fetch('api_peso_local.php?accion=salud', { credentials: 'same-origin' });
         if (!resp.ok) return;
         const salud = await resp.json();
         if (salud.pausado_manual) return;

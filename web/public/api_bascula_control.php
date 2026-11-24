@@ -13,8 +13,7 @@ header('Content-Type: application/json; charset=utf-8');
 $usuario = requerirAutenticacion();
 session_write_close();
 
-$hostActual = strtolower((string)($_SERVER['SERVER_NAME'] ?? ''));
-$esLocal = in_array($hostActual, ['localhost', '127.0.0.1', '::1'], true);
+$esLocal = esAccesoPlantaLocal();
 if (!$esLocal || ($usuario['rol'] ?? '') === 'REMOTO' || $_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(403);
     echo json_encode(['ok' => false, 'error' => 'Operación no permitida']);

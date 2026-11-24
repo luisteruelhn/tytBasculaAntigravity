@@ -721,7 +721,7 @@ function conectarLecturaEnVivo() {
 
     setInterval(async () => {
         try {
-            const res = await fetch('http://127.0.0.1:8018/api/v1/peso');
+            const res = await fetch('api_peso_local.php?accion=peso', { credentials: 'same-origin' });
             if (res.ok) {
                 const data = await res.json();
                 pesoEnVivo = Math.round(Number(data.peso_lb || 0));
