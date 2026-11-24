@@ -261,7 +261,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 }
 
 // CARGA DE LISTAS PARA LOS SELECTS
-$personas = $pdo->prepare("SELECT id, nombre, es_cliente, es_proveedor FROM t_clie_prov WHERE empresa_id = :empresa_id AND activo = 1 ORDER BY nombre ASC");
+$personas = $pdo->prepare("SELECT id, nombre, direccion, es_cliente, es_proveedor FROM t_clie_prov WHERE empresa_id = :empresa_id AND activo = 1 ORDER BY nombre ASC");
 $personas->execute([':empresa_id' => $empresaId]);
 $listaPersonas = $personas->fetchAll(PDO::FETCH_ASSOC);
 
@@ -546,10 +546,10 @@ renderizarEncabezado('Primera Pesada', 'primera');
                     <label for="clie_prov_id" id="lblPersona" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
                         Proveedor <span style="color: var(--danger);">*</span>
                     </label>
-                    <select id="clie_prov_id" name="clie_prov_id" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;">
+                    <select id="clie_prov_id" name="clie_prov_id" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" onchange="actualizarSugerenciaUbicacion()">
                         <option value="" disabled selected>Selecciona persona o empresa</option>
                         <?php foreach ($listaPersonas as $p): ?>
-                            <option value="<?= $p['id'] ?>" data-cliente="<?= $p['es_cliente'] ?>" data-proveedor="<?= $p['es_proveedor'] ?>">
+                            <option value="<?= $p['id'] ?>" data-cliente="<?= $p['es_cliente'] ?>" data-proveedor="<?= $p['es_proveedor'] ?>" data-direccion="<?= htmlspecialchars((string)($p['direccion'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                                 <?= htmlspecialchars($p['nombre'], ENT_QUOTES, 'UTF-8') ?>
                             </option>
                         <?php endforeach; ?>
@@ -613,6 +613,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
                         <option value="CEIBITA SUR, SANTA BARBARA">
                         <option value="CEIBITA SUR, SB">
                     </datalist>
+                    <datalist id="listaDireccionPersona"></datalist>
                 </div>
                 <div>
                     <label for="destino" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.2rem;">
@@ -895,19 +896,43 @@ function actualizarSugerenciaUbicacion(tipo) {
     const inputDestino = document.getElementById('destino');
     if (!inputOrigen || !inputDestino) return;
 
-    const esVenta = (tipo === 'VENTA');
-    const sugerido = 'CEIBITA SUR, SANTA BARBARA';
-    const listaId = 'listaCeibitaSugerida';
+    const tipoActual = tipo || (document.getElementById('tipo_operacion')?.value || 'COMPRA');
+    const esVenta = (tipoActual === 'VENTA');
+    const sugeridoPlanta = 'CEIBITA SUR, SANTA BARBARA';
+    const listaPlantaId = 'listaCeibitaSugerida';
+    const listaDirId = 'listaDireccionPersona';
 
-    inputOrigen.placeholder = esVenta ? sugerido : '';
-    inputDestino.placeholder = esVenta ? '' : sugerido;
+    const selPersona = document.getElementById('clie_prov_id');
+    const optSel = (selPersona && selPersona.selectedIndex >= 0) ? selPersona.options[selPersona.selectedIndex] : null;
+    const dirPersona = (optSel && optSel.value) ? (optSel.getAttribute('data-direccion') || '').trim() : '';
+
+    const dlDir = document.getElementById(listaDirId);
+    if (dlDir) {
+        dlDir.innerHTML = '';
+        if (dirPersona !== '') {
+            const opt = document.createElement('option');
+            opt.value = dirPersona;
+            dlDir.appendChild(opt);
+        }
+    }
+
+    inputOrigen.placeholder = esVenta ? sugeridoPlanta : dirPersona;
+    inputDestino.placeholder = esVenta ? dirPersona : sugeridoPlanta;
 
     if (esVenta) {
-        inputOrigen.setAttribute('list', listaId);
-        inputDestino.removeAttribute('list');
+        inputOrigen.setAttribute('list', listaPlantaId);
+        if (dirPersona !== '') {
+            inputDestino.setAttribute('list', listaDirId);
+        } else {
+            inputDestino.removeAttribute('list');
+        }
     } else {
-        inputOrigen.removeAttribute('list');
-        inputDestino.setAttribute('list', listaId);
+        if (dirPersona !== '') {
+            inputOrigen.setAttribute('list', listaDirId);
+        } else {
+            inputOrigen.removeAttribute('list');
+        }
+        inputDestino.setAttribute('list', listaPlantaId);
     }
 }
 
@@ -1157,6 +1182,7 @@ function filtrarPersonas(tipoOp) {
     });
 
     select.value = '';
+    actualizarSugerenciaUbicacion(tipoOp);
 }
 
 function filtrarPresentaciones(productoId) {

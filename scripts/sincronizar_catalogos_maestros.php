@@ -82,10 +82,10 @@ foreach ($categoriasBase as $cat) {
 // =========================================================================
 $productosEntrada = [
     ['codigo' => '01',              'nombre' => 'CAFE STOCK',     'activo' => 1, 'categoria' => 'CAFE',           'obs' => '',    'alias' => []],
-    ['codigo' => '03',              'nombre' => 'CAFE HÚMEDO',    'activo' => 1, 'categoria' => 'CAFE',           'obs' => '',    'alias' => ['CAFE HUMEDO']],
+    ['codigo' => '03',              'nombre' => 'CAFE HUMEDO',    'activo' => 1, 'categoria' => 'CAFE',           'obs' => '',    'alias' => ['CAFE HÚMEDO']],
     ['codigo' => '04',              'nombre' => 'CAFE RESACA',    'activo' => 1, 'categoria' => 'CAFE',           'obs' => '',    'alias' => []],
     ['codigo' => '05',              'nombre' => 'FRIJOL',         'activo' => 1, 'categoria' => 'GRANOS BASICOS', 'obs' => '',    'alias' => []],
-    ['codigo' => '06',              'nombre' => 'MAÍZ',           'activo' => 1, 'categoria' => 'GRANOS BASICOS', 'obs' => '',    'alias' => ['MAIZ']],
+    ['codigo' => '06',              'nombre' => 'MAIZ',           'activo' => 1, 'categoria' => 'GRANOS BASICOS', 'obs' => '',    'alias' => ['MAÍZ']],
     ['codigo' => '07',              'nombre' => 'ACEITE',         'activo' => 1, 'categoria' => 'ACEITES',        'obs' => '',    'alias' => []],
     ['codigo' => '08',              'nombre' => 'CAFE SECO',      'activo' => 1, 'categoria' => 'CAFE',           'obs' => '',    'alias' => []],
     ['codigo' => 'COQ-26227113323', 'nombre' => 'COQUILLO',       'activo' => 1, 'categoria' => 'COQUILLO',       'obs' => 'XXX', 'alias' => []],

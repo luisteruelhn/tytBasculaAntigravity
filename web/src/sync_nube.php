@@ -78,14 +78,14 @@ function encolarPesadaPendiente(PDO $pdo, int $idPesada): void
  *
  * @return array{ok: bool, mensaje: string, resumen?: array}
  */
-function enviarPayloadSyncNube(array $tablas, int $timeoutSeg = 4): array
+function enviarPayloadSyncNube(array $tablas, int $timeoutSeg = 4, array $opciones = []): array
 {
     $cfg = obtenerConfigSyncNube();
     if (!$cfg['habilitado']) {
         return ['ok' => false, 'mensaje' => 'Sincronización aún no configurada en este equipo.'];
     }
 
-    $jsonBody = json_encode(['tablas' => $tablas], JSON_UNESCAPED_UNICODE);
+    $jsonBody = json_encode(array_merge(['tablas' => $tablas], $opciones), JSON_UNESCAPED_UNICODE);
     if ($jsonBody === false) {
         return ['ok' => false, 'mensaje' => 'No se pudo serializar el lote de datos.'];
     }
@@ -237,7 +237,7 @@ function sincronizarTodoConNube(PDO $pdo): array
         't_pesada_anulaciones'      => $pdo->query('SELECT * FROM t_pesada_anulaciones')->fetchAll(PDO::FETCH_ASSOC),
     ];
 
-    $res = enviarPayloadSyncNube($tablas, 12);
+    $res = enviarPayloadSyncNube($tablas, 12, ['reemplazar_pesadas' => true]);
     if ($res['ok']) {
         $pdo->exec('UPDATE t_sincronizacion_pendiente SET enviado_at = NOW(), intentos = intentos + 1 WHERE enviado_at IS NULL');
     }

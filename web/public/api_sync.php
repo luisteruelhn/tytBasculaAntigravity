@@ -106,6 +106,25 @@ try {
         }
     }
 
+    // Si es una sincronización completa (espejo exacto), purgar pesadas eliminadas en planta local
+    if (!empty($payload['reemplazar_pesadas']) && isset($tablasDatos['t_pesadas']) && is_array($tablasDatos['t_pesadas'])) {
+        $idsVigentes = array_values(array_filter(array_map(
+            static fn($f) => isset($f['idpesada']) ? (int)$f['idpesada'] : 0,
+            $tablasDatos['t_pesadas']
+        )));
+        if (!empty($idsVigentes)) {
+            $phIds = implode(',', array_fill(0, count($idsVigentes), '?'));
+            $stmtDelAnul = $pdo->prepare("DELETE FROM `t_pesada_anulaciones` WHERE `idpesada` NOT IN ({$phIds})");
+            $stmtDelAnul->execute($idsVigentes);
+            $stmtDelPes = $pdo->prepare("DELETE FROM `t_pesadas` WHERE `idpesada` NOT IN ({$phIds})");
+            $stmtDelPes->execute($idsVigentes);
+            $resumen['t_pesadas_eliminadas'] = $stmtDelPes->rowCount();
+        } else {
+            $pdo->exec('DELETE FROM `t_pesada_anulaciones`');
+            $resumen['t_pesadas_eliminadas'] = (int)$pdo->exec('DELETE FROM `t_pesadas`');
+        }
+    }
+
     $pdo->exec('SET FOREIGN_KEY_CHECKS=1');
     $pdo->commit();
 
