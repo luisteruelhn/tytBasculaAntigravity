@@ -312,7 +312,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
             <div style="font-size: 0.82rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">
                 Notas abiertas
             </div>
-            <div style="font-size: 2.2rem; font-weight: 800; color: #0f172a; line-height: 1; margin-bottom: 0.45rem;">
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); line-height: 1; margin-bottom: 0.45rem;">
                 <?= number_format($totalNotasAbiertas) ?>
             </div>
             <div style="font-size: 0.78rem; color: #64748b;">
@@ -325,7 +325,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
             <div style="font-size: 0.82rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">
                 Pesadas cerradas
             </div>
-            <div style="font-size: 2.2rem; font-weight: 800; color: #0f172a; line-height: 1; margin-bottom: 0.45rem;">
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); line-height: 1; margin-bottom: 0.45rem;">
                 <?= number_format($totalPesadasCerradas) ?>
             </div>
             <div style="font-size: 0.78rem; color: #64748b;">
@@ -338,7 +338,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
             <div style="font-size: 0.82rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">
                 Libras finales
             </div>
-            <div style="font-size: 2.2rem; font-weight: 800; color: #0f172a; line-height: 1; margin-bottom: 0.45rem;">
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); line-height: 1; margin-bottom: 0.45rem;">
                 <?= number_format($sumaLibrasFinales) ?>
             </div>
             <div style="font-size: 0.78rem; color: #64748b;">
@@ -351,7 +351,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
             <div style="font-size: 0.82rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">
                 Quintales
             </div>
-            <div style="font-size: 2.2rem; font-weight: 800; color: #0f172a; line-height: 1; margin-bottom: 0.45rem;">
+            <div style="font-size: 2.2rem; font-weight: 800; color: var(--text-main); line-height: 1; margin-bottom: 0.45rem;">
                 <?= number_format($totalQuintales, 2) ?>
             </div>
             <div style="font-size: 0.78rem; color: #64748b;">
@@ -366,10 +366,10 @@ renderizarEncabezado('Dashboard', 'dashboard');
 
         <!-- COLUMNA 1: COMPRAS -->
         <div class="card" style="padding: 1.75rem 1.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
-            <h2 style="font-size: 1.4rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #0f172a;">
+            <h2 style="font-size: 1.4rem; font-weight: 800; margin: 0 0 0.5rem 0; color: var(--text-main);">
                 Compras
             </h2>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">
                 <?= $datosCompras['cerradas'] ?> cerradas &middot; 
                 <?= number_format($datosCompras['total_lb']) ?> lb &middot; 
                 <?= number_format($datosCompras['total_qq'], 2) ?> QQ &middot; 
@@ -379,7 +379,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
                 Tiempo entre primera y segunda pesada, en horas decimales (<?= $datosCompras['notas_con_tiempo'] ?> notas con ambas fechas válidas). Solo cerradas del rango de cierre; excluye anuladas. 1.50 h equivale a 1 hora y 30 minutos.
             </p>
 
-            <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0 0 0.35rem 0; color: #0f172a;">
+            <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0 0 0.35rem 0; color: var(--text-main);">
                 Compras por producto
             </h3>
             <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 1rem;">
@@ -405,7 +405,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
                     <?php else: ?>
                         <?php foreach ($datosCompras['productos'] as $prod): ?>
                             <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 0.65rem 0.5rem; font-weight: 600; color: #1e293b;"><?= htmlspecialchars($prod['producto_nombre'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td style="padding: 0.65rem 0.5rem; font-weight: 600; color: var(--text-main);"><?= htmlspecialchars($prod['producto_nombre'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td style="padding: 0.65rem 0.5rem; color: #334155;"><?= $prod['cerradas'] ?></td>
                                 <td style="padding: 0.65rem 0.5rem; color: #334155;"><?= number_format((float)$prod['final_lb']) ?></td>
                                 <td style="padding: 0.65rem 0.5rem; color: #334155;"><?= number_format((float)$prod['final_lb'] / 100.0, 2) ?></td>
@@ -418,10 +418,10 @@ renderizarEncabezado('Dashboard', 'dashboard');
 
         <!-- COLUMNA 2: VENTAS -->
         <div class="card" style="padding: 1.75rem 1.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
-            <h2 style="font-size: 1.4rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #0f172a;">
+            <h2 style="font-size: 1.4rem; font-weight: 800; margin: 0 0 0.5rem 0; color: var(--text-main);">
                 Ventas
             </h2>
-            <div style="font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem;">
+            <div style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">
                 <?= $datosVentas['cerradas'] ?> cerradas &middot; 
                 <?= number_format($datosVentas['total_lb']) ?> lb &middot; 
                 <?= number_format($datosVentas['total_qq'], 2) ?> QQ &middot; 
@@ -431,7 +431,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
                 Tiempo entre primera y segunda pesada, en horas decimales (<?= $datosVentas['notas_con_tiempo'] ?> notas con ambas fechas válidas). Solo cerradas del rango de cierre; excluye anuladas. 1.50 h equivale a 1 hora y 30 minutos.
             </p>
 
-            <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0 0 0.35rem 0; color: #0f172a;">
+            <h3 style="font-size: 1.05rem; font-weight: 800; margin: 0 0 0.35rem 0; color: var(--text-main);">
                 Ventas por producto
             </h3>
             <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 1rem;">
@@ -457,7 +457,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
                     <?php else: ?>
                         <?php foreach ($datosVentas['productos'] as $prod): ?>
                             <tr style="border-bottom: 1px solid #f1f5f9;">
-                                <td style="padding: 0.65rem 0.5rem; font-weight: 600; color: #1e293b;"><?= htmlspecialchars($prod['producto_nombre'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td style="padding: 0.65rem 0.5rem; font-weight: 600; color: var(--text-main);"><?= htmlspecialchars($prod['producto_nombre'], ENT_QUOTES, 'UTF-8') ?></td>
                                 <td style="padding: 0.65rem 0.5rem; color: #334155;"><?= $prod['cerradas'] ?></td>
                                 <td style="padding: 0.65rem 0.5rem; color: #334155;"><?= number_format((float)$prod['final_lb']) ?></td>
                                 <td style="padding: 0.65rem 0.5rem; color: #334155;"><?= number_format((float)$prod['final_lb'] / 100.0, 2) ?></td>
@@ -472,7 +472,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
 
     <!-- TARJETA: EVOLUCIÓN DIARIA (GRÁFICO LINEAL Y TABLA) -->
     <div class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.5rem;">
-        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #0f172a;">
+        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0 0 0.5rem 0; color: var(--text-main);">
             Evolución diaria
         </h2>
         <div style="font-size: 0.85rem; color: #475569; display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
@@ -531,7 +531,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
                 <?php else: ?>
                     <?php foreach ($filasDiarias as $fd): ?>
                         <tr style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 0.65rem 0.5rem; font-weight: 600; color: #1e293b;"><?= htmlspecialchars($fd['fecha_cierre'], ENT_QUOTES, 'UTF-8') ?></td>
+                            <td style="padding: 0.65rem 0.5rem; font-weight: 600; color: var(--text-main);"><?= htmlspecialchars($fd['fecha_cierre'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td style="padding: 0.65rem 0.5rem; color: #334155;"><?= $fd['tipo_operacion'] === 'COMPRA' ? 'Compra' : 'Venta' ?></td>
                             <td style="padding: 0.65rem 0.5rem; color: #334155;"><?= $fd['cerradas'] ?></td>
                             <td style="padding: 0.65rem 0.5rem; color: #334155;"><?= number_format((float)$fd['final_lb']) ?></td>
@@ -545,7 +545,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
 
     <!-- TARJETA: NOTAS PENDIENTES ACTUALES -->
     <div id="notasPendientes" class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 2rem;">
-        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0 0 0.5rem 0; color: #0f172a;">
+        <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0 0 0.5rem 0; color: var(--text-main);">
             Notas pendientes actuales
         </h2>
         <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">
