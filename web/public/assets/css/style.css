@@ -926,6 +926,70 @@ select.form-control {
     }
 }
 
+@media (max-width: 768px) {
+    /* En móvil: mostrar primero el Indicador en Vivo arriba de Captura/Fijar Peso */
+    .cockpit-live-panel {
+        order: -1;
+        padding: 0.7rem 1rem !important;
+    }
+    .cockpit-live-panel h2 {
+        font-size: 1rem !important;
+    }
+    .cockpit-live-panel #livePesoValor {
+        font-size: 2.35rem !important;
+    }
+    .cockpit-page-header {
+        margin-bottom: 0.5rem !important;
+    }
+    .cockpit-page-header .cockpit-eyebrow,
+    .cockpit-page-header .cockpit-empresa-sub {
+        display: none !important;
+    }
+    .cockpit-page-header h1 {
+        font-size: 1.35rem !important;
+        margin: 0 !important;
+    }
+    .cockpit-top-bar {
+        padding: 0.55rem 0.75rem !important;
+        margin-bottom: 0.55rem !important;
+        gap: 0.45rem !important;
+    }
+    .cockpit-top-bar .cockpit-tx-label,
+    .cockpit-top-bar #badgeOpOperacion {
+        display: none !important;
+    }
+    .cockpit-nota-banner {
+        padding: 0.55rem 0.85rem !important;
+        margin-bottom: 0.55rem !important;
+        gap: 0.35rem !important;
+    }
+    .cockpit-nota-banner h2 {
+        font-size: 1.05rem !important;
+    }
+    .cockpit-captura-panel {
+        padding: 0.75rem 0.9rem !important;
+    }
+    .cockpit-captura-panel p {
+        display: none !important;
+    }
+    /* Convertir el botón flotante de Asistente TYTOne en ícono circular discreto en móvil para no tapar botones */
+    #aiChatWidget {
+        bottom: 12px !important;
+        right: 12px !important;
+    }
+    #btnToggleChat {
+        padding: 0 !important;
+        width: 42px !important;
+        height: 42px !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        opacity: 0.88;
+    }
+    #btnToggleChat span {
+        display: none !important;
+    }
+}
+
 @media (max-width: 640px) {
     .cockpit-grid-3,
     .cockpit-grid-4,

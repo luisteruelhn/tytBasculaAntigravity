@@ -259,14 +259,14 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
 <div style="max-width: 1040px; margin: 0 auto;">
 
     <!-- ENCABEZADO -->
-    <div style="margin-bottom: 1.5rem;">
-        <span style="font-size: 0.78rem; font-weight: 800; color: #1e40af; letter-spacing: 1.5px; text-transform: uppercase;">
+    <div class="cockpit-page-header" style="margin-bottom: 1.5rem;">
+        <span class="cockpit-eyebrow" style="font-size: 0.78rem; font-weight: 800; color: #1e40af; letter-spacing: 1.5px; text-transform: uppercase;">
             PESAJE
         </span>
         <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0.2rem 0 0.2rem 0; color: var(--text-main); line-height: 1.1;">
             Segunda pesada
         </h1>
-        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
+        <span class="cockpit-empresa-sub" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">
             <?= htmlspecialchars($empresaNombre, ENT_QUOTES, 'UTF-8') ?>
         </span>
     </div>
@@ -348,7 +348,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
             <input type="hidden" id="tipoPrimeraPesada" value="<?= $pesadaActiva['tipo_primera_pesada'] ?>">
 
             <!-- DETALLE DE LA NOTA ABIERTA (REDISTRIBUIDO HORIZONTALMENTE) -->
-            <div class="card" style="padding: 0.85rem 1.35rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div class="card cockpit-nota-banner" style="padding: 0.85rem 1.35rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
                 <div style="display: flex; align-items: baseline; gap: 0.85rem; flex-wrap: wrap;">
                     <span style="font-size: 0.82rem; font-weight: 800; color: #1e40af; background: #dbeafe; padding: 0.25rem 0.65rem; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px;">
                         <?= ($pesadaActiva['tipo_operacion'] === 'COMPRA' ? 'COMPRA #' . $pesadaActiva['id_compra'] : 'VENTA #' . $pesadaActiva['id_venta']) ?>
@@ -369,7 +369,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
             <!-- FILA 2: CAPTURA COMPLEMENTARIA + INDICADOR EN VIVO (MISMA ALTURA) -->
             <div class="cockpit-grid-2" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 1rem; align-items: stretch; margin-bottom: 0.85rem;">
                 <!-- IZQUIERDA: CAPTURA COMPLEMENTARIA -->
-                <div class="card" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin: 0; display: flex; flex-direction: column; justify-content: space-between;">
+                <div class="card cockpit-captura-panel" style="padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin: 0; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; gap: 0.5rem; flex-wrap: wrap;">
                             <h3 style="font-size: 1.02rem; font-weight: 800; margin: 0; color: var(--text-main);">
@@ -433,7 +433,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                 </div>
 
                 <!-- DERECHA: INDICADOR AZUL MARINO EN VIVO -->
-                <div style="background: #0f233a; color: #ffffff; border-radius: 12px; padding: 1rem 1.35rem; display: flex; flex-direction: column; justify-content: space-between;">
+                <div class="cockpit-live-panel" style="background: #0f233a; color: #ffffff; border-radius: 12px; padding: 1rem 1.35rem; display: flex; flex-direction: column; justify-content: space-between;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div>
                             <span style="font-size: 0.68rem; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #94a3b8;">
@@ -468,7 +468,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
             </div>
 
             <!-- FILA 3: TARA DE EMPAQUE, DESCUENTOS DETALLADOS, OBSERVACIONES Y CIERRE -->
-            <div class="card" style="padding: 1.1rem 1.35rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.25rem;">
+            <div id="seccionLiquidacionSegunda" class="card" style="padding: 1.1rem 1.35rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.25rem;">
                 <h3 style="font-size: 1.02rem; font-weight: 800; margin: 0 0 0.75rem 0; color: var(--text-main);">
                     Tara de empaque y descuentos
                 </h3>
@@ -848,6 +848,13 @@ function fijarSegundoPeso() {
 
     ocultarAvisoFaltante();
     calcularTotales();
+
+    if (window.innerWidth <= 768) {
+        const seccionLiq = document.getElementById('seccionLiquidacionSegunda');
+        if (seccionLiq) {
+            setTimeout(() => seccionLiq.scrollIntoView({ behavior: 'smooth', block: 'start' }), 180);
+        }
+    }
 }
 
 function calcularTotales() {

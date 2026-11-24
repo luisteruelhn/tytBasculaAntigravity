@@ -64,7 +64,7 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
     <meta name="robots" content="noindex, nofollow">
     <title><?= htmlspecialchars($titulo, ENT_QUOTES, 'UTF-8') ?> — TYTONE BÁSCULA</title>
     <!-- Estilos CSS Modernos y Ligeros -->
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=20261124m">
     <!-- Carga inmediata de tema para evitar parpadeos -->
     <script src="assets/js/theme.js"></script>
 </head>
