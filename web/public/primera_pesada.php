@@ -1182,8 +1182,132 @@ function filtrarPersonas(tipoOp) {
     });
 
     select.value = '';
+    if (typeof select._comboSync === 'function') select._comboSync();
     actualizarSugerenciaUbicacion(tipoOp);
 }
+
+/**
+ * Convierte un <select> en un combo con búsqueda instantánea en Vanilla JS
+ * conservando intacto el <select> oculto para envío POST y eventos existentes.
+ */
+function inicializarBuscadorSelect(selectId, placeholderTexto) {
+    const select = document.getElementById(selectId);
+    if (!select || select.dataset.buscadorListo) return;
+    select.dataset.buscadorListo = '1';
+    select.style.display = 'none';
+
+    const wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-control';
+    input.placeholder = placeholderTexto;
+    input.autocomplete = 'off';
+    input.style.cssText = 'height: 38px; min-height: 38px; border-radius: 6px; font-size: 0.88rem; padding: 0.35rem 2.1rem 0.35rem 0.75rem;';
+
+    const btnLimpiar = document.createElement('button');
+    btnLimpiar.type = 'button';
+    btnLimpiar.innerHTML = '&times;';
+    btnLimpiar.title = 'Limpiar selección';
+    btnLimpiar.style.cssText = 'display: none; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #64748b; font-size: 1.15rem; cursor: pointer; padding: 0 4px; line-height: 1;';
+
+    const lista = document.createElement('div');
+    lista.style.cssText = 'display: none; position: absolute; left: 0; right: 0; top: calc(100% + 2px); max-height: 230px; overflow-y: auto; background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 8px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16); z-index: 60;';
+
+    wrap.appendChild(input);
+    wrap.appendChild(btnLimpiar);
+    wrap.appendChild(lista);
+    select.parentNode.insertBefore(wrap, select.nextSibling);
+
+    const normalizar = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+    function sincronizarTextoDesdeSelect() {
+        const opt = select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
+        if (opt && opt.value) {
+            input.value = opt.text.trim();
+            btnLimpiar.style.display = 'block';
+        } else {
+            input.value = '';
+            btnLimpiar.style.display = 'none';
+        }
+    }
+    select._comboSync = sincronizarTextoDesdeSelect;
+
+    function renderOpciones(filtroRaw) {
+        const filtro = normalizar(filtroRaw);
+        lista.innerHTML = '';
+        let visibles = 0;
+
+        Array.from(select.options).forEach((opt) => {
+            if (!opt.value || opt.style.display === 'none') return;
+            const texto = opt.text.trim();
+            if (filtro !== '' && !normalizar(texto).includes(filtro)) return;
+
+            const item = document.createElement('div');
+            item.textContent = texto;
+            const seleccionado = (select.value === opt.value);
+            item.style.cssText = 'padding: 0.5rem 0.75rem; font-size: 0.86rem; cursor: pointer; color: var(--text-main); border-bottom: 1px solid var(--border-color, #f1f5f9);' +
+                (seleccionado ? 'background: rgba(37, 99, 235, 0.12); font-weight: 700;' : '');
+
+            item.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                select.value = opt.value;
+                sincronizarTextoDesdeSelect();
+                lista.style.display = 'none';
+                select.dispatchEvent(new Event('change'));
+            });
+            item.addEventListener('mouseenter', () => { item.style.background = 'rgba(37, 99, 235, 0.08)'; });
+            item.addEventListener('mouseleave', () => { item.style.background = seleccionado ? 'rgba(37, 99, 235, 0.12)' : 'transparent'; });
+
+            lista.appendChild(item);
+            visibles++;
+        });
+
+        if (visibles === 0) {
+            const vacio = document.createElement('div');
+            vacio.textContent = 'Sin coincidencias';
+            vacio.style.cssText = 'padding: 0.6rem 0.75rem; font-size: 0.84rem; color: var(--text-muted); text-align: center;';
+            lista.appendChild(vacio);
+        }
+        lista.style.display = 'block';
+    }
+
+    input.addEventListener('focus', () => {
+        input.select();
+        renderOpciones('');
+    });
+    input.addEventListener('input', () => {
+        btnLimpiar.style.display = input.value ? 'block' : 'none';
+        if (select.value !== '') {
+            select.value = '';
+            select.dispatchEvent(new Event('change'));
+        }
+        renderOpciones(input.value);
+    });
+    input.addEventListener('blur', () => {
+        setTimeout(() => {
+            lista.style.display = 'none';
+            if (select.value === '') input.value = '';
+            else sincronizarTextoDesdeSelect();
+        }, 160);
+    });
+
+    btnLimpiar.addEventListener('click', () => {
+        select.value = '';
+        input.value = '';
+        btnLimpiar.style.display = 'none';
+        select.dispatchEvent(new Event('change'));
+        input.focus();
+    });
+
+    sincronizarTextoDesdeSelect();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    inicializarBuscadorSelect('clie_prov_id', 'Buscar cliente o proveedor...');
+    inicializarBuscadorSelect('producto_id', 'Buscar producto...');
+});
 
 function filtrarPresentaciones(productoId) {
     const selPres = document.getElementById('presentacion_id');
