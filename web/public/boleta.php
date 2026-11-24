@@ -61,8 +61,9 @@ $fechaSalida  = !empty($pesada['segunda_pesada_at']) ? date('d/m/Y H:i', strtoti
 $fechaCierre  = !empty($pesada['segunda_pesada_at']) ? date('d/m/Y H:i', strtotime($pesada['segunda_pesada_at'])) : date('d/m/Y H:i', strtotime($pesada['fecha_at']));
 
 $netoInicial = max(0.0, (float)$pesada['peso_bruto_lb'] - (float)$pesada['tara_vehiculo_lb']);
-$taraEmpaquesTotal = round((float)($pesada['tara_unitaria_aplicada_lb'] ?? 0) * (int)$pesada['cantidad_empaques']);
-$baseDescuentos = (float)($pesada['base_descuentos_lb'] ?? ($netoInicial - $taraEmpaquesTotal));
+$taraEmpaquesCalc = ceil(round((float)($pesada['tara_unitaria_aplicada_lb'] ?? 0) * (int)$pesada['cantidad_empaques'], 4));
+$baseDescuentos = (float)($pesada['base_descuentos_lb'] ?? ($netoInicial - $taraEmpaquesCalc));
+$taraEmpaquesTotal = ($pesada['base_descuentos_lb'] !== null) ? max(0.0, $netoInicial - $baseDescuentos) : $taraEmpaquesCalc;
 $pesoFinal = (float)($pesada['peso_final_lb'] ?? $baseDescuentos);
 $quintales = $pesoFinal / 100.0;
 ?>
@@ -396,13 +397,17 @@ $renderizarBoleta = function(string $etiquetaCopia) use ($empresa, $tipoOp, $cor
             </tbody>
         </table>
 
-        <!-- 4. OBSERVACIONES (SI EXISTEN) -->
+        <!-- 4. OBSERVACIONES -->
         <div class="boleta-notas">
-            <?php if (!empty($pesada['observaciones'])): ?>
-                <div>Observaciones primera: <?= htmlspecialchars($pesada['observaciones'], ENT_QUOTES, 'UTF-8') ?></div>
-            <?php endif; ?>
-            <?php if (!empty($pesada['observaciones_segunda'])): ?>
-                <div>Observaciones segunda: <?= htmlspecialchars($pesada['observaciones_segunda'], ENT_QUOTES, 'UTF-8') ?></div>
+            <?php if (!empty($pesada['observaciones']) || !empty($pesada['observaciones_segunda'])): ?>
+                <?php if (!empty($pesada['observaciones'])): ?>
+                    <div>Observaciones primera: <?= htmlspecialchars($pesada['observaciones'], ENT_QUOTES, 'UTF-8') ?></div>
+                <?php endif; ?>
+                <?php if (!empty($pesada['observaciones_segunda'])): ?>
+                    <div>Observaciones segunda: <?= htmlspecialchars($pesada['observaciones_segunda'], ENT_QUOTES, 'UTF-8') ?></div>
+                <?php endif; ?>
+            <?php else: ?>
+                <div>Observaciones: —</div>
             <?php endif; ?>
         </div>
 
