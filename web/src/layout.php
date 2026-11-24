@@ -563,8 +563,8 @@ setInterval(intentarSyncPendientesNube, 300000);
 <?php endif; ?>
 
 <!-- Scripts esenciales: monitor de báscula y control del sidebar -->
-<script src="assets/js/pesaje.js"></script>
-<script src="assets/js/sidebar.js"></script>
+<script src="assets/js/pesaje.js?v=20261124m"></script>
+<script src="assets/js/sidebar.js?v=20261124m"></script>
 </body>
 </html>
 <?php
