@@ -38,18 +38,28 @@ CREATE TABLE IF NOT EXISTS t_presentaciones (
 
 -- Semilla inicial de categorías (solo si no existen para empresa 1)
 INSERT IGNORE INTO t_categorias (empresa_id, codigo, nombre, descripcion, activo) VALUES
-    (1, 'CAFE', 'CAFÉ', 'Café pergamino, húmedo, oro, resaca y derivados', 1),
+    (1, 'CAFE', 'CAFE', 'Café pergamino, húmedo, seco, oro, resaca y derivados', 1),
     (1, 'ACEITES', 'ACEITES', 'Aceite crudo, refinado de palma y grasas', 1),
-    (1, 'GRANOS_BASICOS', 'GRANOS BÁSICOS', 'Maíz, frijol, arroz, sorgo y granos alimenticios', 1);
+    (1, 'GRANOS_BASICOS', 'GRANOS BASICOS', 'Maíz, frijol, arroz, sorgo y granos alimenticios', 1),
+    (1, 'COQUILLO', 'COQUILLO', 'Coquillo y subproductos de palma', 1),
+    (1, 'SALVADO', 'SALVADO', 'Salvado e insumos agroindustriales', 1);
 
 -- Semilla inicial de presentaciones (solo si no existen para empresa 1)
 INSERT IGNORE INTO t_presentaciones (empresa_id, codigo, nombre, descripcion, activo) VALUES
     (1, 'SACOS', 'SACOS', 'Presentación en sacos o bultos', 1),
     (1, 'GRANEL', 'A GRANEL', 'Carga a granel sin empaque', 1);
 
--- 2. Columna categoria_id en t_productos
+-- 2. Columnas en t_productos y t_clie_prov
 ALTER TABLE t_productos
-    ADD COLUMN IF NOT EXISTS categoria_id INT UNSIGNED DEFAULT NULL AFTER empresa_id;
+    ADD COLUMN IF NOT EXISTS categoria_id INT UNSIGNED DEFAULT NULL AFTER empresa_id,
+    ADD COLUMN IF NOT EXISTS codigo VARCHAR(30) DEFAULT NULL AFTER categoria_id,
+    ADD COLUMN IF NOT EXISTS observaciones VARCHAR(255) DEFAULT NULL AFTER nombre;
+
+ALTER TABLE t_clie_prov
+    ADD COLUMN IF NOT EXISTS codigo VARCHAR(30) DEFAULT NULL AFTER empresa_id,
+    ADD COLUMN IF NOT EXISTS email VARCHAR(150) DEFAULT NULL AFTER telefono,
+    ADD COLUMN IF NOT EXISTS ciudad VARCHAR(100) DEFAULT NULL AFTER direccion,
+    ADD COLUMN IF NOT EXISTS observaciones VARCHAR(255) DEFAULT NULL AFTER ciudad;
 
 -- 3. Columna gemini_api_key en t_configuracion_bascula (Asistente IA)
 ALTER TABLE t_configuracion_bascula

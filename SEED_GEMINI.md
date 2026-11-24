@@ -22,9 +22,9 @@ Guía de referencia para la base de datos `dbBascula` en MariaDB (XAMPP).
 | `t_usuarios` | Usuarios del sistema y credenciales hash | `id`, `empresa_id`, `rol` |
 | `t_configuracion_bascula` | Ajustes de puerto COM, baudios, paridad, modo (SERIAL/SIMULADO) | `id`, `empresa_id`, `estacion` |
 | `t_pesadas` | Transacciones de pesaje (primera y segunda pesada, bruto, tara, neto) | `id`, `empresa_id`, `numero_boleta` |
-| `t_clie_prov` | Catálogo de Clientes y Proveedores | `id`, `empresa_id` |
-| `t_categorias` | Catálogo de categorías de producto (CAFÉ, ACEITES, GRANOS BÁSICOS) | `id`, `empresa_id`, `codigo` |
-| `t_productos` | Catálogo maestro de productos (con `categoria_id`) | `id`, `empresa_id`, `categoria_id` |
+| `t_clie_prov` | Catálogo de Clientes y Proveedores (`codigo`, `nombre`, `rtn`, `telefono`, `email`, `direccion`, `ciudad`, `observaciones`) | `id`, `empresa_id` |
+| `t_categorias` | Catálogo de categorías de producto (`CAFE`, `ACEITES`, `GRANOS BASICOS`, `COQUILLO`, `SALVADO`) | `id`, `empresa_id`, `codigo` |
+| `t_productos` | Catálogo maestro de productos (`categoria_id`, `codigo`, `nombre`, `observaciones`) | `id`, `empresa_id`, `categoria_id` |
 | `t_producto_presentaciones` | Presentaciones/empaques vinculadas por producto | `id`, `producto_id` |
 | `t_presentaciones` | Catálogo maestro de presentaciones/taras de empaque (SACOS, A GRANEL) | `id`, `empresa_id`, `codigo` |
 | `t_taras` | Taras predeterminadas por placa de vehículo | `id`, `empresa_id`, `placa` |
