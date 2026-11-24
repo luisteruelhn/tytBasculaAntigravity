@@ -35,6 +35,7 @@ estado_servicio = {
     "modo": "real",  # 'real' o 'simulado'
     "puerto_com": None,
     "baudios": 9600,
+    "pausado_manual": False,
 }
 
 
@@ -67,6 +68,7 @@ def salud():
         "modo": estado_servicio["modo"],
         "puerto_com": estado_servicio["puerto_com"],
         "lector_activo": lector_global.corriendo,
+        "pausado_manual": estado_servicio["pausado_manual"],
     }
 
 
@@ -157,15 +159,17 @@ def configurar_serial(req: SerialConfigRequest):
 
 @app.post("/api/v1/lector/detener")
 def detener_lector_temporal():
-    """Detiene temporalmente el lector serial para liberar el puerto COM en pruebas."""
+    """Detiene el lector serial para liberar el puerto COM."""
+    estado_servicio["pausado_manual"] = True
     lector_global.detener()
-    return {"ok": True, "lector_activo": lector_global.corriendo}
+    return {"ok": True, "lector_activo": lector_global.corriendo, "pausado_manual": True}
 
 
 @app.post("/api/v1/lector/iniciar")
 def iniciar_lector_temporal():
     """Reanuda el lector serial si el modo activo es 'real' y hay puerto configurado."""
+    estado_servicio["pausado_manual"] = False
     if estado_servicio["modo"] == "real" and estado_servicio["puerto_com"]:
         lector_global.configurar(estado_servicio["puerto_com"], estado_servicio["baudios"])
         lector_global.iniciar()
-    return {"ok": True, "lector_activo": lector_global.corriendo}
+    return {"ok": True, "lector_activo": lector_global.corriendo, "pausado_manual": False}

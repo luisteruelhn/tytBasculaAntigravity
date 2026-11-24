@@ -538,6 +538,7 @@ async function sincronizarBasculaApi() {
         const resp = await fetch('http://127.0.0.1:8018/api/v1/salud');
         if (!resp.ok) return;
         const salud = await resp.json();
+        if (salud.pausado_manual) return;
         const requiereSync = (
             salud.modo !== BASCULA_DB_SYNC.modo ||
             (BASCULA_DB_SYNC.puerto_com && salud.puerto_com !== BASCULA_DB_SYNC.puerto_com) ||

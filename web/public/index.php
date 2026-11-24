@@ -195,9 +195,14 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
                 </span>
             </li>
             <?php else: ?>
-            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; gap: 0.65rem; flex-wrap: wrap;">
                 <span>Microservicio Báscula (FastAPI :8018):</span>
-                <span id="badgeEstadoMicroservicio" class="badge badge-modo">CONSULTANDO...</span>
+                <div style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                    <span id="badgeEstadoMicroservicio" class="badge badge-modo">CONSULTANDO...</span>
+                    <button type="button" id="btnToggleLecturaCom" onclick="alternarLecturaComInicio()" class="btn btn-primary" style="background: #1e40af; padding: 0.35rem 0.8rem; font-size: 0.8rem; font-weight: 700; border-radius: 6px;">
+                        ▶️ Arrancar Lectura
+                    </button>
+                </div>
             </li>
             <li style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                 <span id="estadoSyncInicio" style="font-size: 0.85rem; color: var(--text-muted);">Sincronización con Hostinger:</span>
@@ -247,24 +252,76 @@ async function simularEvento(accion) {
     }
 }
 
-// Chequear el microservicio FastAPI para actualizar el badge de diagnóstico
-document.addEventListener('DOMContentLoaded', async () => {
+// Chequear el microservicio FastAPI para actualizar el badge y botón de lectura COM
+let lecturaComActiva = false;
+
+function actualizarBotonLecturaCom(activo, pausado, servicioArriba, puerto) {
+    lecturaComActiva = Boolean(activo);
     const badge = document.getElementById('badgeEstadoMicroservicio');
-    if (!badge) return;
+    const btn = document.getElementById('btnToggleLecturaCom');
+    if (badge) {
+        if (!servicioArriba) {
+            badge.textContent = 'APAGADO (COM LIBRE)';
+            badge.className = 'badge badge-inestable';
+        } else if (activo) {
+            badge.textContent = (puerto ? puerto + ' ACTIVO' : 'ACTIVO (8018)');
+            badge.className = 'badge badge-estable';
+        } else if (pausado) {
+            badge.textContent = 'PAUSADO (COM LIBRE)';
+            badge.className = 'badge badge-modo';
+        } else {
+            badge.textContent = 'ACTIVO (8018)';
+            badge.className = 'badge badge-estable';
+        }
+    }
+    if (btn) {
+        btn.textContent = lecturaComActiva ? '⏹️ Parar Lectura' : '▶️ Arrancar Lectura';
+        btn.style.background = lecturaComActiva ? '#b91c1c' : '#1e40af';
+    }
+}
+
+async function consultarEstadoMicroservicio() {
     try {
         const resp = await fetch('http://127.0.0.1:8018/api/v1/salud');
         if (resp.ok) {
-            badge.textContent = 'ACTIVO (8018)';
-            badge.className = 'badge badge-estable';
+            const s = await resp.json();
+            actualizarBotonLecturaCom(s.lector_activo, s.pausado_manual, true, s.puerto_com);
         } else {
-            badge.textContent = 'ERROR HTTP';
-            badge.className = 'badge badge-inestable';
+            actualizarBotonLecturaCom(false, false, false, '');
         }
     } catch (e) {
-        badge.textContent = 'NO INICIADO';
-        badge.className = 'badge badge-inestable';
+        actualizarBotonLecturaCom(false, false, false, '');
     }
-});
+}
+
+async function alternarLecturaComInicio() {
+    const btn = document.getElementById('btnToggleLecturaCom');
+    if (!btn) return;
+    const accion = lecturaComActiva ? 'parar' : 'arrancar';
+    btn.disabled = true;
+    btn.textContent = accion === 'arrancar' ? 'Iniciando...' : 'Deteniendo...';
+
+    try {
+        const resp = await fetch('api_bascula_control.php?accion=' + accion, {
+            method: 'POST',
+            credentials: 'same-origin'
+        });
+        const data = await resp.json();
+        if (data.ok) {
+            await consultarEstadoMicroservicio();
+        } else {
+            alert(data.error || 'No se pudo cambiar el estado del lector.');
+            await consultarEstadoMicroservicio();
+        }
+    } catch (e) {
+        alert('Error de comunicación con el servidor local.');
+        await consultarEstadoMicroservicio();
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', consultarEstadoMicroservicio);
 
 async function sincronizarNubeInicio() {
     const btn = document.getElementById('btnSyncInicio');

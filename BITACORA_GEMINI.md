@@ -222,5 +222,8 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregados `.htaccess`, `index.php` y `robots.txt` en la raíz del repositorio para permitir despliegue directo en Hostinger desde Git (`produccion`) manteniendo `inversionesvallecillo.com/` institucional, `/bascula/` enrutado a `web/public/` y carpetas internas bloqueadas.
   - Agregado reintento automático cada 5 minutos (`api_sync_pendientes.php` + `procesarPendientesSyncNube()` + timer en `layout.php`) para enviar pesadas pendientes de `t_sincronizacion_pendiente` apenas regrese el internet en planta.
   - Agregado botón **☁️ Sincronizar con la Nube** en `web/public/index.php` (solo entorno local) conectado a `api_sync_pendientes.php?modo=todo`.
+* **Control de Lectura Serial desde Inicio (`2026-11-24`)**:
+  - Agregado `pausado_manual` en `api/main.py` y respetado en `web/src/layout.php` (`sincronizarBasculaApi`) para no reabrir el puerto `COM` tras pausarlo.
+  - Creado `web/public/api_bascula_control.php` y botón **▶️ Arrancar Lectura / ⏹️ Parar Lectura** en `web/public/index.php` para levantar `:8018` bajo demanda o liberar `COM4` al sistema anterior con un clic.
 * **Indicador de Modo en Vivo (`primera_pesada.php`, `segunda_pesada.php`, `layout.php`)**:
   - Corregido `#liveModoTexto` para reflejar dinámicamente `Modo real` o `Modo simulado` según `data.origen` de FastAPI (`:8018`), e incluida la sincronización automática al cargar `primera_pesada.php` y `segunda_pesada.php`.
