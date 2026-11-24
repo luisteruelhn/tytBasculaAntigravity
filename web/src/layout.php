@@ -66,7 +66,7 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
     <!-- Estilos CSS Modernos y Ligeros -->
     <link rel="stylesheet" href="assets/css/style.css?v=20261124m">
     <!-- Carga inmediata de tema para evitar parpadeos -->
-    <script src="assets/js/theme.js"></script>
+    <script src="assets/js/theme.js?v=20261124c"></script>
 </head>
 <body>
 

@@ -256,4 +256,6 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregado `inicializarBuscadorSelect()` en Vanilla JS para filtrar al instante **Cliente / Proveedor** y **Producto** (ignorando mayúsculas y acentos) manteniendo intacto el `<select>` oculto, la sugerencia automática de dirección y el filtro `COMPRA`/`VENTA` (commit `d9d12c6`).
   - Preseleccionada automáticamente la presentación **`SACOS`** al elegir cualquier producto tipo `CAFE` y **`A GRANEL`** al elegir `ACEITE` en `filtrarPresentaciones()` (commit `d490bf8`).
 * **RTN en Boleta de Compra y Venta (`web/public/boleta.php`)**:
-  - Agregado el **RTN** de la empresa (`t_empresas.rtn`) en el encabezado de la boleta oficial (aplica tanto para `COMPRA` como para `VENTA`), ubicado justo debajo de la dirección.
+  - Agregado el **RTN** de la empresa (`t_empresas.rtn`) en el encabezado de la boleta oficial (aplica tanto para `COMPRA` como para `VENTA`), ubicado justo debajo de la dirección (commit `43453a1`).
+* **Tema Claro Predeterminado (`web/public/assets/js/theme.js`, `web/src/layout.php`)**:
+  - Cambiado el tema por defecto de `'dark'` a `'light'` (Modo Claro) manteniendo la opción de alternar manualmente a Modo Oscuro desde el botón superior/sidebar.

@@ -8,7 +8,7 @@
 
 // 1. Aplicación inmediata en el encabezado
 (function() {
-    const temaGuardado = localStorage.getItem('bascula_tema') || 'dark';
+    const temaGuardado = localStorage.getItem('bascula_tema') || 'light';
     document.documentElement.setAttribute('data-theme', temaGuardado);
 })();
 
@@ -16,7 +16,7 @@
  * Alterna entre modo 'dark' y 'light' y guarda la preferencia.
  */
 function alternarTema() {
-    const actual = document.documentElement.getAttribute('data-theme') || 'dark';
+    const actual = document.documentElement.getAttribute('data-theme') || 'light';
     const nuevo = (actual === 'dark') ? 'light' : 'dark';
     
     document.documentElement.setAttribute('data-theme', nuevo);
@@ -41,6 +41,6 @@ function actualizarBotonesTema(tema) {
 
 // Sincronizar los botones cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
-    const temaActual = document.documentElement.getAttribute('data-theme') || 'dark';
+    const temaActual = document.documentElement.getAttribute('data-theme') || 'light';
     actualizarBotonesTema(temaActual);
 });
