@@ -106,5 +106,6 @@ tytBasculaAntigravity/
    ```cmd
    runtime\python\python.exe -m uvicorn api.main:app --host 127.0.0.1 --port 8018
    ```
-3. **Abrir en el Navegador**:
-   * Ingresar a `http://localhost/bascula/`
+3. **Abrir en el Navegador (PC o Celular en Red Local)**:
+   * **En la PC de báscula**: `http://localhost/bascula/`
+   * **Desde Celular / Tablet (mismo Wi-Fi LAN)**: Escanear el botón **📱 Abrir en celular (QR)** en **Inicio** o la tarjeta QR en **Despliegue / Nube** (ej. `http://192.168.2.20/bascula/`). El peso en tiempo real se sirve por Apache mediante `api_peso_local.php` sin abrir el puerto `8018` fuera de loopback ni depender de internet.
