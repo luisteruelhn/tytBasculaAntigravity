@@ -276,6 +276,9 @@ $renderizarBoleta = function(string $etiquetaCopia) use ($empresa, $tipoOp, $cor
                         <?php if (!empty($empresa['direccion'])): ?>
                             <?= htmlspecialchars($empresa['direccion'], ENT_QUOTES, 'UTF-8') ?><br>
                         <?php endif; ?>
+                        <?php if (!empty($empresa['rtn'])): ?>
+                            <strong>RTN:</strong> <?= htmlspecialchars($empresa['rtn'], ENT_QUOTES, 'UTF-8') ?><br>
+                        <?php endif; ?>
                         <?php if (!empty($empresa['telefono'])): ?>
                             <strong>Tel:</strong> <?= htmlspecialchars($empresa['telefono'], ENT_QUOTES, 'UTF-8') ?>
                         <?php endif; ?>
