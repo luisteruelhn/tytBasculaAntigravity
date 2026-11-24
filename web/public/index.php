@@ -103,8 +103,11 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
                 <div id="displayPesoUnidad" class="display-unidad">LB</div>
             </div>
 
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted); margin-top: 0.35rem;">
                 <span>Lectura continua en vivo &bull; Microservicio en loopback (8018)</span>
+                <button type="button" id="btnToggleLecturaCom" onclick="alternarLecturaComInicio()" class="btn btn-primary" style="background: #1e40af; padding: 0.4rem 0.95rem; font-size: 0.84rem; font-weight: 700; border-radius: 6px;">
+                    ▶️ Arrancar Lectura
+                </button>
             </div>
         <?php endif; ?>
     </div>
@@ -195,14 +198,9 @@ renderizarEncabezado('Inicio / Monitor de Pesaje', 'monitor');
                 </span>
             </li>
             <?php else: ?>
-            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; gap: 0.65rem; flex-wrap: wrap;">
+            <li style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
                 <span>Microservicio Báscula (FastAPI :8018):</span>
-                <div style="display: inline-flex; align-items: center; gap: 0.5rem;">
-                    <span id="badgeEstadoMicroservicio" class="badge badge-modo">CONSULTANDO...</span>
-                    <button type="button" id="btnToggleLecturaCom" onclick="alternarLecturaComInicio()" class="btn btn-primary" style="background: #1e40af; padding: 0.35rem 0.8rem; font-size: 0.8rem; font-weight: 700; border-radius: 6px;">
-                        ▶️ Arrancar Lectura
-                    </button>
-                </div>
+                <span id="badgeEstadoMicroservicio" class="badge badge-modo">CONSULTANDO...</span>
             </li>
             <li style="display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
                 <span id="estadoSyncInicio" style="font-size: 0.85rem; color: var(--text-muted);">Sincronización con Hostinger:</span>
