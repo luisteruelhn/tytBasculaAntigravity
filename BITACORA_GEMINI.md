@@ -290,3 +290,5 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Excluidos los usuarios con `rol = 'OPERADOR'` del envío hacia Hostinger en `cargarTablasMaestrasSync()` (`WHERE rol <> 'OPERADOR'`).
   - En `api_sync.php`: bloqueo de inserción de filas `OPERADOR` y depuración automática `DELETE FROM t_usuarios WHERE rol = 'OPERADOR'` en la base remota.
   - En `login.php`: restricción adicional que impide iniciar sesión con cuentas `OPERADOR` fuera de la red local de planta.
+* **Corrección de Ruta `/bascula` sin Barra Final en Hostinger (`.htaccess`, `web/public/login.php`)**:
+  - Corregido `RewriteRule ^bascula/?$` en `.htaccess` (que hacía rewrite interno sin `/` al final, rompiendo las rutas relativas `assets/css/style.css` y `assets/js/theme.js` cuando se escribía `inversionesvallecillo.com/bascula`), redirigiendo `^bascula$` a `/bascula/` y respaldado también en `login.php`.

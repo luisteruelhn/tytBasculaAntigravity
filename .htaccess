@@ -5,8 +5,9 @@
     RewriteRule ^(\.git|\.agents|\.runtime|\.venv|api|scripts|dbbackup|runtime|web/config|web/src)(/|$) - [F,L,NC]
     RewriteRule \.(md|sql|py|cmd|json|bak|log|env|ini)$ - [F,L,NC]
 
-    # Enrutar /bascula/* de forma transparente hacia web/public/*
-    RewriteRule ^bascula/?$ web/public/login.php [L]
+    # Asegurar barra final en /bascula para que rutas relativas (assets/css, js, login.php) carguen siempre bien
+    RewriteRule ^bascula$ /bascula/ [R=301,L]
+    RewriteRule ^bascula/$ web/public/index.php [L]
     RewriteRule ^bascula/(.+)$ web/public/$1 [L,QSA]
 </IfModule>
 

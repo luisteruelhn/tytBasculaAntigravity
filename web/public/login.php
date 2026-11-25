@@ -9,6 +9,13 @@
 
 declare(strict_types=1);
 
+// Si se accede a /bascula sin barra final (rewrite interno), redirigir a /bascula/login.php para no romper rutas relativas CSS/JS
+$reqPathLogin = (string)(parse_url((string)($_SERVER['REQUEST_URI'] ?? ''), PHP_URL_PATH) ?: '');
+if ($reqPathLogin !== '' && preg_match('#/bascula$#i', $reqPathLogin)) {
+    header('Location: ' . $reqPathLogin . '/login.php', true, 302);
+    exit;
+}
+
 require_once dirname(__DIR__) . '/src/auth.php';
 
 // Redirigir al inicio si ya hay sesión activa
