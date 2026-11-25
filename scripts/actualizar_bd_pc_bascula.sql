@@ -74,9 +74,10 @@ ALTER TABLE t_pesadas
     ADD COLUMN IF NOT EXISTS transportista_rtn VARCHAR(20) NULL AFTER motivo_traslado_otro,
     ADD COLUMN IF NOT EXISTS marca_vehiculo VARCHAR(60) NULL AFTER transportista_rtn;
 
--- 5. Rol REMOTO (solo consulta) y usuario maria.jose (sin tocar otros usuarios existentes)
+-- 5. Rol REMOTO (solo consulta), clave_visible cifrada para SUPER y usuario maria.jose (sin tocar otros usuarios existentes)
 ALTER TABLE t_usuarios
-    MODIFY COLUMN rol ENUM('SUPER', 'ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR', 'REMOTO') NOT NULL DEFAULT 'OPERADOR';
+    MODIFY COLUMN rol ENUM('SUPER', 'ADMINISTRADOR', 'SUPERVISOR', 'OPERADOR', 'REMOTO') NOT NULL DEFAULT 'OPERADOR',
+    ADD COLUMN IF NOT EXISTS clave_visible VARCHAR(512) DEFAULT NULL AFTER clave_hash;
 
 INSERT INTO t_usuarios (empresa_id, nombre, usuario, email, clave_hash, rol, activo)
 SELECT 1, 'María José', 'maria.jose', 'maria.jose@bascula.local', '$2y$12$d12QvYNWMKcFKDpdTz7BgugwkflZsMrjQC8i040RLpic/qFWHH1jm', 'REMOTO', 1

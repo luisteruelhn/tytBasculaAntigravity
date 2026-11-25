@@ -64,6 +64,14 @@ try {
                 continue;
             }
 
+            if ($tabla === 't_usuarios') {
+                try {
+                    $pdo->exec('ALTER TABLE `t_usuarios` ADD COLUMN IF NOT EXISTS `clave_visible` VARCHAR(512) DEFAULT NULL AFTER `clave_hash`');
+                } catch (Throwable $eAlter) {
+                    // Continúa con las columnas existentes si el usuario MySQL remoto no tiene privilegio ALTER
+                }
+            }
+
             // Obtener columnas reales de la tabla en el servidor remoto
             $colsRemotas = $pdo->query("SHOW COLUMNS FROM `{$tabla}`")->fetchAll(PDO::FETCH_COLUMN);
             if (!$colsRemotas) {

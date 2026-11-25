@@ -22,6 +22,7 @@ if ($rolActual === 'REMOTO') {
 }
 $pdo = obtenerDB();
 $empresaId = (int)$usuarioActual['empresa_id'];
+$esSuper = ($rolActual === 'SUPER');
 $esAdminOSuper = in_array($rolActual, ['SUPER', 'ADMINISTRADOR'], true);
 $esSupervisor = ($rolActual === 'SUPERVISOR');
 $esOperador = ($rolActual === 'OPERADOR');
@@ -89,18 +90,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                     $error = 'El nombre de usuario "' . htmlspecialchars($usuarioLogin) . '" ya está en uso.';
                 } else {
                     $claveHash = password_hash($clave, PASSWORD_BCRYPT, ['cost' => 12]);
-                    $stmtInsert = $pdo->prepare(
-                        "INSERT INTO t_usuarios (empresa_id, nombre, usuario, email, clave_hash, rol, activo)
-                         VALUES (:empresa_id, :nombre, :usuario, :email, :clave_hash, :rol, 1)"
-                    );
-                    $stmtInsert->execute([
-                        ':empresa_id'  => $empresaId,
-                        ':nombre'      => $nombre,
-                        ':usuario'     => $usuarioLogin,
-                        ':email'       => $email,
-                        ':clave_hash'  => $claveHash,
-                        ':rol'         => $rol,
-                    ]);
+                    $claveVis  = cifrarClaveVisible($clave);
+                    try {
+                        $stmtInsert = $pdo->prepare(
+                            "INSERT INTO t_usuarios (empresa_id, nombre, usuario, email, clave_hash, clave_visible, rol, activo)
+                             VALUES (:empresa_id, :nombre, :usuario, :email, :clave_hash, :clave_visible, :rol, 1)"
+                        );
+                        $stmtInsert->execute([
+                            ':empresa_id'    => $empresaId,
+                            ':nombre'        => $nombre,
+                            ':usuario'       => $usuarioLogin,
+                            ':email'         => $email,
+                            ':clave_hash'    => $claveHash,
+                            ':clave_visible' => $claveVis,
+                            ':rol'           => $rol,
+                        ]);
+                    } catch (PDOException $eCol) {
+                        $stmtInsert = $pdo->prepare(
+                            "INSERT INTO t_usuarios (empresa_id, nombre, usuario, email, clave_hash, rol, activo)
+                             VALUES (:empresa_id, :nombre, :usuario, :email, :clave_hash, :rol, 1)"
+                        );
+                        $stmtInsert->execute([
+                            ':empresa_id'  => $empresaId,
+                            ':nombre'      => $nombre,
+                            ':usuario'     => $usuarioLogin,
+                            ':email'       => $email,
+                            ':clave_hash'  => $claveHash,
+                            ':rol'         => $rol,
+                        ]);
+                    }
 
                     $mensajeExito = "El usuario \"$usuarioLogin\" ha sido creado exitosamente.";
                     $valores = ['nombre' => '', 'usuario' => '', 'email' => '', 'rol' => 'OPERADOR'];
@@ -127,15 +145,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
             $error = 'La nueva contraseña debe tener al menos 4 caracteres.';
         } else {
             try {
-                $nuevoHash = password_hash($nuevaClave, PASSWORD_BCRYPT, ['cost' => 12]);
-                $stmtReset = $pdo->prepare("UPDATE t_usuarios SET clave_hash = :hash WHERE id = :id AND empresa_id = :empresa_id");
-                $stmtReset->execute([
-                    ':hash'       => $nuevoHash,
-                    ':id'         => $idTarget,
-                    ':empresa_id' => $empresaId,
-                ]);
-                $mensajeExito = 'Contraseña actualizada correctamente para el usuario seleccionado.';
-                sincronizarCatalogosAutomatico('t_usuarios');
+                $stmtTarget = $pdo->prepare("SELECT id, usuario, rol FROM t_usuarios WHERE id = :id AND empresa_id = :empresa_id LIMIT 1");
+                $stmtTarget->execute([':id' => $idTarget, ':empresa_id' => $empresaId]);
+                $usrObjetivo = $stmtTarget->fetch(PDO::FETCH_ASSOC);
+
+                if (!$usrObjetivo) {
+                    $error = 'No se encontró el usuario seleccionado.';
+                } elseif ($usrObjetivo['rol'] === 'SUPER' && !$esSuper) {
+                    $error = 'Solo un usuario SUPER puede editar la contraseña de una cuenta SUPER.';
+                } else {
+                    $nuevoHash = password_hash($nuevaClave, PASSWORD_BCRYPT, ['cost' => 12]);
+                    $nuevaVis  = cifrarClaveVisible($nuevaClave);
+                    try {
+                        $stmtReset = $pdo->prepare("UPDATE t_usuarios SET clave_hash = :hash, clave_visible = :vis WHERE id = :id AND empresa_id = :empresa_id");
+                        $stmtReset->execute([
+                            ':hash'       => $nuevoHash,
+                            ':vis'        => $nuevaVis,
+                            ':id'         => $idTarget,
+                            ':empresa_id' => $empresaId,
+                        ]);
+                    } catch (PDOException $eCol) {
+                        $stmtReset = $pdo->prepare("UPDATE t_usuarios SET clave_hash = :hash WHERE id = :id AND empresa_id = :empresa_id");
+                        $stmtReset->execute([
+                            ':hash'       => $nuevoHash,
+                            ':id'         => $idTarget,
+                            ':empresa_id' => $empresaId,
+                        ]);
+                    }
+                    $mensajeExito = 'Contraseña actualizada correctamente para @' . $usrObjetivo['usuario'] . '.';
+                    sincronizarCatalogosAutomatico('t_usuarios');
+                }
             } catch (Exception $e) {
                 $error = 'Error al actualizar contraseña: ' . $e->getMessage();
             }
@@ -186,13 +225,33 @@ if ($esOperador) {
     );
     $stmtUsuarios->execute([':id' => (int)$usuarioActual['id']]);
 } else {
-    $stmtUsuarios = $pdo->prepare(
-        "SELECT id, nombre, usuario, email, rol, activo 
-         FROM t_usuarios 
-         WHERE empresa_id = :empresa_id 
-         ORDER BY activo DESC, rol ASC, nombre ASC"
-    );
-    $stmtUsuarios->execute([':empresa_id' => $empresaId]);
+    if ($esSuper) {
+        try {
+            $stmtUsuarios = $pdo->prepare(
+                "SELECT id, nombre, usuario, email, rol, activo, clave_visible
+                 FROM t_usuarios
+                 WHERE empresa_id = :empresa_id
+                 ORDER BY activo DESC, rol ASC, nombre ASC"
+            );
+            $stmtUsuarios->execute([':empresa_id' => $empresaId]);
+        } catch (PDOException $eCol) {
+            $stmtUsuarios = $pdo->prepare(
+                "SELECT id, nombre, usuario, email, rol, activo
+                 FROM t_usuarios
+                 WHERE empresa_id = :empresa_id
+                 ORDER BY activo DESC, rol ASC, nombre ASC"
+            );
+            $stmtUsuarios->execute([':empresa_id' => $empresaId]);
+        }
+    } else {
+        $stmtUsuarios = $pdo->prepare(
+            "SELECT id, nombre, usuario, email, rol, activo 
+             FROM t_usuarios 
+             WHERE empresa_id = :empresa_id 
+             ORDER BY activo DESC, rol ASC, nombre ASC"
+        );
+        $stmtUsuarios->execute([':empresa_id' => $empresaId]);
+    }
 }
 $listaUsuarios = $stmtUsuarios->fetchAll();
 
@@ -285,6 +344,9 @@ renderizarEncabezado('Usuarios y Roles', 'usuarios');
                         <th>Usuario / Nombre</th>
                         <th>Correo Electrónico</th>
                         <th>Rol de Acceso</th>
+                        <?php if ($esSuper): ?>
+                            <th>Contraseña</th>
+                        <?php endif; ?>
                         <th>Estado</th>
                         <th style="text-align: right;">Acciones</th>
                     </tr>
@@ -292,7 +354,7 @@ renderizarEncabezado('Usuarios y Roles', 'usuarios');
                 <tbody>
                     <?php if (empty($listaUsuarios)): ?>
                         <tr>
-                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
+                            <td colspan="<?= $esSuper ? 6 : 5 ?>" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
                                 No se encontraron registros de usuario.
                             </td>
                         </tr>
@@ -300,6 +362,7 @@ renderizarEncabezado('Usuarios y Roles', 'usuarios');
                         <?php foreach ($listaUsuarios as $usr): 
                             $inicial = mb_strtoupper(mb_substr($usr['nombre'], 0, 1, 'UTF-8'), 'UTF-8');
                             $esMiUsuario = ((int)$usr['id'] === (int)$usuarioActual['id']);
+                            $clavePlanaUsr = $esSuper ? descifrarClaveVisible($usr['clave_visible'] ?? null) : '';
                         ?>
                             <tr>
                                 <td>
@@ -336,6 +399,26 @@ renderizarEncabezado('Usuarios y Roles', 'usuarios');
                                         <?= htmlspecialchars($usr['rol'], ENT_QUOTES, 'UTF-8') ?>
                                     </span>
                                 </td>
+                                <?php if ($esSuper): ?>
+                                <td>
+                                    <?php if ($clavePlanaUsr !== ''): ?>
+                                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; background: var(--bg-surface-elevated); border: 1px solid var(--border-color); padding: 0.2rem 0.5rem; border-radius: 6px;">
+                                            <span class="pass-mask" style="font-family: monospace; letter-spacing: 1px; color: var(--text-muted); font-size: 0.85rem;">••••••••</span>
+                                            <code class="pass-real" style="display: none; font-family: monospace; font-weight: 700; color: var(--text-main); font-size: 0.85rem;"><?= htmlspecialchars($clavePlanaUsr, ENT_QUOTES, 'UTF-8') ?></code>
+                                            <button
+                                                type="button"
+                                                onclick="toggleVerClaveFila(this)"
+                                                title="Mostrar / ocultar contraseña"
+                                                style="background: none; border: none; cursor: pointer; padding: 0 0.15rem; font-size: 0.9rem; line-height: 1; opacity: 0.8;"
+                                            >👁️</button>
+                                        </div>
+                                    <?php else: ?>
+                                        <span style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;" title="Asigna o edita la contraseña con el botón Clave para habilitar su visualización">
+                                            Sin registro (editar)
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                                <?php endif; ?>
                                 <td>
                                     <?php if ($usr['activo']): ?>
                                         <span class="badge badge-estable">ACTIVO</span>
@@ -348,16 +431,19 @@ renderizarEncabezado('Usuarios y Roles', 'usuarios');
                                         <a href="mi_clave.php" class="btn btn-secondary" style="padding: 0.3rem 0.65rem; font-size: 0.8rem; min-height: 32px;">
                                             Cambiar mi clave
                                         </a>
-                                    <?php elseif ($puedeModificarOtros): ?>
+                                    <?php elseif ($puedeModificarOtros && ($esSuper || $usr['rol'] !== 'SUPER')): ?>
                                         <!-- ACCIONES EXCLUSIVAS DE ADMINISTRADOR Y SUPER -->
                                         <div style="display: inline-flex; gap: 0.4rem; align-items: center;">
-                                            <!-- Botón Cambiar Contraseña Modal/Prompt -->
+                                            <!-- Botón Editar Contraseña Modal -->
                                             <button 
                                                 type="button" 
                                                 class="btn btn-secondary" 
                                                 style="padding: 0.3rem 0.65rem; font-size: 0.8rem; min-height: 32px;"
-                                                onclick="cambiarClaveUsuario(<?= (int)$usr['id'] ?>, '<?= htmlspecialchars(addslashes($usr['usuario'])) ?>')"
-                                                title="Cambiar contraseña de este usuario"
+                                                data-uid="<?= (int)$usr['id'] ?>"
+                                                data-usuario="<?= htmlspecialchars($usr['usuario'], ENT_QUOTES, 'UTF-8') ?>"
+                                                data-clave="<?= $esSuper ? htmlspecialchars($clavePlanaUsr, ENT_QUOTES, 'UTF-8') : '' ?>"
+                                                onclick="abrirModalClaveUsuario(this)"
+                                                title="Ver / editar contraseña de este usuario"
                                             >
                                                 🔑 Clave
                                             </button>
@@ -531,27 +617,112 @@ renderizarEncabezado('Usuarios y Roles', 'usuarios');
     <?php endif; ?>
 </div>
 
-<!-- FORMULARIO OCULTO PARA RESET DE CONTRASEÑA POR ADMINISTRADOR -->
+<!-- MODAL PARA VER Y EDITAR CONTRASEÑA DE USUARIOS -->
 <?php if ($puedeCambiarClaveOtros): ?>
-<form id="formResetClave" method="POST" action="usuarios.php" style="display:none;">
-    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
-    <input type="hidden" name="accion" value="reset_clave">
-    <input type="hidden" id="resetUserId" name="id_usuario" value="">
-    <input type="hidden" id="resetUserPass" name="nueva_clave" value="">
-</form>
+<div id="modalEditarClave" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); z-index: 9999; align-items: center; justify-content: center; padding: 1rem;">
+    <div class="card" style="width: 100%; max-width: 430px; margin: 0; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25);">
+        <div class="card-title" style="margin-bottom: 1rem;">
+            <span>🔑 Contraseña de <strong id="modalClaveUsuarioLbl"></strong></span>
+            <button type="button" onclick="cerrarModalClaveUsuario()" style="background: none; border: none; font-size: 1.25rem; cursor: pointer; color: var(--text-muted); line-height: 1;">✕</button>
+        </div>
+
+        <form id="formResetClave" method="POST" action="usuarios.php" autocomplete="off">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="accion" value="reset_clave">
+            <input type="hidden" id="resetUserId" name="id_usuario" value="">
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label for="resetUserPass" class="form-label">
+                    <?= $esSuper ? 'Contraseña actual / nueva (mínimo 4 caracteres)' : 'Nueva contraseña (mínimo 4 caracteres)' ?>
+                </label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <input
+                        type="<?= $esSuper ? 'text' : 'password' ?>"
+                        id="resetUserPass"
+                        name="nueva_clave"
+                        class="form-control"
+                        minlength="4"
+                        maxlength="1024"
+                        placeholder="Escribe la contraseña..."
+                        required
+                        style="font-family: monospace; font-weight: 600;"
+                    >
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        onclick="toggleInputModalClave()"
+                        title="Mostrar / ocultar"
+                        style="padding: 0.5rem 0.75rem; flex-shrink: 0;"
+                    >👁️</button>
+                </div>
+                <?php if ($esSuper): ?>
+                    <small id="modalClaveAvisoSinRegistro" style="display: none; color: var(--text-muted); margin-top: 0.4rem; font-size: 0.78rem;">
+                        Este usuario fue creado antes de activar el registro visible. Escribe y guarda una contraseña para dejarla visible.
+                    </small>
+                <?php endif; ?>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 0.6rem;">
+                <button type="button" class="btn btn-secondary" onclick="cerrarModalClaveUsuario()">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar Contraseña</button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
-function cambiarClaveUsuario(id, usuario) {
-    const nueva = prompt('Ingresa la nueva contraseña para el usuario @' + usuario + ' (mínimo 4 caracteres):');
-    if (!nueva) return;
-    if (nueva.length < 4) {
-        alert('La contraseña debe tener al menos 4 caracteres.');
-        return;
-    }
-    document.getElementById('resetUserId').value = id;
-    document.getElementById('resetUserPass').value = nueva;
-    document.getElementById('formResetClave').submit();
+function toggleVerClaveFila(btn) {
+    const contenedor = btn.parentElement;
+    if (!contenedor) return;
+    const mask = contenedor.querySelector('.pass-mask');
+    const real = contenedor.querySelector('.pass-real');
+    if (!mask || !real) return;
+    const mostrando = real.style.display !== 'none';
+    real.style.display = mostrando ? 'none' : 'inline';
+    mask.style.display = mostrando ? 'inline' : 'none';
+    btn.textContent = mostrando ? '👁️' : '🙈';
 }
+
+function abrirModalClaveUsuario(btn) {
+    const id = btn.getAttribute('data-uid') || '';
+    const usuario = btn.getAttribute('data-usuario') || '';
+    const claveActual = btn.getAttribute('data-clave') || '';
+
+    document.getElementById('resetUserId').value = id;
+    document.getElementById('modalClaveUsuarioLbl').textContent = '@' + usuario;
+
+    const input = document.getElementById('resetUserPass');
+    input.value = claveActual;
+
+    const aviso = document.getElementById('modalClaveAvisoSinRegistro');
+    if (aviso) {
+        aviso.style.display = (claveActual === '') ? 'block' : 'none';
+    }
+
+    const modal = document.getElementById('modalEditarClave');
+    modal.style.display = 'flex';
+    setTimeout(function() {
+        input.focus();
+        input.select();
+    }, 30);
+}
+
+function cerrarModalClaveUsuario() {
+    document.getElementById('modalEditarClave').style.display = 'none';
+    document.getElementById('resetUserPass').value = '';
+}
+
+function toggleInputModalClave() {
+    const input = document.getElementById('resetUserPass');
+    input.type = (input.type === 'password') ? 'text' : 'password';
+    input.focus();
+}
+
+document.getElementById('modalEditarClave').addEventListener('click', function(e) {
+    if (e.target === this) {
+        cerrarModalClaveUsuario();
+    }
+});
 </script>
 <?php endif; ?>
 

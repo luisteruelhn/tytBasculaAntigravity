@@ -44,8 +44,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 try {
                     $nuevoHash = password_hash($claveNueva, PASSWORD_BCRYPT, ['cost' => 12]);
-                    $upd = $pdo->prepare("UPDATE t_usuarios SET clave_hash = :hash WHERE id = :id");
-                    $upd->execute([':hash' => $nuevoHash, ':id' => $userId]);
+                    $nuevaVisible = cifrarClaveVisible($claveNueva);
+                    try {
+                        $upd = $pdo->prepare("UPDATE t_usuarios SET clave_hash = :hash, clave_visible = :vis WHERE id = :id");
+                        $upd->execute([':hash' => $nuevoHash, ':vis' => $nuevaVisible, ':id' => $userId]);
+                    } catch (PDOException $eCol) {
+                        $upd = $pdo->prepare("UPDATE t_usuarios SET clave_hash = :hash WHERE id = :id");
+                        $upd->execute([':hash' => $nuevoHash, ':id' => $userId]);
+                    }
 
                     $mensajeExito = '¡Tu contraseña ha sido cambiada exitosamente!';
                     sincronizarCatalogosAutomatico('t_usuarios');

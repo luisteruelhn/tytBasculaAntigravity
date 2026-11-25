@@ -270,3 +270,61 @@ function cerrarSesion(): void
     }
     session_destroy();
 }
+
+/**
+ * Cifra simétricamente (AES-256-CBC + HMAC-SHA256) una contraseña para consulta exclusiva del rol SUPER.
+ * La autenticación de login sigue usando exclusivamente password_verify() sobre clave_hash.
+ */
+function cifrarClaveVisible(string $clavePlana): ?string
+{
+    if ($clavePlana === '') {
+        return null;
+    }
+
+    $material = 'tytBasculaAntigravity::ClaveVisible::v1::2026';
+    $encKey   = hash('sha256', $material . '::enc', true);
+    $macKey   = hash('sha256', $material . '::mac', true);
+
+    if (function_exists('openssl_encrypt')) {
+        $iv = random_bytes(16);
+        $cipher = openssl_encrypt($clavePlana, 'AES-256-CBC', $encKey, OPENSSL_RAW_DATA, $iv);
+        if ($cipher !== false) {
+            $mac = hash_hmac('sha256', $iv . $cipher, $macKey, true);
+            return 'v1:' . base64_encode($iv . $mac . $cipher);
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Descifra una contraseña almacenada con cifrarClaveVisible() tras verificar su integridad HMAC.
+ */
+function descifrarClaveVisible(?string $valorCifrado): string
+{
+    $valor = trim((string)$valorCifrado);
+    if ($valor === '' || !str_starts_with($valor, 'v1:') || !function_exists('openssl_decrypt')) {
+        return '';
+    }
+
+    $raw = base64_decode(substr($valor, 3), true);
+    if ($raw === false || strlen($raw) <= 48) {
+        return '';
+    }
+
+    $iv     = substr($raw, 0, 16);
+    $mac    = substr($raw, 16, 32);
+    $cipher = substr($raw, 48);
+
+    $material = 'tytBasculaAntigravity::ClaveVisible::v1::2026';
+    $encKey   = hash('sha256', $material . '::enc', true);
+    $macKey   = hash('sha256', $material . '::mac', true);
+
+    $macCalc = hash_hmac('sha256', $iv . $cipher, $macKey, true);
+    if (!hash_equals($mac, $macCalc)) {
+        return '';
+    }
+
+    $plana = openssl_decrypt($cipher, 'AES-256-CBC', $encKey, OPENSSL_RAW_DATA, $iv);
+    return ($plana !== false) ? $plana : '';
+}
