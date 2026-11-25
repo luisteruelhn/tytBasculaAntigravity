@@ -305,8 +305,20 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                         ?>
                             <tr class="fila-historial" data-op="<?= htmlspecialchars($b['tipo_operacion'], ENT_QUOTES, 'UTF-8') ?>" data-est="<?= htmlspecialchars($b['estado'], ENT_QUOTES, 'UTF-8') ?>" data-fecha="<?= htmlspecialchars($fechaIso, ENT_QUOTES, 'UTF-8') ?>" data-texto="<?= htmlspecialchars($textoBusq, ENT_QUOTES, 'UTF-8') ?>" style="border-bottom: 1px solid var(--border-color);">
                                 <td style="padding: 1rem 0.5rem; font-family: monospace; font-weight: 800; font-size: 0.95rem; color: <?= ($b['tipo_operacion'] === 'COMPRA' ? '#1e40af' : '#047857') ?>;">
-                                    <?= htmlspecialchars($numFormato, ENT_QUOTES, 'UTF-8') ?>
-                                    <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; font-family: sans-serif;"><?= $b['tipo_operacion'] ?></div>
+                                    <?php if ($esCerrada): ?>
+                                        <a href="boleta.php?id=<?= (int)$b['idpesada'] ?>" target="_blank" style="color: inherit; text-decoration: none;" title="Abrir vista de impresión de boleta">
+                                            <?= htmlspecialchars($numFormato, ENT_QUOTES, 'UTF-8') ?>
+                                            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; font-family: sans-serif;"><?= $b['tipo_operacion'] ?></div>
+                                        </a>
+                                    <?php elseif (!$esAnulada && !$esRemoto): ?>
+                                        <a href="segunda_pesada.php?id=<?= (int)$b['idpesada'] ?>" style="color: inherit; text-decoration: none;" title="Completar segunda pesada">
+                                            <?= htmlspecialchars($numFormato, ENT_QUOTES, 'UTF-8') ?>
+                                            <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; font-family: sans-serif;"><?= $b['tipo_operacion'] ?></div>
+                                        </a>
+                                    <?php else: ?>
+                                        <?= htmlspecialchars($numFormato, ENT_QUOTES, 'UTF-8') ?>
+                                        <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; font-family: sans-serif;"><?= $b['tipo_operacion'] ?></div>
+                                    <?php endif; ?>
                                 </td>
                                 <td style="padding: 1rem 0.5rem; font-size: 0.85rem; color: #475569;">
                                     <?= $fechaFmt ?>

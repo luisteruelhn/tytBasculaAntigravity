@@ -303,6 +303,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Corrección de Buscador en Boletas e Historial (`web/public/pesadas.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` al filtrar por texto/placa/boleta separando los placeholders `:q1`, `:q2`, `:q_num1` y `:q_num2` bajo `ATTR_EMULATE_PREPARES = false`.
   - Implementado filtrado instantáneo en vivo (`q`, `tipo`, `estado` y `fecha`) para mostrar resultados mientras se escribe o cambian los selectores, restaurando todo el historial al limpiar o borrar el texto.
+  - Convertido el número/ID de boleta en enlace directo: abre `boleta.php` si está cerrada o `segunda_pesada.php` si está abierta (respetando rol `REMOTO`).
 * **Buscador Instantáneo en Filtros de Reportes (`web/public/reportes.php`)**:
   - Agregado `inicializarBuscadorFiltro()` para permitir escribir y filtrar al instante en los selectores de **Cliente / proveedor** (`#persona_id`) y **Producto** (`#producto_id`), conservando sincronizados los filtros de `Tipo de persona` y `Categoría`.
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
@@ -313,6 +314,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Corrección de Buscador en Boletas e Historial (`web/public/pesadas.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` al filtrar por texto/placa/boleta separando los placeholders `:q1`, `:q2`, `:q_num1` y `:q_num2` bajo `ATTR_EMULATE_PREPARES = false`.
   - Implementado filtrado instantáneo en vivo (`q`, `tipo`, `estado` y `fecha`) para mostrar resultados mientras se escribe o cambian los selectores, restaurando todo el historial al limpiar o borrar el texto.
+  - Convertido el número/ID de boleta en enlace directo: abre `boleta.php` si está cerrada o `segunda_pesada.php` si está abierta (respetando rol `REMOTO`).
 * **Buscador Instantáneo en Filtros de Reportes (`web/public/reportes.php`)**:
   - Agregado `inicializarBuscadorFiltro()` para permitir escribir y filtrar al instante en los selectores de **Cliente / proveedor** (`#persona_id`) y **Producto** (`#producto_id`), conservando sincronizados los filtros de `Tipo de persona` y `Categoría`.
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
