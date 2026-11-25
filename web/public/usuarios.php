@@ -12,6 +12,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/sync_nube.php';
 
 $usuarioActual = requerirAutenticacion();
 $rolActual = $usuarioActual['rol'] ?? 'OPERADOR';
@@ -103,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 
                     $mensajeExito = "El usuario \"$usuarioLogin\" ha sido creado exitosamente.";
                     $valores = ['nombre' => '', 'usuario' => '', 'email' => '', 'rol' => 'OPERADOR'];
+                    sincronizarCatalogosAutomatico('t_usuarios');
                 }
             } catch (Exception $e) {
                 $error = 'Error al registrar usuario: ' . $e->getMessage();
@@ -133,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                     ':empresa_id' => $empresaId,
                 ]);
                 $mensajeExito = 'Contraseña actualizada correctamente para el usuario seleccionado.';
+                sincronizarCatalogosAutomatico('t_usuarios');
             } catch (Exception $e) {
                 $error = 'Error al actualizar contraseña: ' . $e->getMessage();
             }
@@ -163,6 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                     ':empresa_id' => $empresaId,
                 ]);
                 $mensajeExito = ($nuevoEstado === 1) ? 'Usuario activado exitosamente.' : 'Usuario desactivado del sistema.';
+                sincronizarCatalogosAutomatico('t_usuarios');
             } catch (Exception $e) {
                 $error = 'Error al actualizar estado del usuario: ' . $e->getMessage();
             }

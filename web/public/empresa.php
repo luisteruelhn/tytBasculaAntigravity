@@ -7,6 +7,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/sync_nube.php';
 
 $usuario = requerirAutenticacion();
 if (!tieneRol($usuario, ['SUPER', 'ADMINISTRADOR'])) {
@@ -111,6 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $empresa['logo']             = $logoPath;
 
                 $mensajeExito = 'Los datos y logo de la empresa se han actualizado correctamente.';
+                sincronizarCatalogosAutomatico('t_empresas');
             } catch (Exception $e) {
                 $error = 'Error al actualizar en la base de datos: ' . $e->getMessage();
             }

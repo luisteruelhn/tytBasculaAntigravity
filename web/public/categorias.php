@@ -12,6 +12,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/sync_nube.php';
 
 $usuarioActual = requerirAutenticacion();
 $rolActual = $usuarioActual['rol'] ?? 'OPERADOR';
@@ -74,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                             ':descripcion'  => ($descripcion !== '' ? $descripcion : null),
                         ]);
                         $mensajeExito = "Categoría \"$nombre\" registrada con éxito.";
+                        sincronizarCatalogosAutomatico('t_categorias');
                     }
                 } else {
                     $stmtUpd = $pdo->prepare(
@@ -89,6 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                         ':empresa_id'  => $empresaId,
                     ]);
                     $mensajeExito = "Categoría \"$nombre\" actualizada correctamente.";
+                    sincronizarCatalogosAutomatico('t_categorias');
                 }
             } catch (Exception $e) {
                 $error = 'Error al guardar en base de datos: ' . $e->getMessage();
@@ -117,6 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 ':empresa_id' => $empresaId,
             ]);
             $mensajeExito = ($nuevoEstado === 1) ? 'Categoría activada.' : 'Categoría desactivada.';
+            sincronizarCatalogosAutomatico('t_categorias');
         } catch (Exception $e) {
             $error = 'Error al cambiar estado: ' . $e->getMessage();
         }

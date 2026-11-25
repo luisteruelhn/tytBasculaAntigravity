@@ -15,6 +15,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/sync_nube.php';
 
 $usuarioActual = requerirAutenticacion();
 $rolActual = $usuarioActual['rol'] ?? 'OPERADOR';
@@ -92,6 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                             ':es_proveedor' => $esProveedor,
                         ]);
                         $mensajeExito = "Se ha registrado exitosamente a \"$nombre\".";
+                        sincronizarCatalogosAutomatico('t_clie_prov');
                     }
                 } else {
                     // Modo Edición
@@ -116,6 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                         ':empresa_id'   => $empresaId,
                     ]);
                     $mensajeExito = "Registro actualizado correctamente.";
+                    sincronizarCatalogosAutomatico('t_clie_prov');
                 }
             } catch (Exception $e) {
                 $error = 'Error al guardar en la base de datos: ' . $e->getMessage();
@@ -144,6 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                 ':empresa_id' => $empresaId,
             ]);
             $mensajeExito = ($nuevoEstado === 1) ? 'Registro activado exitosamente.' : 'Registro desactivado.';
+            sincronizarCatalogosAutomatico('t_clie_prov');
         } catch (Exception $e) {
             $error = 'Error al cambiar estado: ' . $e->getMessage();
         }

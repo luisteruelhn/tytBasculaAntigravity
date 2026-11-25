@@ -10,6 +10,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/sync_nube.php';
 
 $usuarioActual = requerirAutenticacion();
 $rolActual = $usuarioActual['rol'] ?? 'OPERADOR';
@@ -68,6 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                             ':descripcion'  => ($descripcion !== '' ? $descripcion : null),
                         ]);
                         $mensajeExito = "Tipo de empaque \"$nombre\" registrado con éxito.";
+                        sincronizarCatalogosAutomatico('t_presentaciones');
                     }
                 } else {
                     $stmtUpd = $pdo->prepare(
@@ -83,6 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                         ':empresa_id'  => $empresaId,
                     ]);
                     $mensajeExito = "Tipo de empaque \"$nombre\" actualizado correctamente.";
+                    sincronizarCatalogosAutomatico('t_presentaciones');
                 }
             } catch (Exception $e) {
                 $error = 'Error en base de datos: ' . $e->getMessage();

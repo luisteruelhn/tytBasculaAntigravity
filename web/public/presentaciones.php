@@ -11,6 +11,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/sync_nube.php';
 
 $usuarioActual = requerirAutenticacion();
 $rolActual = $usuarioActual['rol'] ?? 'OPERADOR';
@@ -54,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                         ':taralbs' => $taralbs
                     ]);
                     $mensajeExito = "Tara \"$nombre\" registrada con éxito.";
+                    sincronizarCatalogosAutomatico('t_taras');
                 } else {
                     $stmtUpd = $pdo->prepare(
                         "UPDATE t_taras SET nombre = :nombre, taralbs = :taralbs WHERE idempaque = :id"
@@ -64,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && in_array
                         ':id'      => $idEmpaque
                     ]);
                     $mensajeExito = "Tara \"$nombre\" actualizada correctamente.";
+                    sincronizarCatalogosAutomatico('t_taras');
                 }
             } catch (Exception $e) {
                 $error = 'Error en base de datos: ' . $e->getMessage();

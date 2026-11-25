@@ -270,3 +270,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
     - Verificado y documentado en `IMPLEMENTACION.md` el mecanismo real de autoarranque ya activo en `shell:startup` (`Iniciar Apache y MySQL.vbs` + `XAMPP Control.lnk`), evitando la dependencia de escritura UAC sobre `C:\xampp\xampp-control.ini`.
 * **Favicon Oficial TYTOne (`web/public/favicon.ico`)**:
   - Convertido el logotipo oficial `tytlogo.png` a icono Windows multi-resolución 32-bit ARGB (`16x16`, `32x32`, `48x48`, `64x64`, `256x256`) con el nombre estándar `favicon.ico` en `web/public/favicon.ico` (y actualizado en `C:\xampp\htdocs\favicon.ico` con respaldo previo `favicon.xampp.bak`), enlazado en `layout.php`, `login.php`, `boleta.php` y `guia_remision.php`.
+* **Sincronización Automática Total (Pesadas + Anulaciones + Catálogos / Administración)**:
+  - Agregado `sincronizarCatalogosAutomatico()` y `encolarCatalogosPendientes()` en `web/src/sync_nube.php`, integrando también `entidad = 'catalogos'` y `t_pesada_anulaciones` en `sincronizarPesadaAutomatica()` y `procesarPendientesSyncNube()` (reintento automático cada 5 minutos si no hay internet).
+  - Agregada limpieza espejo de `t_producto_presentaciones` (`reemplazar_producto_presentaciones`) en `web/public/api_sync.php`.
+  - Conectado disparo automático inmediato al guardar/editar/alternar estado en `clientes.php`, `categorias.php`, `productos.php`, `presentaciones.php`, `presentaciones_tipo.php`, `empresa.php`, `usuarios.php` y `mi_clave.php`.

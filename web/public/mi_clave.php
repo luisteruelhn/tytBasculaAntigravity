@@ -10,6 +10,7 @@
 declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/src/layout.php';
+require_once dirname(__DIR__) . '/src/sync_nube.php';
 
 $usuarioActual = requerirAutenticacion();
 $pdo = obtenerDB();
@@ -47,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $upd->execute([':hash' => $nuevoHash, ':id' => $userId]);
 
                     $mensajeExito = '¡Tu contraseña ha sido cambiada exitosamente!';
+                    sincronizarCatalogosAutomatico('t_usuarios');
                 } catch (Exception $e) {
                     $error = 'Error al actualizar la contraseña: ' . $e->getMessage();
                 }

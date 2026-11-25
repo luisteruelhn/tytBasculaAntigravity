@@ -106,6 +106,21 @@ try {
         }
     }
 
+    // Sincronizar bajas de presentaciones de productos editados en catálogo local
+    if (!empty($payload['reemplazar_producto_presentaciones']) && isset($tablasDatos['t_producto_presentaciones']) && is_array($tablasDatos['t_producto_presentaciones'])) {
+        $idsPresVigentes = array_values(array_filter(array_map(
+            static fn($f) => isset($f['id']) ? (int)$f['id'] : 0,
+            $tablasDatos['t_producto_presentaciones']
+        )));
+        if (!empty($idsPresVigentes)) {
+            $phPres = implode(',', array_fill(0, count($idsPresVigentes), '?'));
+            $stmtDelPres = $pdo->prepare("DELETE FROM `t_producto_presentaciones` WHERE `id` NOT IN ({$phPres})");
+            $stmtDelPres->execute($idsPresVigentes);
+        } else {
+            $pdo->exec('DELETE FROM `t_producto_presentaciones`');
+        }
+    }
+
     // Si es una sincronización completa (espejo exacto), purgar pesadas eliminadas en planta local
     if (!empty($payload['reemplazar_pesadas']) && isset($tablasDatos['t_pesadas']) && is_array($tablasDatos['t_pesadas'])) {
         $idsVigentes = array_values(array_filter(array_map(
