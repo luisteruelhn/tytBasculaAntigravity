@@ -9,13 +9,21 @@
 
 declare(strict_types=1);
 
-require_once dirname(__DIR__) . '/config/db.php';
+require_once dirname(__DIR__) . '/src/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['ok' => false, 'error' => 'Método no permitido']);
+    exit;
+}
+
+$ipRemota = (string)($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0');
+$claveRateSync = 'sync_fail:' . $ipRemota;
+if (!verificarTasaLimite($claveRateSync, 5, 900)) {
+    http_response_code(429);
+    echo json_encode(['ok' => false, 'error' => 'Demasiados intentos fallidos. IP bloqueada temporalmente por 15 minutos.']);
     exit;
 }
 
@@ -27,6 +35,9 @@ if ($tokenConfigurado === '' || $tokenRecibido === '' || !hash_equals($tokenConf
     echo json_encode(['ok' => false, 'error' => 'Token de sincronización inválido o no configurado en el servidor remoto.']);
     exit;
 }
+
+// Token válido: limpiar contador de fallos de esta IP para nunca limitar envíos legítimos de planta
+limpiarTasaLimite($claveRateSync);
 
 $rawBody = file_get_contents('php://input');
 $payload = json_decode((string)$rawBody, true);

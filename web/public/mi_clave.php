@@ -33,6 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'La nueva contraseña debe tener al menos 4 caracteres.';
         } elseif ($claveNueva !== $claveConfirm) {
             $error = 'La nueva contraseña y su confirmación no coinciden.';
+        } elseif (!verificarTasaLimite('clave_usr:' . $userId, 5, 300)) {
+            http_response_code(429);
+            $error = 'Demasiados intentos fallidos. Por seguridad, espera 5 minutos antes de volver a intentarlo.';
         } else {
             // Verificar contraseña actual en base de datos
             $stmt = $pdo->prepare("SELECT clave_hash FROM t_usuarios WHERE id = :id LIMIT 1");
@@ -42,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!$cuenta || !password_verify($claveActual, $cuenta['clave_hash'])) {
                 $error = 'La contraseña actual ingresada es incorrecta.';
             } else {
+                limpiarTasaLimite('clave_usr:' . $userId);
                 try {
                     $nuevoHash = password_hash($claveNueva, PASSWORD_BCRYPT, ['cost' => 12]);
                     $nuevaVisible = cifrarClaveVisible($claveNueva);
