@@ -29,6 +29,7 @@ Guía de referencia para la base de datos `dbBascula` en MariaDB (XAMPP).
 | `t_presentaciones` | Catálogo maestro de presentaciones/taras de empaque (SACOS, A GRANEL) | `id`, `empresa_id`, `codigo` |
 | `t_taras` | Taras predeterminadas por placa de vehículo | `id`, `empresa_id`, `placa` |
 | `t_pesada_anulaciones` | Registro de auditoría de boletas anuladas y motivo | `id`, `pesada_id` |
+| `t_sincronizacion_pendiente` | Cola offline-first de eventos pendientes de envío hacia Hostinger | `id_evento` (CHAR 36), `entidad`, `enviado_at` |
 
 ---
 
@@ -42,6 +43,8 @@ Guía de referencia para la base de datos `dbBascula` en MariaDB (XAMPP).
    - Autorización de anulaciones de pesadas, reimpresión y consulta de reportes consolidados.
 4. **OPERADOR**:
    - Operación diaria: captura de Primera Pesada (entrada) y Segunda Pesada (salida), emisión de boletas y captura manual cuando corresponda.
+5. **REMOTO**:
+   - Acceso exclusivo de **solo lectura / consulta** (Dashboard, Boletas e Historial, Guías de Remisión, Reportes, Catálogos en lectura y Asistente TYTOne), sin permisos de pesaje ni edición.
 
 ---
 

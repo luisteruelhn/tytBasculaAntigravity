@@ -259,3 +259,8 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregado el **RTN** de la empresa (`t_empresas.rtn`) en el encabezado de la boleta oficial (aplica tanto para `COMPRA` como para `VENTA`), ubicado justo debajo de la dirección (commit `43453a1`).
 * **Tema Claro Predeterminado (`web/public/assets/js/theme.js`, `web/src/layout.php`)**:
   - Cambiado el tema por defecto de `'dark'` a `'light'` (Modo Claro) manteniendo la opción de alternar manualmente a Modo Oscuro desde el botón superior/sidebar.
+* **Depuración y Alineación Documental (`2026-11-25`)**:
+  - Eliminado el borrador sin seguimiento `IMPLEMENTACION.MD` (con secciones duplicadas y superado por `IMPLEMENTACION_FINAL.MD`).
+  - Actualizado `SEED_GEMINI.md` completando las 12 tablas (`t_sincronizacion_pendiente`) y el 5.º rol `REMOTO`.
+  - Actualizado `AGENTS_GEMINI.md` documentando el espejo HTTPS de solo lectura en Hostinger y el rol `REMOTO` en RBAC.
+  - Actualizado el árbol de archivos de `README_GEMINI.md` reemplazando la referencia obsoleta `web/src/bascula.php` por `sync_nube.php`, `api_peso_local.php` y `api_bascula_control.php`.

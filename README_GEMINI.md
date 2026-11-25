@@ -74,11 +74,13 @@ tytBasculaAntigravity/
 │   ├── config/
 │   │   └── db.php         # Conexión PDO a MariaDB XAMPP
 │   ├── src/
-│   │   ├── auth.php       # Funciones de autenticación, CSRF y control de roles
-│   │   ├── layout.php     # Plantilla base, barra de navegación y pie
-│   │   └── bascula.php    # Integración con el microservicio de peso
+│   │   ├── auth.php       # Funciones de autenticación, CSRF, RBAC y detección LAN
+│   │   ├── layout.php     # Plantilla base, sidebar y sincronización con FastAPI (:8018)
+│   │   └── sync_nube.php  # Cliente de sincronización offline-first hacia Hostinger
 │   └── public/            # Carpeta servida por Apache (enlace /bascula)
-│       ├── index.php      # Dashboard y monitor de peso en vivo
+│       ├── index.php      # Inicio, monitor en vivo, control lectura COM y QR LAN
+│       ├── api_peso_local.php      # Puente autenticado LAN hacia FastAPI (:8018)
+│       ├── api_bascula_control.php # Arranque / pausa bajo demanda del lector serial COM
 │       ├── login.php      # Formulario de inicio de sesión
 │       ├── logout.php     # Cierre de sesión
 │       ├── primera_pesada.php  # Registro de entrada

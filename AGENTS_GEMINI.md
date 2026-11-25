@@ -23,7 +23,7 @@ Documento de directrices y reglas obligatorias para el asistente en el proyecto 
 * **Frontend y Lógica de Negocio**: PHP 8 nativo bajo servidor web **Apache de XAMPP**.
 * **Base de Datos**: **MariaDB de XAMPP** (`127.0.0.1:3306`, base de datos `dbBascula`).
 * **Microservicio de Hardware / Báscula**: **FastAPI** en Python portable (`runtime/python/python.exe`), escuchando en loopback local (`http://127.0.0.1:8018`).
-* **Exclusión de Nube**: Entorno 100% local/on-premise. No se utiliza Google Cloud ni dependencias externas en la nube.
+* **Espejo en Nube (Solo Consulta)**: Operación de pesaje 100% local/on-premise (offline-first). El servidor remoto en Hostinger (`inversionesvallecillo.com`) se utiliza únicamente como espejo HTTPS de **solo lectura** (sincronizado mediante `api_sync.php` y `sync_nube.php`), sin dependencias de servicios pesados de nube.
 
 ---
 
@@ -46,7 +46,7 @@ Documento de directrices y reglas obligatorias para el asistente en el proyecto 
   - Consultas SQL estrictamente preparadas con **PDO** (cero inyección SQL).
   - Protección **CSRF** en todos los formularios y endpoints de acción (POST).
   - Manejo seguro de sesiones (`HttpOnly`, `SameSite=Strict`, `cookie_secure` cuando aplique, regeneración de ID).
-  - Control de Acceso Basado en Roles (**RBAC**): `SUPER`, `ADMINISTRADOR`, `SUPERVISOR`, `OPERADOR`.
+  - Control de Acceso Basado en Roles (**RBAC**): `SUPER`, `ADMINISTRADOR`, `SUPERVISOR`, `OPERADOR`, `REMOTO` (solo consulta).
   - Protección contra fuerza bruta en inicio de sesión.
   - Sanitización estricta de salidas contra XSS (`htmlspecialchars`).
 
