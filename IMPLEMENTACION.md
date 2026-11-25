@@ -203,13 +203,19 @@ Resumen de integración (para el paso a paso ilustrado en hPanel ver **[desplieg
 
 ---
 
-## 9. Automatización para el Corte Definitivo en Producción
+## 9. Automatización en el Inicio de Windows (`shell:startup`)
 
-Aplicar estos dos ajustes cuando esta estación quede como **sistema único definitivo** en la PC de cabina:
-
-1. **Autoarranque de Apache y MySQL en XAMPP (`C:\xampp\xampp-control.ini`):**
-   * Abrir `XAMPP Control Panel` como Administrador → `Config` → `Autostart of modules` → marcar **Apache** y **MySQL** (deja `Apache=1` y `MySQL=1` en `[Autostart]`), y colocar acceso directo de `xampp-control.exe` en el inicio de Windows si no está como servicio.
-2. **Autoarranque oculto de FastAPI (`:8018`) al iniciar sesión en Windows:**
+1. **Autoarranque de Apache y MySQL (Ya implementado y verificado en PC de producción):**
+   * En lugar de depender de `C:\xampp\xampp-control.ini` (que requiere permisos elevados de Administrador y suele fallar al guardar en Windows con UAC), el inicio automático se realiza en `shell:startup` (`%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\`) mediante:
+     * **`XAMPP Control.lnk`** → acceso directo a `C:\xampp\xampp-control.exe`.
+     * **`Iniciar Apache y MySQL.vbs`** → lanza ambos motores en segundo plano sin ventana (`0`) al iniciar sesión:
+       ```vbscript
+       Set WshShell = CreateObject("WScript.Shell")
+       WshShell.CurrentDirectory = "C:\xampp"
+       WshShell.Run """C:\xampp\apache\bin\httpd.exe""", 0, False
+       WshShell.Run """C:\xampp\mysql\bin\mysqld.exe"" --defaults-file=mysql\bin\my.ini --standalone", 0, False
+       ```
+2. **Autoarranque oculto de FastAPI (`:8018`) para el Corte Definitivo:**
    * *(Activar únicamente cuando el sistema anterior ya no se use en esa PC, para no disputar el puerto `COM` al encender).*
    * Presionar `Win + R` → escribir `shell:startup` → crear un acceso directo o script `.vbs`/`.cmd` que ejecute en `<RUTA_PROYECTO>`:
      ```powershell
