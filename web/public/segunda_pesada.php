@@ -674,7 +674,9 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                             <?php foreach ($pesadasPendientes as $pend): ?>
                                 <tr class="fila-pendiente" style="border-bottom: 1px solid var(--border-color);">
                                     <td style="padding: 1.15rem 0.5rem; font-weight: 800; color: #1e40af;">
-                                        <?= ($pend['tipo_operacion'] === 'COMPRA' ? 'Compra #' . $pend['id_compra'] : 'Venta #' . $pend['id_venta']) ?>
+                                        <a href="segunda_pesada.php?id=<?= (int)$pend['idpesada'] ?>" style="color: inherit; text-decoration: none;" title="Completar segunda pesada">
+                                            <?= ($pend['tipo_operacion'] === 'COMPRA' ? 'Compra #' . $pend['id_compra'] : 'Venta #' . $pend['id_venta']) ?>
+                                        </a>
                                     </td>
                                     <td style="padding: 1.15rem 0.5rem; font-weight: 800; font-family: monospace; font-size: 1rem; color: var(--text-main);">
                                         <?= htmlspecialchars((string)($pend['placa'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>

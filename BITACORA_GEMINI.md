@@ -310,6 +310,9 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` en el buscador de camiones pendientes en patio separando `:q1`, `:q2` y `:q3`.
   - Agregado filtrado en vivo (`input` / `search` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe y restaurar todas las filas al limpiar o borrar el campo.
+  - Enlazado el ID de boleta en la lista de camiones pendientes en patio (`segunda_pesada.php`) hacia su pantalla de segunda pesada.
+* **Enlace de Retorno en Boleta (`web/public/boleta.php`)**:
+  - Cambiado el enlace superior izquierdo `← Volver a Segunda Pesada` por `← Volver a Inicio` apuntando a `index.php`.
 * **KPI y Detalle de Pesadas Manuales en Dashboard (`web/public/dashboard.php`)**:
   - Agregada tarjeta KPI **Pesadas manuales** y tabla detallada **Pesadas manuales en el rango** con enlace a la boleta, operación, fecha, cliente/proveedor, producto/placa, cuál captura fue manual (`Peso Bruto`, `Tara Vehículo` o `Bruto y Tara`) y pesos registrados.
 * **Corrección de Buscador en Boletas e Historial (`web/public/pesadas.php`)**:
@@ -322,3 +325,6 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` en el buscador de camiones pendientes en patio separando `:q1`, `:q2` y `:q3`.
   - Agregado filtrado en vivo (`input` / `search` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe y restaurar todas las filas al limpiar o borrar el campo.
+  - Enlazado el ID de boleta en la lista de camiones pendientes en patio (`segunda_pesada.php`) hacia su pantalla de segunda pesada.
+* **Enlace de Retorno en Boleta (`web/public/boleta.php`)**:
+  - Cambiado el enlace superior izquierdo `← Volver a Segunda Pesada` por `← Volver a Inicio` apuntando a `index.php`.

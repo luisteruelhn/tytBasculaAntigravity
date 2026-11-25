@@ -235,8 +235,8 @@ $quintales = $pesoFinal / 100.0;
 <body>
 
 <div class="acciones-pantalla">
-    <a href="segunda_pesada.php" style="color: #1e40af; font-size: 0.95rem; font-weight: 600; text-decoration: none;">
-        &larr; Volver a Segunda Pesada
+    <a href="index.php" style="color: #1e40af; font-size: 0.95rem; font-weight: 600; text-decoration: none;">
+        &larr; Volver a Inicio
     </a>
     <div style="display: flex; gap: 1rem;">
         <a href="pesadas.php" class="btn btn-secondary" style="padding: 0.5rem 1.25rem; font-size: 0.9rem; text-decoration: none; border: 1px solid #cbd5e1; background: #fff; border-radius: 6px; color: #0f172a; font-weight: 600;">
