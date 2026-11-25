@@ -59,7 +59,8 @@ Documento de directrices y reglas obligatorias para el asistente en el proyecto 
 * **Documentación permanente**:
   - Todo cambio, decisión, prueba y despliegue debe registrarse cronológicamente en:
     - `BITACORA_GEMINI.md`: Registro de intervenciones con fecha y hora.
-    - `README_GEMINI.md`: Guía de arquitectura, instalación y ejecución.
+    - `README.md`: Guía unificada de arquitectura, módulos y ejecución rápida.
+    - `IMPLEMENTACION.md`: Guía maestra paso a paso para instalaciones, migraciones y puesta en producción.
     - `SEED_GEMINI.md`: Esquema de base de datos, datos iniciales y procedimientos de respaldo.
 
 ---

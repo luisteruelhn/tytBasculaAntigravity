@@ -264,3 +264,6 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Actualizado `SEED_GEMINI.md` completando las 12 tablas (`t_sincronizacion_pendiente`) y el 5.º rol `REMOTO`.
   - Actualizado `AGENTS_GEMINI.md` documentando el espejo HTTPS de solo lectura en Hostinger y el rol `REMOTO` en RBAC.
   - Actualizado el árbol de archivos de `README_GEMINI.md` reemplazando la referencia obsoleta `web/src/bascula.php` por `sync_nube.php`, `api_peso_local.php` y `api_bascula_control.php`.
+  - **Unificación definitiva de guías (`README.md` e `IMPLEMENTACION.md`)**:
+    - Consolidados `README.md`, `README_GEMINI.md`, `LEEME.md` y `web/README.md` en un único **`README.md`** principal actualizado a la arquitectura real (XAMPP + FastAPI `:8018` + LAN QR Offline + Espejo Hostinger), eliminando los duplicados históricos para evitar confusiones.
+    - Consolidados íntegramente `IMPLEMENT.md` e `IMPLEMENTACION_FINAL.MD` en una única guía maestra **`IMPLEMENTACION.md`** (conservando el 100% de reglas Windows/COM/DCB, baseline XAMPP/`php.ini`, instalación limpia y migración idempotente de las 12 tablas + constraints `CEILING`, diagnóstico SSE, red LAN QR, sincronización Hostinger, autoarranque de corte definitivo, checklist de 12 pruebas y protocolo de actualización/reversión).
