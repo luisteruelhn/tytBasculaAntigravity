@@ -63,11 +63,95 @@ $tablasPermitidas = [
 
 try {
     $pdo = obtenerDB();
+    $tablasDatos = $payload['tablas'] ?? [];
+
+    // Auto-migraciones idempotentes de esquema remoto ANTES de abrir transacción (DDL hace commit implícito en MySQL/MariaDB)
+    if (is_array($tablasDatos)) {
+        if (!empty($tablasDatos['t_usuarios'])) {
+            try {
+                $pdo->exec('ALTER TABLE `t_usuarios` ADD COLUMN IF NOT EXISTS `clave_visible` VARCHAR(512) DEFAULT NULL AFTER `clave_hash`');
+            } catch (Throwable $eAlterUsr) {
+                // Ignorar si ya existe o no tiene privilegio ALTER
+            }
+        }
+
+        if (!empty($tablasDatos['t_pesadas'])) {
+            try {
+                $createPesRow = $pdo->query('SHOW CREATE TABLE `t_pesadas`')->fetch(PDO::FETCH_NUM);
+                $ddlPesadas = (string)($createPesRow[1] ?? '');
+                if ($ddlPesadas !== '' && stripos($ddlPesadas, 'chk_pesadas_descuentos') !== false && stripos($ddlPesadas, 'CEILING') === false) {
+                    try {
+                        $pdo->exec('ALTER TABLE `t_pesadas` DROP CONSTRAINT IF EXISTS `chk_pesadas_pesos`');
+                        $pdo->exec('ALTER TABLE `t_pesadas` DROP CONSTRAINT IF EXISTS `chk_pesadas_descuentos`');
+                    } catch (Throwable $eDrop) {
+                        // Compatibilidad MySQL 8 si no es MariaDB
+                        try { $pdo->exec('ALTER TABLE `t_pesadas` DROP CHECK `chk_pesadas_pesos`'); } catch (Throwable $e1) {}
+                        try { $pdo->exec('ALTER TABLE `t_pesadas` DROP CHECK `chk_pesadas_descuentos`'); } catch (Throwable $e2) {}
+                    }
+
+                    $pdo->exec("
+                        ALTER TABLE `t_pesadas`
+                            ADD CONSTRAINT `chk_pesadas_pesos` CHECK (
+                                peso_bruto_lb >= 0
+                                AND tara_vehiculo_lb >= 0
+                                AND peso_final_lb >= 0
+                                AND (peso_bruto_lb IS NULL OR tara_vehiculo_lb IS NULL OR peso_bruto_lb >= tara_vehiculo_lb)
+                                AND (
+                                    peso_final_lb IS NULL
+                                    OR peso_final_lb <= peso_bruto_lb - tara_vehiculo_lb - CASE
+                                        WHEN calculo_libras_enteras THEN LEAST(
+                                            ROUND(cantidad_empaques * COALESCE(tara_unitaria_aplicada_lb, 0), 0),
+                                            CEILING(ROUND(cantidad_empaques * COALESCE(tara_unitaria_aplicada_lb, 0), 4))
+                                        )
+                                        ELSE cantidad_empaques * COALESCE(tara_unitaria_aplicada_lb, 0)
+                                    END
+                                )
+                                AND calculo_libras_enteras IN (0, 1)
+                                AND (calculo_libras_enteras = 0 OR (peso_bruto_lb MOD 1 = 0 AND tara_vehiculo_lb MOD 1 = 0 AND peso_final_lb MOD 1 = 0))
+                            ),
+                            ADD CONSTRAINT `chk_pesadas_descuentos` CHECK (
+                                (base_descuentos_lb IS NULL AND descuento_humedad_lb IS NULL AND descuento_defectos_lb IS NULL)
+                                OR (
+                                    base_descuentos_lb IS NOT NULL
+                                    AND descuento_humedad_lb IS NOT NULL
+                                    AND descuento_defectos_lb IS NOT NULL
+                                    AND calculo_libras_enteras = 1
+                                    AND estado IN ('CERRADA', 'ANULADA')
+                                    AND segunda_pesada_at IS NOT NULL
+                                    AND base_descuentos_lb >= 0
+                                    AND descuento_humedad_lb >= 0
+                                    AND descuento_defectos_lb >= 0
+                                    AND base_descuentos_lb MOD 1 = 0
+                                    AND descuento_humedad_lb MOD 1 = 0
+                                    AND descuento_defectos_lb MOD 1 = 0
+                                    AND ajuste_humedad_pct + descuento_calidad_pct <= 100
+                                    AND base_descuentos_lb IN (
+                                        peso_bruto_lb - tara_vehiculo_lb - CEILING(ROUND(cantidad_empaques * COALESCE(tara_unitaria_aplicada_lb, 0), 4)),
+                                        peso_bruto_lb - tara_vehiculo_lb - ROUND(cantidad_empaques * COALESCE(tara_unitaria_aplicada_lb, 0), 0)
+                                    )
+                                    AND descuento_humedad_lb IN (
+                                        CEILING(ROUND(base_descuentos_lb * ajuste_humedad_pct / 100, 4)),
+                                        ROUND(base_descuentos_lb * ajuste_humedad_pct / 100, 0)
+                                    )
+                                    AND descuento_defectos_lb IN (
+                                        CEILING(ROUND(base_descuentos_lb * descuento_calidad_pct / 100, 4)),
+                                        ROUND(base_descuentos_lb * descuento_calidad_pct / 100, 0)
+                                    )
+                                    AND peso_final_lb = base_descuentos_lb - descuento_humedad_lb - descuento_defectos_lb
+                                )
+                            )
+                    ");
+                }
+            } catch (Throwable $eAlterChk) {
+                // Continuar si el motor no requiere o no permite cambiar el CHECK
+            }
+        }
+    }
+
     $pdo->beginTransaction();
     $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
 
     $resumen = [];
-    $tablasDatos = $payload['tablas'] ?? [];
 
     if (is_array($tablasDatos)) {
         foreach ($tablasPermitidas as $tabla) {
@@ -76,11 +160,6 @@ try {
             }
 
             if ($tabla === 't_usuarios') {
-                try {
-                    $pdo->exec('ALTER TABLE `t_usuarios` ADD COLUMN IF NOT EXISTS `clave_visible` VARCHAR(512) DEFAULT NULL AFTER `clave_hash`');
-                } catch (Throwable $eAlter) {
-                    // Continúa con las columnas existentes si el usuario MySQL remoto no tiene privilegio ALTER
-                }
                 // Garantizar que ningún usuario pesador (OPERADOR) exista en la base de datos de la nube
                 $pdo->exec("DELETE FROM `t_usuarios` WHERE `rol` = 'OPERADOR'");
             }

@@ -269,7 +269,7 @@ CREATE TABLE IF NOT EXISTS t_pesadas (
         peso_bruto_lb >= 0 AND tara_vehiculo_lb >= 0 AND peso_final_lb >= 0
         AND (peso_bruto_lb IS NULL OR tara_vehiculo_lb IS NULL OR peso_bruto_lb >= tara_vehiculo_lb)
         AND (peso_final_lb IS NULL OR peso_final_lb <= peso_bruto_lb - tara_vehiculo_lb
-             - CASE WHEN calculo_libras_enteras THEN ROUND(cantidad_empaques * COALESCE(tara_unitaria_aplicada_lb, 0), 0)
+             - CASE WHEN calculo_libras_enteras THEN CEILING(ROUND(cantidad_empaques * COALESCE(tara_unitaria_aplicada_lb, 0), 4))
                     ELSE cantidad_empaques * COALESCE(tara_unitaria_aplicada_lb, 0) END)
         AND calculo_libras_enteras IN (0, 1)
         AND (calculo_libras_enteras = FALSE OR
@@ -282,9 +282,9 @@ CREATE TABLE IF NOT EXISTS t_pesadas (
             AND base_descuentos_lb>=0 AND descuento_humedad_lb>=0 AND descuento_defectos_lb>=0
             AND MOD(base_descuentos_lb,1)=0 AND MOD(descuento_humedad_lb,1)=0 AND MOD(descuento_defectos_lb,1)=0
             AND ajuste_humedad_pct+descuento_calidad_pct<=100
-            AND base_descuentos_lb=peso_bruto_lb-tara_vehiculo_lb-ROUND(cantidad_empaques*COALESCE(tara_unitaria_aplicada_lb,0),0)
-            AND descuento_humedad_lb=ROUND(base_descuentos_lb*ajuste_humedad_pct/100,0)
-            AND descuento_defectos_lb=ROUND(base_descuentos_lb*descuento_calidad_pct/100,0)
+            AND base_descuentos_lb=peso_bruto_lb-tara_vehiculo_lb-CEILING(ROUND(cantidad_empaques*COALESCE(tara_unitaria_aplicada_lb,0),4))
+            AND descuento_humedad_lb=CEILING(ROUND(base_descuentos_lb*ajuste_humedad_pct/100,4))
+            AND descuento_defectos_lb=CEILING(ROUND(base_descuentos_lb*descuento_calidad_pct/100,4))
             AND peso_final_lb=base_descuentos_lb-descuento_humedad_lb-descuento_defectos_lb)
     ),
     CONSTRAINT chk_pesadas_empaque CHECK (
