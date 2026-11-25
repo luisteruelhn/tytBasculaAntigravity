@@ -308,6 +308,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Buscador Instantáneo en Filtros de Reportes (`web/public/reportes.php`)**:
   - Agregado `inicializarBuscadorFiltro()` para permitir escribir y filtrar al instante en los selectores de **Cliente / proveedor** (`#persona_id`) y **Producto** (`#producto_id`), conservando sincronizados los filtros de `Tipo de persona` y `Categoría`.
   - Agregados ajustes responsivos exclusivos para móvil (`@media screen and (max-width: 768px)`) en `reportes.php` para apilar el encabezado del reporte sin recortes, envolver subtotales y habilitar scroll horizontal limpio en tablas sin alterar escritorio ni impresión.
+  - Mejorado el contraste de los textos azules oscuros (`REPORTE DE BOLETAS`, `SECCIÓN: COMPRAS` y correlativo `#boleta`) exclusivamente en Modo Oscuro (`[data-theme="dark"]` bajo `@media screen`) en `reportes.php`.
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` en el buscador de camiones pendientes en patio separando `:q1`, `:q2` y `:q3`.
   - Agregado filtrado en vivo (`input` / `search` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe (tolerando búsquedas sin `#` o con espacios como `compra 19` / `c ompra 19`) y restaurar todas las filas al limpiar o borrar el campo.
@@ -324,6 +325,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Buscador Instantáneo en Filtros de Reportes (`web/public/reportes.php`)**:
   - Agregado `inicializarBuscadorFiltro()` para permitir escribir y filtrar al instante en los selectores de **Cliente / proveedor** (`#persona_id`) y **Producto** (`#producto_id`), conservando sincronizados los filtros de `Tipo de persona` y `Categoría`.
   - Agregados ajustes responsivos exclusivos para móvil (`@media screen and (max-width: 768px)`) en `reportes.php` para apilar el encabezado del reporte sin recortes, envolver subtotales y habilitar scroll horizontal limpio en tablas sin alterar escritorio ni impresión.
+  - Mejorado el contraste de los textos azules oscuros (`REPORTE DE BOLETAS`, `SECCIÓN: COMPRAS` y correlativo `#boleta`) exclusivamente en Modo Oscuro (`[data-theme="dark"]` bajo `@media screen`) en `reportes.php`.
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` en el buscador de camiones pendientes en patio separando `:q1`, `:q2` y `:q3`.
   - Agregado filtrado en vivo (`input` / `search` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe (tolerando búsquedas sin `#` o con espacios como `compra 19` / `c ompra 19`) y restaurar todas las filas al limpiar o borrar el campo.

@@ -1042,6 +1042,22 @@ function descargarPDFDirecto() {
 </script>
 
 <style>
+@media screen {
+    [data-theme="dark"] .no-print > span[style*="color: #1e40af"] {
+        color: #60a5fa !important;
+    }
+    [data-theme="dark"] #seccionReporteImprimible > div:first-child h3 {
+        color: #f8fafc !important;
+    }
+    [data-theme="dark"] #seccionReporteImprimible h4[style*="color: #1e40af"],
+    [data-theme="dark"] #seccionReporteImprimible td[style*="color: #1e40af"] {
+        color: #60a5fa !important;
+    }
+    [data-theme="dark"] #seccionReporteImprimible > div[style*="border-bottom: 2px solid #1e40af"] {
+        border-bottom-color: #60a5fa !important;
+    }
+}
+
 @media screen and (max-width: 768px) {
     .card.no-print {
         padding: 1.15rem 1rem !important;
