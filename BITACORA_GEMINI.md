@@ -300,3 +300,5 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregada como primera regla mandatoria: prohibido hacer más cambios de los que se solicitan (aplicar única y exclusivamente la instrucción literal del usuario).
 * **KPI y Detalle de Pesadas Manuales en Dashboard (`web/public/dashboard.php`)**:
   - Agregada tarjeta KPI **Pesadas manuales** y tabla detallada **Pesadas manuales en el rango** con enlace a la boleta, operación, fecha, cliente/proveedor, producto/placa, cuál captura fue manual (`Peso Bruto`, `Tara Vehículo` o `Bruto y Tara`) y pesos registrados.
+* **Corrección de Buscador en Boletas e Historial (`web/public/pesadas.php`)**:
+  - Corregido `SQLSTATE[HY093]: Invalid parameter number` al filtrar por texto/placa/boleta separando los placeholders `:q1`, `:q2`, `:q_num1` y `:q_num2` bajo `ATTR_EMULATE_PREPARES = false`.

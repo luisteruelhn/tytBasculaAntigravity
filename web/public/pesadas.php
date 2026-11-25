@@ -170,9 +170,13 @@ $sql = "
 $params = [':empresa_id' => $empresaId];
 
 if ($busqueda !== '') {
-    $sql .= " AND (p.placa LIKE :q OR cp.nombre LIKE :q OR p.id_compra LIKE :q_num OR p.id_venta LIKE :q_num)";
-    $params[':q'] = '%' . $busqueda . '%';
-    $params[':q_num'] = '%' . ltrim($busqueda, '#0') . '%';
+    $sql .= " AND (p.placa LIKE :q1 OR cp.nombre LIKE :q2 OR p.id_compra LIKE :q_num1 OR p.id_venta LIKE :q_num2)";
+    $likeTexto = '%' . $busqueda . '%';
+    $likeNum   = '%' . ltrim($busqueda, '#0') . '%';
+    $params[':q1']     = $likeTexto;
+    $params[':q2']     = $likeTexto;
+    $params[':q_num1'] = $likeNum;
+    $params[':q_num2'] = $likeNum;
 }
 
 if ($filtroTipo === 'COMPRA' || $filtroTipo === 'VENTA') {
