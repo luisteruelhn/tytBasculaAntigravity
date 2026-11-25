@@ -240,8 +240,11 @@ $sqlPendientes = "
 $paramsPend = [':empresa_id' => $empresaId];
 
 if ($filtroQ !== '') {
-    $sqlPendientes .= " AND (p.placa LIKE :q OR cp.nombre LIKE :q OR prod.nombre LIKE :q)";
-    $paramsPend[':q'] = '%' . $filtroQ . '%';
+    $sqlPendientes .= " AND (p.placa LIKE :q1 OR cp.nombre LIKE :q2 OR prod.nombre LIKE :q3)";
+    $likeQ = '%' . $filtroQ . '%';
+    $paramsPend[':q1'] = $likeQ;
+    $paramsPend[':q2'] = $likeQ;
+    $paramsPend[':q3'] = $likeQ;
 }
 
 $sqlPendientes .= " ORDER BY p.idpesada DESC";
