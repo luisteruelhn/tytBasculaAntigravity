@@ -306,6 +306,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregado `inicializarBuscadorFiltro()` para permitir escribir y filtrar al instante en los selectores de **Cliente / proveedor** (`#persona_id`) y **Producto** (`#producto_id`), conservando sincronizados los filtros de `Tipo de persona` y `Categoría`.
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` en el buscador de camiones pendientes en patio separando `:q1`, `:q2` y `:q3`.
+  - Agregado filtrado en vivo (`input` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe.
 * **KPI y Detalle de Pesadas Manuales en Dashboard (`web/public/dashboard.php`)**:
   - Agregada tarjeta KPI **Pesadas manuales** y tabla detallada **Pesadas manuales en el rango** con enlace a la boleta, operación, fecha, cliente/proveedor, producto/placa, cuál captura fue manual (`Peso Bruto`, `Tara Vehículo` o `Bruto y Tara`) y pesos registrados.
 * **Corrección de Buscador en Boletas e Historial (`web/public/pesadas.php`)**:
@@ -314,3 +315,4 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregado `inicializarBuscadorFiltro()` para permitir escribir y filtrar al instante en los selectores de **Cliente / proveedor** (`#persona_id`) y **Producto** (`#producto_id`), conservando sincronizados los filtros de `Tipo de persona` y `Categoría`.
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` en el buscador de camiones pendientes en patio separando `:q1`, `:q2` y `:q3`.
+  - Agregado filtrado en vivo (`input` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe.

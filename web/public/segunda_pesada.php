@@ -652,7 +652,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                 </div>
 
                 <form method="GET" action="segunda_pesada.php" style="display: flex; gap: 0.65rem; align-items: center; max-width: 350px;">
-                    <input type="text" name="q" class="form-control" placeholder="Buscar por placa o persona..." value="<?= htmlspecialchars($filtroQ, ENT_QUOTES, 'UTF-8') ?>" style="height: 40px; border-radius: 6px;">
+                    <input type="text" id="buscadorPendientes" name="q" class="form-control" placeholder="Buscar por placa, boleta o persona..." value="<?= htmlspecialchars($filtroQ, ENT_QUOTES, 'UTF-8') ?>" autocomplete="off" style="height: 40px; border-radius: 6px;">
                     <button type="submit" class="btn btn-secondary" style="height: 40px; padding: 0 1rem; font-weight: 600; background: #e8f0fe; color: #1e40af; border: none;">
                         Buscar
                     </button>
@@ -671,7 +671,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                             <th style="background: transparent; color: var(--text-main); font-size: 0.9rem; font-weight: 700; padding: 0.85rem 0.5rem; text-align: right;">Acción</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="tablaPendientesBody">
                         <?php if (empty($pesadasPendientes)): ?>
                             <tr>
                                 <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3.5rem 1rem;">
@@ -680,7 +680,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                             </tr>
                         <?php else: ?>
                             <?php foreach ($pesadasPendientes as $pend): ?>
-                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                <tr class="fila-pendiente" style="border-bottom: 1px solid var(--border-color);">
                                     <td style="padding: 1.15rem 0.5rem; font-weight: 800; color: #1e40af;">
                                         <?= ($pend['tipo_operacion'] === 'COMPRA' ? 'Compra #' . $pend['id_compra'] : 'Venta #' . $pend['id_venta']) ?>
                                     </td>
@@ -704,6 +704,11 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
+                            <tr id="filaSinCoincidenciasPendientes" style="display: none;">
+                                <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem 1rem;">
+                                    No se encontraron camiones pendientes que coincidan con tu búsqueda.
+                                </td>
+                            </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -945,6 +950,30 @@ function calcularTotales() {
         }
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const inputBusq = document.getElementById('buscadorPendientes');
+    if (!inputBusq) return;
+
+    const filas = Array.from(document.querySelectorAll('#tablaPendientesBody tr.fila-pendiente'));
+    const filaVacia = document.getElementById('filaSinCoincidenciasPendientes');
+    const normalizar = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+    function filtrarEnVivo() {
+        const q = normalizar(inputBusq.value);
+        let visibles = 0;
+        filas.forEach(tr => {
+            const coincide = (q === '' || normalizar(tr.textContent).includes(q));
+            tr.style.display = coincide ? '' : 'none';
+            if (coincide) visibles++;
+        });
+        if (filaVacia) {
+            filaVacia.style.display = (filas.length > 0 && visibles === 0) ? '' : 'none';
+        }
+    }
+
+    inputBusq.addEventListener('input', filtrarEnVivo);
+});
 </script>
 
 <?php
