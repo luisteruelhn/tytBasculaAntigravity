@@ -951,13 +951,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const filas = Array.from(document.querySelectorAll('#tablaPendientesBody tr.fila-pendiente'));
     const filaVacia = document.getElementById('filaSinCoincidenciasPendientes');
-    const normalizar = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const normalizar = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/#/g, ' ').replace(/\s+/g, ' ').toLowerCase().trim();
+    const compactar = (t) => normalizar(t).replace(/\s+/g, '');
 
     function filtrarEnVivo() {
         const q = normalizar(inputBusq.value);
+        const qCompacta = compactar(inputBusq.value);
+        const tokens = q ? q.split(' ').filter(Boolean) : [];
         let visibles = 0;
         filas.forEach(tr => {
-            const coincide = (q === '' || normalizar(tr.textContent).includes(q));
+            const texto = normalizar(tr.textContent);
+            const coincide = (q === '' || tokens.every(tok => texto.includes(tok)) || compactar(texto).includes(qCompacta));
             tr.style.display = coincide ? '' : 'none';
             if (coincide) visibles++;
         });

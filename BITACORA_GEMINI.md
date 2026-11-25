@@ -309,7 +309,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregado `inicializarBuscadorFiltro()` para permitir escribir y filtrar al instante en los selectores de **Cliente / proveedor** (`#persona_id`) y **Producto** (`#producto_id`), conservando sincronizados los filtros de `Tipo de persona` y `Categoría`.
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` en el buscador de camiones pendientes en patio separando `:q1`, `:q2` y `:q3`.
-  - Agregado filtrado en vivo (`input` / `search` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe y restaurar todas las filas al limpiar o borrar el campo.
+  - Agregado filtrado en vivo (`input` / `search` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe (tolerando búsquedas sin `#` o con espacios como `compra 19` / `c ompra 19`) y restaurar todas las filas al limpiar o borrar el campo.
   - Enlazado el ID de boleta en la lista de camiones pendientes en patio (`segunda_pesada.php`) hacia su pantalla de segunda pesada.
 * **Enlace de Retorno en Boleta (`web/public/boleta.php`)**:
   - Cambiado el enlace superior izquierdo `← Volver a Segunda Pesada` por `← Volver a Inicio` apuntando a `index.php`.
@@ -324,7 +324,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregado `inicializarBuscadorFiltro()` para permitir escribir y filtrar al instante en los selectores de **Cliente / proveedor** (`#persona_id`) y **Producto** (`#producto_id`), conservando sincronizados los filtros de `Tipo de persona` y `Categoría`.
 * **Corrección de Buscador en Segunda Pesada (`web/public/segunda_pesada.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` en el buscador de camiones pendientes en patio separando `:q1`, `:q2` y `:q3`.
-  - Agregado filtrado en vivo (`input` / `search` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe y restaurar todas las filas al limpiar o borrar el campo.
+  - Agregado filtrado en vivo (`input` / `search` event) en la lista de camiones pendientes en patio de `segunda_pesada.php` para mostrar resultados al instante mientras se escribe (tolerando búsquedas sin `#` o con espacios como `compra 19` / `c ompra 19`) y restaurar todas las filas al limpiar o borrar el campo.
   - Enlazado el ID de boleta en la lista de camiones pendientes en patio (`segunda_pesada.php`) hacia su pantalla de segunda pesada.
 * **Enlace de Retorno en Boleta (`web/public/boleta.php`)**:
   - Cambiado el enlace superior izquierdo `← Volver a Segunda Pesada` por `← Volver a Inicio` apuntando a `index.php`.
