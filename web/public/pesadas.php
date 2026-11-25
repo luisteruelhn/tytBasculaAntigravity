@@ -314,7 +314,7 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                                             <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; font-family: sans-serif;"><?= $b['tipo_operacion'] ?></div>
                                         </a>
                                     <?php elseif (!$esAnulada && !$esRemoto): ?>
-                                        <a href="segunda_pesada.php?id=<?= (int)$b['idpesada'] ?>" style="color: inherit; text-decoration: none;" title="Completar segunda pesada">
+                                        <a href="segunda_pesada.php" style="color: inherit; text-decoration: none;" title="Ver camiones pendientes en patio">
                                             <?= htmlspecialchars($numFormato, ENT_QUOTES, 'UTF-8') ?>
                                             <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; font-family: sans-serif;"><?= $b['tipo_operacion'] ?></div>
                                         </a>
