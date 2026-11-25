@@ -73,9 +73,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
             try {
                 $pdo->beginTransaction();
 
-                // Obtener correlativo de compra o venta para la empresa
+                // Obtener correlativo único continuo (Compra y Venta comparten secuencia a partir de 418)
                 $colCorrelativo = ($tipoOperacion === 'COMPRA') ? 'id_compra' : 'id_venta';
-                $stmtCorr = $pdo->prepare("SELECT COALESCE(MAX($colCorrelativo), 0) + 1 AS sig FROM t_pesadas WHERE empresa_id = :empresa_id");
+                $stmtCorr = $pdo->prepare("
+                    SELECT GREATEST(
+                        417,
+                        COALESCE(MAX(id_compra), 0),
+                        COALESCE(MAX(id_venta), 0)
+                    ) + 1 AS sig
+                    FROM t_pesadas
+                    WHERE empresa_id = :empresa_id
+                    FOR UPDATE
+                ");
                 $stmtCorr->execute([':empresa_id' => $empresaId]);
                 $correlativo = (int)$stmtCorr->fetch(PDO::FETCH_ASSOC)['sig'];
 
