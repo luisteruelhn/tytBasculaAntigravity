@@ -1042,6 +1042,73 @@ function descargarPDFDirecto() {
 </script>
 
 <style>
+@media screen and (max-width: 768px) {
+    .card.no-print {
+        padding: 1.15rem 1rem !important;
+    }
+    #formReporte > div:nth-child(2) > div[style*="width: 1px"] {
+        display: none !important;
+    }
+    #formReporte > div:nth-child(2) > div {
+        flex: 1 1 130px !important;
+        width: auto !important;
+    }
+    #formReporte > div:nth-child(2) > button,
+    #formReporte > div:nth-child(2) > a {
+        flex: 1 1 calc(50% - 0.4rem);
+        justify-content: center;
+    }
+    #seccionReporteImprimible {
+        padding: 1.15rem 0.9rem !important;
+        overflow-x: hidden;
+    }
+    #seccionReporteImprimible > div:first-child {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.9rem !important;
+        margin-bottom: 1.25rem !important;
+    }
+    #seccionReporteImprimible > div:first-child > div:first-child {
+        gap: 0.85rem !important;
+        align-items: flex-start !important;
+    }
+    #seccionReporteImprimible > div:first-child img {
+        max-height: 54px !important;
+        max-width: 74px !important;
+    }
+    #seccionReporteImprimible > div:first-child h2 {
+        font-size: 1.1rem !important;
+    }
+    #seccionReporteImprimible > div:first-child > div:last-child {
+        text-align: left !important;
+        width: 100%;
+    }
+    #seccionReporteImprimible > div:first-child h3 {
+        font-size: 1.05rem !important;
+    }
+    #seccionReporteImprimible > div[style*="justify-content: space-between"] {
+        flex-wrap: wrap !important;
+        gap: 0.4rem 0.85rem !important;
+    }
+    #seccionReporteImprimible .table-responsive {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    #seccionReporteImprimible .table-responsive > table.table {
+        min-width: 680px !important;
+        white-space: nowrap;
+    }
+    #seccionReporteImprimible div[style*="display: flex"][style*="gap: 1.5rem"],
+    #seccionReporteImprimible div[style*="display: flex"][style*="gap: 1.75rem"],
+    #seccionReporteImprimible div[style*="display: flex"][style*="gap: 2rem"] {
+        flex-wrap: wrap !important;
+        gap: 0.5rem 1rem !important;
+    }
+}
+
 @media print {
     .app-sidebar, .mobile-topbar, .footer, #formReporte, .no-print, #chat-widget-btn, #chat-widget-panel, [class*="chat-"] {
         display: none !important;
