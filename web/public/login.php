@@ -122,8 +122,8 @@ $tokenFormulario = obtenerCsrfToken();
     <title>Acceso — Báscula de Rastras y Carga Pesada</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico?v=20261125">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=20261125">
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="assets/js/theme.js"></script>
+    <link rel="stylesheet" href="assets/css/style.css?v=20261125d">
+    <script src="assets/js/theme.js?v=20261125d"></script>
     <style>
         .login-page-container {
             min-height: 100vh;

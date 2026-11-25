@@ -66,9 +66,9 @@ function renderizarEncabezado(string $titulo = 'Sistema de Báscula', string $se
     <link rel="icon" type="image/x-icon" href="favicon.ico?v=20261125">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=20261125">
     <!-- Estilos CSS Modernos y Ligeros -->
-    <link rel="stylesheet" href="assets/css/style.css?v=20261124m">
+    <link rel="stylesheet" href="assets/css/style.css?v=20261125d">
     <!-- Carga inmediata de tema para evitar parpadeos -->
-    <script src="assets/js/theme.js?v=20261124c"></script>
+    <script src="assets/js/theme.js?v=20261125d"></script>
 </head>
 <body>
 

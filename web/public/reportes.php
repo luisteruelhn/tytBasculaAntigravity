@@ -1024,15 +1024,18 @@ function descargarPDFDirecto() {
         margin:       [6, 6, 6, 6],
         filename:     'Reporte_Boletas_<?= date('Ymd_His') ?>.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        html2canvas:  { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' },
         jsPDF:        { unit: 'mm', format: 'letter', orientation: 'landscape' },
         pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
     };
 
+    document.body.classList.add('generando-pdf');
     html2pdf().set(opt).from(elemento).save().then(() => {
+        document.body.classList.remove('generando-pdf');
         btn.disabled = false;
         btn.innerHTML = textoOriginal;
     }).catch(err => {
+        document.body.classList.remove('generando-pdf');
         console.error('Error html2pdf:', err);
         window.print();
         btn.disabled = false;

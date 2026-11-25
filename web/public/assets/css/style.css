@@ -1012,3 +1012,190 @@ select.form-control {
         padding: 0.4rem 0;
     }
 }
+
+/* ==========================================================================
+   ESTANDARIZACIÓN GLOBAL DE MODO OSCURO (ALINEADO CON DASHBOARD)
+   Solo afecta pantalla (@media screen) y excluye generación directa de PDF
+   ========================================================================== */
+@media screen {
+    /* 1. Textos y números oscuros -> blanco/gris claro nítido (#f1f5f9 / #f8fafc) */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #0f172a"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #0f233a"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #1e293b"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #334155"] {
+        color: #f1f5f9 !important;
+    }
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content div[style*="background: #334155"] {
+        background: var(--bg-surface-elevated) !important;
+        border: 1px solid var(--border-color);
+        color: #f8fafc !important;
+    }
+
+    /* 2. Textos secundarios, encabezados de tabla y etiquetas -> gris pizarra claro (#94a3b8) */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #475569"]:not(button),
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #64748b"] {
+        color: #94a3b8 !important;
+    }
+
+    /* 3. Acentos azules, subtítulos de sección, enlaces y # de boleta -> azul claro legible (#60a5fa) */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #1e40af"]:not([style*="background: #1e40af"]),
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #1e3a8a"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #0b57d0"]:not(.btn-primary):not([style*="background: #0b57d0"]),
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #2563eb"]:not(.btn-primary):not([style*="background: #2563eb"]) {
+        color: #60a5fa !important;
+    }
+
+    /* 4. Acentos semánticos (verde ventas/activo, ámbar, rojo/burdeos de pesos y descuentos) */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #047857"]:not([style*="background: #047857"]),
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #065f46"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #166534"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #16a34a"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: rgb(22, 163, 74)"] {
+        color: #34d399 !important;
+    }
+
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #b45309"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #92400e"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #d97706"] {
+        color: #fbbf24 !important;
+    }
+
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #991b1b"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #b91c1c"]:not([style*="background: #b91c1c"]),
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #dc2626"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: rgb(220, 38, 38)"] {
+        color: #f87171 !important;
+    }
+
+    /* Números de 1ra captura en tabla de pendientes (color burdeos #701a2b en claro -> legible en oscuro) */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="color: #701a2b"] {
+        color: #fda4af !important;
+    }
+
+    /* 5. Fondos claros incrustados -> superficies oscuras uniformes con el Dashboard */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #f8fafc"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #f1f5f9"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #e2e8f0"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: linear-gradient(135deg, #f1f5f9"] {
+        background: var(--bg-surface-elevated) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #ffffff"]:not(#contenedorQrInicio):not(#cajaQrDeploy),
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background:#ffffff"]:not(#contenedorQrInicio):not(#cajaQrDeploy) {
+        background: var(--bg-surface-elevated) !important;
+        border-color: var(--border-color) !important;
+    }
+
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content select[style*="background: rgb(255, 255, 255)"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content select[style*="background: rgb(248, 250, 252)"] {
+        background: var(--bg-input) !important;
+        color: var(--text-main) !important;
+        border-color: var(--border-input) !important;
+    }
+
+    /* Botón inactivo de COMPRA/VENTA en Primera Pesada */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content button[style*="background: transparent"][style*="color: #475569"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content button[style*="background: transparent"][style*="color: rgb(71, 85, 105)"] {
+        color: #cbd5e1 !important;
+    }
+
+    /* Fondos pastel (azul, verde, ámbar, rojo) -> translúcidos suaves en modo oscuro */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #eff6ff"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #dbeafe"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #e8f0fe"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: rgb(219, 234, 254)"] {
+        background: rgba(59, 130, 246, 0.16) !important;
+        border-color: rgba(96, 165, 250, 0.32) !important;
+    }
+
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #ecfdf5"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #f0fdf4"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #d1fae5"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: rgb(209, 250, 229)"] {
+        background: rgba(16, 185, 129, 0.15) !important;
+        border-color: rgba(52, 211, 153, 0.32) !important;
+    }
+
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #fef3c7"] {
+        background: rgba(245, 158, 11, 0.16) !important;
+        border-color: rgba(251, 191, 36, 0.32) !important;
+    }
+
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="background: #fef2f2"] {
+        background: rgba(239, 68, 68, 0.15) !important;
+        border-color: rgba(248, 113, 113, 0.32) !important;
+    }
+
+    /* 6. Bordes divisores de tablas y tarjetas que tenían grises claros fijos */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="border-bottom: 1px solid #f1f5f9"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="border-bottom: 1px dotted #e2e8f0"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="border-bottom: 2px solid #0f233a"] {
+        border-bottom-color: var(--border-color) !important;
+    }
+
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="border-top: 1px solid #cbd5e1"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="border-top: 1px solid #94a3b8"],
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content [style*="border-top: 1px dashed #cbd5e1"] {
+        border-top-color: var(--border-color) !important;
+    }
+
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content div[style*="width: 1px"][style*="background: #cbd5e1"] {
+        background: var(--border-color) !important;
+    }
+
+    /* Gráfico SVG de Evolución Diaria en Dashboard */
+    html[data-theme="dark"] body:not(.generando-pdf) .dash-wrapper svg line[stroke="#cbd5e1"] {
+        stroke: rgba(148, 163, 184, 0.25);
+    }
+    html[data-theme="dark"] body:not(.generando-pdf) .dash-wrapper svg polyline[stroke="#0b57d0"] {
+        stroke: #60a5fa;
+    }
+    html[data-theme="dark"] body:not(.generando-pdf) .dash-wrapper svg polyline[stroke="#64748b"] {
+        stroke: #94a3b8;
+    }
+    html[data-theme="dark"] body:not(.generando-pdf) .dash-wrapper svg text[fill="#64748b"] {
+        fill: #94a3b8;
+    }
+
+    /* Números de tablas en general con contraste nítido */
+    html[data-theme="dark"] body:not(.generando-pdf) .main-content table tbody td {
+        color: #f1f5f9;
+    }
+
+    /* 7. Widget flotante Asistente TYTOne en modo oscuro */
+    html[data-theme="dark"] #chatBoxContainer {
+        background: var(--bg-surface) !important;
+        border-color: var(--border-color) !important;
+        box-shadow: var(--shadow-lg) !important;
+    }
+    html[data-theme="dark"] #chatMessages {
+        background: var(--bg-primary) !important;
+    }
+    html[data-theme="dark"] #chatMessages > div[style*="background: #ffffff"] {
+        background: var(--bg-surface-elevated) !important;
+        border-color: var(--border-color) !important;
+        color: #f1f5f9 !important;
+    }
+    html[data-theme="dark"] #chatMessages > div[style*="background: #fef2f2"] {
+        background: rgba(239, 68, 68, 0.16) !important;
+        border-color: rgba(248, 113, 113, 0.35) !important;
+        color: #fca5a5 !important;
+    }
+    html[data-theme="dark"] #chatBoxContainer > div[style*="background: #f1f5f9"] {
+        background: var(--bg-surface) !important;
+        border-top-color: var(--border-color) !important;
+    }
+    html[data-theme="dark"] #chatBoxContainer > div[style*="background: #f1f5f9"] button {
+        background: var(--bg-surface-elevated) !important;
+        border-color: var(--border-input) !important;
+        color: #e2e8f0 !important;
+    }
+    html[data-theme="dark"] #chatForm {
+        background: var(--bg-surface) !important;
+        border-top-color: var(--border-color) !important;
+    }
+    html[data-theme="dark"] #chatInput {
+        color: var(--text-main) !important;
+    }
+}
