@@ -301,6 +301,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **KPI y Detalle de Pesadas Manuales en Dashboard (`web/public/dashboard.php`)**:
   - Agregada tarjeta KPI **Pesadas manuales** y tabla detallada **Pesadas manuales en el rango** con enlace a la boleta, operación, fecha, cliente/proveedor, producto/placa, cuál captura fue manual (`Peso Bruto`, `Tara Vehículo` o `Bruto y Tara`) y pesos registrados.
   - Mejorada la legibilidad de los números y celdas de tablas en `dashboard.php` exclusivamente en Modo Oscuro (`[data-theme="dark"]`).
+  - Uniformada la vista móvil (`@media screen and (max-width: 768px)`) de `dashboard.php`: eliminado el desborde horizontal de `minmax(450px, 1fr)` en Compras/Ventas que encogía el resto de tarjetas, alineadas fechas `Desde`/`Hasta` al 50%/50%, botones de acceso rápido e indicadores KPI en grillas simétricas de 2 columnas y tablas con desplazamiento horizontal limpio sin alterar escritorio.
 * **Corrección de Buscador en Boletas e Historial (`web/public/pesadas.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` al filtrar por texto/placa/boleta separando los placeholders `:q1`, `:q2`, `:q_num1` y `:q_num2` bajo `ATTR_EMULATE_PREPARES = false`.
   - Implementado filtrado instantáneo en vivo (`q`, `tipo`, `estado` y `fecha`) para mostrar resultados mientras se escribe o cambian los selectores (tratando espacios como comodines y tolerando `#` / espacios), restaurando todo el historial al limpiar o borrar el texto.
@@ -319,6 +320,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **KPI y Detalle de Pesadas Manuales en Dashboard (`web/public/dashboard.php`)**:
   - Agregada tarjeta KPI **Pesadas manuales** y tabla detallada **Pesadas manuales en el rango** con enlace a la boleta, operación, fecha, cliente/proveedor, producto/placa, cuál captura fue manual (`Peso Bruto`, `Tara Vehículo` o `Bruto y Tara`) y pesos registrados.
   - Mejorada la legibilidad de los números y celdas de tablas en `dashboard.php` exclusivamente en Modo Oscuro (`[data-theme="dark"]`).
+  - Uniformada la vista móvil (`@media screen and (max-width: 768px)`) de `dashboard.php`: eliminado el desborde horizontal de `minmax(450px, 1fr)` en Compras/Ventas que encogía el resto de tarjetas, alineadas fechas `Desde`/`Hasta` al 50%/50%, botones de acceso rápido e indicadores KPI en grillas simétricas de 2 columnas y tablas con desplazamiento horizontal limpio sin alterar escritorio.
 * **Corrección de Buscador en Boletas e Historial (`web/public/pesadas.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` al filtrar por texto/placa/boleta separando los placeholders `:q1`, `:q2`, `:q_num1` y `:q_num2` bajo `ATTR_EMULATE_PREPARES = false`.
   - Implementado filtrado instantáneo en vivo (`q`, `tipo`, `estado` y `fecha`) para mostrar resultados mientras se escribe o cambian los selectores (tratando espacios como comodines y tolerando `#` / espacios), restaurando todo el historial al limpiar o borrar el texto.

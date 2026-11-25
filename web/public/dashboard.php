@@ -261,7 +261,7 @@ $totalPesadasManuales = count($pesadasManuales);
 renderizarEncabezado('Dashboard', 'dashboard');
 ?>
 
-<div style="max-width: 1200px; margin: 0 auto;">
+<div class="dash-wrapper" style="max-width: 1200px; margin: 0 auto;">
 
     <!-- ENCABEZADO -->
     <div style="margin-bottom: 1.5rem;">
@@ -279,8 +279,8 @@ renderizarEncabezado('Dashboard', 'dashboard');
     <!-- TARJETA DE FILTROS SUPERIORES -->
     <div class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.5rem;">
         <form method="GET" action="dashboard.php" style="margin: 0;">
-            <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1rem;">
-                <div style="flex: 1; min-width: 240px;">
+            <div class="dash-filtros-row" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1rem;">
+                <div class="dash-filtro-empresa" style="flex: 1; min-width: 240px;">
                     <label for="empresa_id" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Empresa
                     </label>
@@ -293,21 +293,21 @@ renderizarEncabezado('Dashboard', 'dashboard');
                     </select>
                 </div>
 
-                <div style="width: 175px;">
+                <div class="dash-filtro-fecha" style="width: 175px;">
                     <label for="desde" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Desde
                     </label>
                     <input type="date" id="desde" name="desde" class="form-control" style="height: 40px; border-radius: 6px;" value="<?= htmlspecialchars($fechaDesdeSql, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
 
-                <div style="width: 175px;">
+                <div class="dash-filtro-fecha" style="width: 175px;">
                     <label for="hasta" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                         Hasta
                     </label>
                     <input type="date" id="hasta" name="hasta" class="form-control" style="height: 40px; border-radius: 6px;" value="<?= htmlspecialchars($fechaHastaSql, ENT_QUOTES, 'UTF-8') ?>">
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="height: 40px; padding: 0 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
+                <button type="submit" class="btn btn-primary dash-btn-consultar" style="height: 40px; padding: 0 1.5rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
                     Consultar
                 </button>
             </div>
@@ -319,7 +319,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
     </div>
 
     <!-- BOTONES DE ACCESO RÁPIDO / PILL TABS -->
-    <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
+    <div class="dash-pills" style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
         <a href="#notasPendientes" class="btn btn-secondary" style="border-radius: 8px; font-weight: 600; font-size: 0.85rem; padding: 0.5rem 1.15rem; text-decoration: none;">
             Notas pendientes
         </a>
@@ -335,7 +335,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
     </div>
 
     <!-- 5 TARJETAS KPI EN FILA -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <div class="dash-kpis" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
         
         <!-- KPI 1: Notas abiertas -->
         <div class="card" style="padding: 1.5rem 1.4rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
@@ -405,7 +405,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
     </div>
 
     <!-- BLOQUE DE 2 COLUMNAS: COMPRAS Y VENTAS -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+    <div class="dash-ops-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
 
         <!-- COLUMNA 1: COMPRAS -->
         <div class="card" style="padding: 1.75rem 1.75rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
@@ -554,6 +554,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
             Solo días con cierres; compras y ventas separadas. Días sin filas equivalen a cero.
         </p>
 
+        <div class="dash-table-wrap">
         <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
             <thead>
                 <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
@@ -584,6 +585,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
                 <?php endif; ?>
             </tbody>
         </table>
+        </div>
     </div>
 
     <!-- TARJETA: DETALLE DE PESADAS MANUALES DEL RANGO -->
@@ -704,6 +706,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
             </a>
         </div>
 
+        <div class="dash-table-wrap">
         <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
             <thead>
                 <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
@@ -735,6 +738,7 @@ renderizarEncabezado('Dashboard', 'dashboard');
                 <?php endif; ?>
             </tbody>
         </table>
+        </div>
     </div>
 
     <!-- PIE ACLARATORIO -->
@@ -754,6 +758,86 @@ renderizarEncabezado('Dashboard', 'dashboard');
 }
 [data-theme="dark"] .card table tr[style*="border-bottom: 1px solid #f1f5f9"] {
     border-bottom-color: var(--border-color) !important;
+}
+[data-theme="dark"] .dash-wrapper span[style*="color: #1e40af"],
+[data-theme="dark"] .dash-wrapper a[style*="color: #0b57d0"],
+[data-theme="dark"] .dash-wrapper td[style*="color: #0b57d0"] {
+    color: #60a5fa !important;
+}
+
+@media screen and (max-width: 768px) {
+    .dash-wrapper {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    .dash-wrapper .card {
+        padding: 1.25rem 1.1rem !important;
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+    .dash-filtros-row {
+        gap: 0.75rem !important;
+    }
+    .dash-filtro-empresa {
+        flex: 1 1 100% !important;
+        min-width: 0 !important;
+    }
+    .dash-filtro-fecha {
+        flex: 1 1 calc(50% - 0.4rem) !important;
+        width: auto !important;
+        min-width: 0 !important;
+    }
+    .dash-btn-consultar {
+        flex: 1 1 100% !important;
+        width: 100%;
+        justify-content: center;
+    }
+    .dash-pills {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.6rem !important;
+    }
+    .dash-pills > a {
+        width: 100%;
+        justify-content: center;
+        text-align: center;
+        padding: 0.55rem 0.5rem !important;
+        font-size: 0.8rem !important;
+    }
+    .dash-kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 0.75rem !important;
+    }
+    .dash-kpis > .card {
+        padding: 1.1rem 1rem !important;
+    }
+    .dash-kpis > .card:last-child {
+        grid-column: 1 / -1;
+    }
+    .dash-ops-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 1rem !important;
+    }
+    .dash-table-wrap,
+    #pesadasManuales > div[style*="overflow-x: auto"] {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    #pesadasManuales table {
+        min-width: 640px;
+        white-space: nowrap;
+    }
+    .dash-table-wrap table {
+        min-width: 380px;
+    }
+    .dash-table-wrap table td:first-child,
+    .dash-table-wrap table th:first-child {
+        white-space: nowrap;
+    }
 }
 </style>
 
