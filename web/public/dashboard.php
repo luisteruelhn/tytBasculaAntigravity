@@ -231,6 +231,33 @@ $stmtPendientes = $pdo->prepare("
 $stmtPendientes->execute([':empresa_id' => $empresaFiltroId]);
 $notasPendientes = $stmtPendientes->fetchAll(PDO::FETCH_ASSOC);
 
+// 6. PESADAS MANUALES EN EL RANGO (origen_bruto = 'MANUAL' O origen_tara = 'MANUAL')
+$stmtManuales = $pdo->prepare("
+    SELECT p.idpesada, p.tipo_operacion, p.id_compra, p.id_venta, p.estado,
+           p.placa, p.peso_bruto_lb, p.tara_vehiculo_lb, p.peso_final_lb,
+           p.origen_bruto, p.origen_tara,
+           COALESCE(p.emitida_at, p.segunda_pesada_at, p.primera_pesada_at, p.fecha_at) AS fecha_ref,
+           cp.nombre AS persona_nombre,
+           prod.nombre AS producto_nombre
+    FROM t_pesadas p
+    LEFT JOIN t_clie_prov cp ON cp.id = p.clie_prov_id
+    LEFT JOIN t_producto_presentaciones pr ON pr.id = p.presentacion_id
+    LEFT JOIN t_productos prod ON prod.id = pr.producto_id
+    WHERE p.empresa_id = :empresa_id
+      AND p.estado <> 'ANULADA'
+      AND (p.origen_bruto = 'MANUAL' OR p.origen_tara = 'MANUAL')
+      AND DATE(COALESCE(p.emitida_at, p.segunda_pesada_at, p.primera_pesada_at, p.fecha_at)) >= :desde
+      AND DATE(COALESCE(p.emitida_at, p.segunda_pesada_at, p.primera_pesada_at, p.fecha_at)) <= :hasta
+    ORDER BY fecha_ref DESC, p.idpesada DESC
+");
+$stmtManuales->execute([
+    ':empresa_id' => $empresaFiltroId,
+    ':desde'      => $fechaDesdeSql,
+    ':hasta'      => $fechaHastaSql,
+]);
+$pesadasManuales = $stmtManuales->fetchAll(PDO::FETCH_ASSOC);
+$totalPesadasManuales = count($pesadasManuales);
+
 renderizarEncabezado('Dashboard', 'dashboard');
 ?>
 
@@ -296,6 +323,9 @@ renderizarEncabezado('Dashboard', 'dashboard');
         <a href="#notasPendientes" class="btn btn-secondary" style="border-radius: 8px; font-weight: 600; font-size: 0.85rem; padding: 0.5rem 1.15rem; text-decoration: none;">
             Notas pendientes
         </a>
+        <a href="#pesadasManuales" class="btn btn-secondary" style="border-radius: 8px; font-weight: 600; font-size: 0.85rem; padding: 0.5rem 1.15rem; text-decoration: none;">
+            Pesadas manuales (<?= $totalPesadasManuales ?>)
+        </a>
         <a href="reportes.php?empresa_id=<?= $empresaFiltroId ?>&desde=<?= urlencode($fechaDesdeSql) ?>&hasta=<?= urlencode($fechaHastaSql) ?>" class="btn btn-primary" style="background: #0b57d0; border-radius: 8px; font-weight: 700; font-size: 0.85rem; padding: 0.5rem 1.25rem; text-decoration: none;">
             Reportes del rango
         </a>
@@ -304,8 +334,8 @@ renderizarEncabezado('Dashboard', 'dashboard');
         </a>
     </div>
 
-    <!-- 4 TARJETAS KPI EN FILA -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+    <!-- 5 TARJETAS KPI EN FILA -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
         
         <!-- KPI 1: Notas abiertas -->
         <div class="card" style="padding: 1.5rem 1.4rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
@@ -333,7 +363,20 @@ renderizarEncabezado('Dashboard', 'dashboard');
             </div>
         </div>
 
-        <!-- KPI 3: Libras finales -->
+        <!-- KPI 3: Pesadas manuales -->
+        <a href="#pesadasManuales" class="card" style="padding: 1.5rem 1.4rem; border-radius: 12px; border: 1px solid <?= $totalPesadasManuales > 0 ? 'rgba(245, 158, 11, 0.45)' : 'var(--border-color)' ?>; background: var(--bg-surface); text-decoration: none; display: block;">
+            <div style="font-size: 0.82rem; font-weight: 600; color: <?= $totalPesadasManuales > 0 ? '#d97706' : '#64748b' ?>; margin-bottom: 0.5rem;">
+                Pesadas manuales
+            </div>
+            <div style="font-size: 2.2rem; font-weight: 800; color: <?= $totalPesadasManuales > 0 ? '#d97706' : 'var(--text-main)' ?>; line-height: 1; margin-bottom: 0.45rem;">
+                <?= number_format($totalPesadasManuales) ?>
+            </div>
+            <div style="font-size: 0.78rem; color: #64748b;">
+                Con bruto o tara manual en el rango (ver detalle).
+            </div>
+        </a>
+
+        <!-- KPI 4: Libras finales -->
         <div class="card" style="padding: 1.5rem 1.4rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface);">
             <div style="font-size: 0.82rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem;">
                 Libras finales
@@ -541,6 +584,109 @@ renderizarEncabezado('Dashboard', 'dashboard');
                 <?php endif; ?>
             </tbody>
         </table>
+    </div>
+
+    <!-- TARJETA: DETALLE DE PESADAS MANUALES DEL RANGO -->
+    <div id="pesadasManuales" class="card" style="padding: 1.75rem 2rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.35rem;">
+            <h2 style="font-size: 1.35rem; font-weight: 800; margin: 0; color: var(--text-main);">
+                Pesadas manuales en el rango (<?= $totalPesadasManuales ?>)
+            </h2>
+            <span style="font-size: 0.78rem; font-weight: 700; color: #b45309; background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.35); padding: 0.25rem 0.65rem; border-radius: 6px;">
+                Auditoría de capturas manuales
+            </span>
+        </div>
+        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 1rem;">
+            Detalla todas las boletas dentro del rango seleccionado donde el peso bruto, la tara vehicular o ambos fueron ingresados en modo <strong>MANUAL</strong>.
+        </p>
+
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color); text-align: left;">
+                        <th style="padding: 0.6rem 0.5rem; font-weight: 700; color: #475569;">Boleta</th>
+                        <th style="padding: 0.6rem 0.5rem; font-weight: 700; color: #475569;">Operación</th>
+                        <th style="padding: 0.6rem 0.5rem; font-weight: 700; color: #475569;">Fecha</th>
+                        <th style="padding: 0.6rem 0.5rem; font-weight: 700; color: #475569;">Cliente / Proveedor</th>
+                        <th style="padding: 0.6rem 0.5rem; font-weight: 700; color: #475569;">Producto / Placa</th>
+                        <th style="padding: 0.6rem 0.5rem; font-weight: 700; color: #475569;">Captura Manual</th>
+                        <th style="padding: 0.6rem 0.5rem; font-weight: 700; color: #475569;">Bruto / Tara (lb)</th>
+                        <th style="padding: 0.6rem 0.5rem; font-weight: 700; color: #475569;">Final (lb / QQ)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($pesadasManuales)): ?>
+                        <tr>
+                            <td colspan="8" style="padding: 1.25rem 0.5rem; color: #64748b; font-style: italic;">
+                                No hay pesadas manuales registradas en este rango de fechas.
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($pesadasManuales as $pm): ?>
+                            <?php
+                                $numBol = ($pm['tipo_operacion'] === 'COMPRA')
+                                    ? '#' . sprintf('%07d', (int)$pm['id_compra'])
+                                    : '#' . sprintf('%07d', (int)$pm['id_venta']);
+                                $esBrutoManual = (($pm['origen_bruto'] ?? '') === 'MANUAL');
+                                $esTaraManual  = (($pm['origen_tara'] ?? '') === 'MANUAL');
+                                if ($esBrutoManual && $esTaraManual) {
+                                    $detalleManual = 'Bruto y Tara';
+                                } elseif ($esBrutoManual) {
+                                    $detalleManual = 'Peso Bruto';
+                                } else {
+                                    $detalleManual = 'Tara Vehículo';
+                                }
+                                $brutoTxt = $pm['peso_bruto_lb'] !== null ? number_format((float)$pm['peso_bruto_lb']) : '—';
+                                $taraTxt  = $pm['tara_vehiculo_lb'] !== null ? number_format((float)$pm['tara_vehiculo_lb']) : '—';
+                                $finalLb  = $pm['peso_final_lb'] !== null ? (float)$pm['peso_final_lb'] : null;
+                            ?>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 0.65rem 0.5rem; font-weight: 700;">
+                                    <?php if (($pm['estado'] ?? '') === 'CERRADA'): ?>
+                                        <a href="boleta.php?id=<?= (int)$pm['idpesada'] ?>" style="color: #0b57d0; text-decoration: none;" title="Ver boleta">
+                                            <?= $numBol ?>
+                                        </a>
+                                    <?php else: ?>
+                                        <span style="color: #0b57d0;"><?= $numBol ?></span>
+                                        <span style="font-size: 0.72rem; color: #d97706;">(ABIERTA)</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="padding: 0.65rem 0.5rem; color: #334155;">
+                                    <?= $pm['tipo_operacion'] === 'COMPRA' ? 'Compra' : 'Venta' ?>
+                                </td>
+                                <td style="padding: 0.65rem 0.5rem; color: #334155;">
+                                    <?= htmlspecialchars((string)($pm['fecha_ref'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td style="padding: 0.65rem 0.5rem; font-weight: 600; color: var(--text-main);">
+                                    <?= htmlspecialchars((string)($pm['persona_nombre'] ?? 'Sin asignar'), ENT_QUOTES, 'UTF-8') ?>
+                                </td>
+                                <td style="padding: 0.65rem 0.5rem; color: #334155;">
+                                    <?= htmlspecialchars((string)($pm['producto_nombre'] ?? '—'), ENT_QUOTES, 'UTF-8') ?>
+                                    <?php if (!empty($pm['placa'])): ?>
+                                        <span style="font-size: 0.76rem; color: #64748b; font-family: monospace;">· <?= htmlspecialchars((string)$pm['placa'], ENT_QUOTES, 'UTF-8') ?></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td style="padding: 0.65rem 0.5rem;">
+                                    <span style="font-size: 0.76rem; font-weight: 700; color: #b45309; background: rgba(245, 158, 11, 0.14); border: 1px solid rgba(245, 158, 11, 0.35); padding: 0.15rem 0.5rem; border-radius: 5px;">
+                                        <?= $detalleManual ?>
+                                    </span>
+                                </td>
+                                <td style="padding: 0.65rem 0.5rem; color: #334155; font-family: monospace;">
+                                    B: <?= $brutoTxt ?><?= $esBrutoManual ? ' (M)' : '' ?> / T: <?= $taraTxt ?><?= $esTaraManual ? ' (M)' : '' ?>
+                                </td>
+                                <td style="padding: 0.65rem 0.5rem; font-weight: 600; color: var(--text-main);">
+                                    <?php if ($finalLb !== null): ?>
+                                        <?= number_format($finalLb) ?> lb (<?= number_format($finalLb / 100.0, 2) ?> QQ)
+                                    <?php else: ?>
+                                        <span style="color: #64748b; font-weight: 400;">Pendiente</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- TARJETA: NOTAS PENDIENTES ACTUALES -->

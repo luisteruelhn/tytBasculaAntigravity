@@ -298,3 +298,5 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Integrado temporizador de inactividad en cliente (`web/src/layout.php`) que redirige automáticamente a `logout.php?motivo=inactividad` tras 60 minutos sin uso.
 * **Refuerzo en Skill `surgical-code-editing` (`.agents/skills/surgical-code-editing/SKILL.md`)**:
   - Agregada como primera regla mandatoria: prohibido hacer más cambios de los que se solicitan (aplicar única y exclusivamente la instrucción literal del usuario).
+* **KPI y Detalle de Pesadas Manuales en Dashboard (`web/public/dashboard.php`)**:
+  - Agregada tarjeta KPI **Pesadas manuales** y tabla detallada **Pesadas manuales en el rango** con enlace a la boleta, operación, fecha, cliente/proveedor, producto/placa, cuál captura fue manual (`Peso Bruto`, `Tara Vehículo` o `Bruto y Tara`) y pesos registrados.
