@@ -11,10 +11,14 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__) . '/config/db.php';
 
+const SESION_TIMEOUT_INACTIVIDAD = 3600; // 1 hora (3600 segundos)
+
 /**
  * Inicializa la sesión con directivas de cookies seguras.
+ *
+ * @param bool $renovarActividad Si es false (ej. polling automático en segundo plano), valida expiración sin reiniciar el reloj de inactividad.
  */
-function iniciarSesionSegura(): void
+function iniciarSesionSegura(bool $renovarActividad = true): void
 {
     if (session_status() === PHP_SESSION_NONE) {
         // Directivas de seguridad para cookies de sesión
@@ -31,20 +35,24 @@ function iniciarSesionSegura(): void
 
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
+        ini_set('session.gc_maxlifetime', (string)SESION_TIMEOUT_INACTIVIDAD);
 
         session_start();
+    }
 
-        // Control de inactividad: expira tras 30 minutos sin uso
-        if (isset($_SESSION['ultimo_acceso']) && (time() - $_SESSION['ultimo_acceso'] > 1800)) {
-            cerrarSesion();
-            return;
-        }
+    // Control de inactividad: expira tras 1 hora (3600 s) sin uso humano
+    if (isset($_SESSION['ultimo_acceso']) && (time() - (int)$_SESSION['ultimo_acceso'] > SESION_TIMEOUT_INACTIVIDAD)) {
+        cerrarSesion();
+        return;
+    }
+
+    if ($renovarActividad || !isset($_SESSION['ultimo_acceso'])) {
         $_SESSION['ultimo_acceso'] = time();
+    }
 
-        // Generar token CSRF si no existe
-        if (empty($_SESSION['csrf_token'])) {
-            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-        }
+    // Generar token CSRF si no existe y la sesión sigue activa
+    if (session_status() === PHP_SESSION_ACTIVE && empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
     }
 }
 
@@ -75,11 +83,12 @@ function validarCsrfToken(?string $tokenEnviado): bool
 /**
  * Retorna los datos del usuario actualmente autenticado o null.
  *
+ * @param bool $renovarActividad Si es false, no reinicia el contador de inactividad de la sesión.
  * @return array|null Datos del usuario o null si no hay sesión iniciada.
  */
-function obtenerUsuarioActual(): ?array
+function obtenerUsuarioActual(bool $renovarActividad = true): ?array
 {
-    iniciarSesionSegura();
+    iniciarSesionSegura($renovarActividad);
     if (empty($_SESSION['usuario_id']) || empty($_SESSION['empresa_id'])) {
         return null;
     }
@@ -97,11 +106,12 @@ function obtenerUsuarioActual(): ?array
 /**
  * Exige que exista un usuario logueado. Si no, redirige a login.php.
  *
+ * @param bool $renovarActividad Si es false, valida sesión sin reiniciar el contador de inactividad.
  * @return array Datos del usuario verificado.
  */
-function requerirAutenticacion(): array
+function requerirAutenticacion(bool $renovarActividad = true): array
 {
-    $usuario = obtenerUsuarioActual();
+    $usuario = obtenerUsuarioActual($renovarActividad);
     if ($usuario === null) {
         header('Location: login.php');
         exit;

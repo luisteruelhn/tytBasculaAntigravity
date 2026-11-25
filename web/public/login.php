@@ -25,6 +25,9 @@ if (obtenerUsuarioActual() !== null) {
 }
 
 $error = '';
+if (($_GET['inactividad'] ?? '') === '1' && $_SERVER['REQUEST_METHOD'] !== 'POST') {
+    $error = 'Tu sesión se cerró automáticamente tras 1 hora de inactividad.';
+}
 $usuarioIngresado = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -292,3 +292,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - En `login.php`: restricción adicional que impide iniciar sesión con cuentas `OPERADOR` fuera de la red local de planta.
 * **Corrección de Ruta `/bascula` sin Barra Final en Hostinger (`.htaccess`, `web/public/login.php`)**:
   - Corregido `RewriteRule ^bascula/?$` en `.htaccess` (que hacía rewrite interno sin `/` al final, rompiendo las rutas relativas `assets/css/style.css` y `assets/js/theme.js` cuando se escribía `inversionesvallecillo.com/bascula`), redirigiendo `^bascula$` a `/bascula/` y respaldado también en `login.php`.
+* **Cierre Automático de Sesión tras 1 Hora de Inactividad (`auth.php`, `layout.php`, `api_peso_local.php`, `api_sync_pendientes.php`)**:
+  - Ajustado `SESION_TIMEOUT_INACTIVIDAD = 3600` (`1 hora`) y `session.gc_maxlifetime = 3600` en `web/src/auth.php`.
+  - Evitado que el polling automático en segundo plano (`api_peso_local.php` cada `400 ms` y `api_sync_pendientes.php` cada `5 min`) reinicie el reloj de inactividad sin interacción humana (`obtenerUsuarioActual(false)`).
+  - Integrado temporizador de inactividad en cliente (`web/src/layout.php`) que redirige automáticamente a `logout.php?motivo=inactividad` tras 60 minutos sin uso.

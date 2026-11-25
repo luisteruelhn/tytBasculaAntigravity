@@ -15,7 +15,9 @@ require_once dirname(__DIR__) . '/src/auth.php';
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 
-$usuario = obtenerUsuarioActual();
+$esPingActividad = (($_GET['accion'] ?? '') === 'keepalive');
+$esLecturaFondo  = !$esPingActividad && (strtoupper((string)($_SERVER['REQUEST_METHOD'] ?? 'GET')) === 'GET');
+$usuario = obtenerUsuarioActual(!$esLecturaFondo);
 if ($usuario === null) {
     http_response_code(401);
     echo json_encode(['ok' => false, 'error' => 'Sesión expirada.']);
@@ -23,6 +25,11 @@ if ($usuario === null) {
 }
 // Liberar de inmediato el bloqueo de sesión para no frenar el polling cada 350ms
 session_write_close();
+
+if ($esPingActividad) {
+    echo json_encode(['ok' => true]);
+    exit;
+}
 
 if (!esAccesoPlantaLocal()) {
     http_response_code(403);

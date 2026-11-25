@@ -564,7 +564,35 @@ setInterval(intentarSyncPendientesNube, 300000);
 </script>
 <?php endif; ?>
 
-<!-- Scripts esenciales: monitor de báscula y control del sidebar -->
+<!-- Scripts esenciales: monitor de báscula, control del sidebar y cierre por inactividad (1 hora) -->
+<?php if ($usuario): ?>
+<script>
+(function() {
+    const LIMITE_INACTIVIDAD_MS = 3600 * 1000; // 1 hora exacta
+    let ultimaActividad = Date.now();
+    let ultimoKeepAlive = Date.now();
+
+    function onInteraccion() {
+        const ahora = Date.now();
+        ultimaActividad = ahora;
+        if (ahora - ultimoKeepAlive > 300000) {
+            ultimoKeepAlive = ahora;
+            fetch('mi_clave.php', { method: 'HEAD', credentials: 'same-origin' }).catch(function() {});
+        }
+    }
+
+    ['mousedown', 'keydown', 'touchstart', 'scroll'].forEach(function(evt) {
+        window.addEventListener(evt, onInteraccion, { passive: true });
+    });
+
+    setInterval(function() {
+        if (Date.now() - ultimaActividad >= LIMITE_INACTIVIDAD_MS) {
+            window.location.replace('logout.php?motivo=inactividad');
+        }
+    }, 30000);
+})();
+</script>
+<?php endif; ?>
 <script src="assets/js/pesaje.js?v=20261124m"></script>
 <script src="assets/js/sidebar.js?v=20261124m"></script>
 </body>

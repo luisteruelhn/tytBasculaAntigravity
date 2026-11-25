@@ -11,7 +11,13 @@ require_once dirname(__DIR__) . '/src/sync_nube.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-$usuario = requerirAutenticacion();
+$esSyncManual = (trim((string)($_GET['modo'] ?? 'pendientes')) === 'todo');
+$usuario = obtenerUsuarioActual($esSyncManual);
+if ($usuario === null) {
+    http_response_code(401);
+    echo json_encode(['ok' => false, 'error' => 'Sesión expirada']);
+    exit;
+}
 session_write_close();
 
 $esLocal = esAccesoPlantaLocal();

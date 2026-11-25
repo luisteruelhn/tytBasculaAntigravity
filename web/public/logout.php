@@ -12,5 +12,6 @@ require_once dirname(__DIR__) . '/src/auth.php';
 
 cerrarSesion();
 
-header('Location: login.php');
+$destino = (($_GET['motivo'] ?? '') === 'inactividad') ? 'login.php?inactividad=1' : 'login.php';
+header('Location: ' . $destino);
 exit;
