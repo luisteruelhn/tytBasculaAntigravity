@@ -73,6 +73,8 @@ $quintales = $pesoFinal / 100.0;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boleta de Peso #<?= $correlativo ?> — <?= htmlspecialchars($empresa['nombre_comercial'] ?: $empresa['razon_social'], ENT_QUOTES, 'UTF-8') ?></title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico?v=20261125">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=20261125">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         body { background: #f1f5f9; color: #0f172a; padding: 1.5rem 1rem; }
