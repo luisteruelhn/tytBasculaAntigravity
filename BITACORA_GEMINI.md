@@ -286,3 +286,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Corrección de Conexión del Asistente TYTOne (`web/public/api_chat.php`)**:
   - Detectado en `C:\xampp\apache\logs\error.log` error fatal `Call to undefined function curl_init()` bajo Apache de XAMPP en Windows.
   - Implementado cliente HTTPS híbrido (`curl_init` cuando está disponible y respaldo nativo `stream_context_create` + OpenSSL cuando no), liberación temprana `session_write_close()` y cascada automática de modelos Gemini (`gemini-flash-lite-latest`, `gemini-3.5-flash-lite`, `gemini-3.7-flash`, `gemini-3.8-flash`) ante picos `503` o retiro `404`.
+* **Exclusión de Usuarios Pesadores (`OPERADOR`) en la Nube (`sync_nube.php`, `api_sync.php`, `login.php`, `usuarios.php`)**:
+  - Excluidos los usuarios con `rol = 'OPERADOR'` del envío hacia Hostinger en `cargarTablasMaestrasSync()` (`WHERE rol <> 'OPERADOR'`).
+  - En `api_sync.php`: bloqueo de inserción de filas `OPERADOR` y depuración automática `DELETE FROM t_usuarios WHERE rol = 'OPERADOR'` en la base remota.
+  - En `login.php`: restricción adicional que impide iniciar sesión con cuentas `OPERADOR` fuera de la red local de planta.

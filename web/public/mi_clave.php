@@ -58,7 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
 
                     $mensajeExito = '¡Tu contraseña ha sido cambiada exitosamente!';
-                    sincronizarCatalogosAutomatico('t_usuarios');
+                    if (($usuarioActual['rol'] ?? '') !== 'OPERADOR') {
+                        sincronizarCatalogosAutomatico('t_usuarios');
+                    }
                 } catch (Exception $e) {
                     $error = 'Error al actualizar la contraseña: ' . $e->getMessage();
                 }

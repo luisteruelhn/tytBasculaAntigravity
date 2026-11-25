@@ -81,6 +81,8 @@ try {
                 } catch (Throwable $eAlter) {
                     // Continúa con las columnas existentes si el usuario MySQL remoto no tiene privilegio ALTER
                 }
+                // Garantizar que ningún usuario pesador (OPERADOR) exista en la base de datos de la nube
+                $pdo->exec("DELETE FROM `t_usuarios` WHERE `rol` = 'OPERADOR'");
             }
 
             // Obtener columnas reales de la tabla en el servidor remoto
@@ -93,6 +95,9 @@ try {
 
             foreach ($tablasDatos[$tabla] as $fila) {
                 if (!is_array($fila)) {
+                    continue;
+                }
+                if ($tabla === 't_usuarios' && strtoupper(trim((string)($fila['rol'] ?? ''))) === 'OPERADOR') {
                     continue;
                 }
                 $filaFiltrada = array_intersect_key($fila, $mapaCols);

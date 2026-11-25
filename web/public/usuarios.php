@@ -36,7 +36,7 @@ $puedeCambiarClaveOtros = $esAdminOSuper;
 $rolesDisponibles = [];
 if ($esAdminOSuper) {
     $rolesDisponibles = [
-        'OPERADOR'      => 'Operador (Pesaje y Emisión de Boletas)',
+        'OPERADOR'      => 'Operador (Pesaje Local — Solo Planta, no sube a la Nube)',
         'SUPERVISOR'    => 'Supervisor (Autorizaciones Especiales y Reportes)',
         'ADMINISTRADOR' => 'Administrador (Control Total de Empresa)',
         'REMOTO'        => 'Remoto (Solo Consulta Web / Nube)',
@@ -44,7 +44,7 @@ if ($esAdminOSuper) {
 } elseif ($esSupervisor) {
     // Supervisor solo puede crear Operadores, Supervisores o Remotos
     $rolesDisponibles = [
-        'OPERADOR'      => 'Operador (Pesaje y Emisión de Boletas)',
+        'OPERADOR'      => 'Operador (Pesaje Local — Solo Planta, no sube a la Nube)',
         'SUPERVISOR'    => 'Supervisor (Autorizaciones Especiales y Reportes)',
         'REMOTO'        => 'Remoto (Solo Consulta Web / Nube)',
     ];
@@ -122,7 +122,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 
                     $mensajeExito = "El usuario \"$usuarioLogin\" ha sido creado exitosamente.";
                     $valores = ['nombre' => '', 'usuario' => '', 'email' => '', 'rol' => 'OPERADOR'];
-                    sincronizarCatalogosAutomatico('t_usuarios');
+                    if ($rol !== 'OPERADOR') {
+                        sincronizarCatalogosAutomatico('t_usuarios');
+                    }
                 }
             } catch (Exception $e) {
                 $error = 'Error al registrar usuario: ' . $e->getMessage();
@@ -173,7 +175,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
                         ]);
                     }
                     $mensajeExito = 'Contraseña actualizada correctamente para @' . $usrObjetivo['usuario'] . '.';
-                    sincronizarCatalogosAutomatico('t_usuarios');
+                    if ($usrObjetivo['rol'] !== 'OPERADOR') {
+                        sincronizarCatalogosAutomatico('t_usuarios');
+                    }
                 }
             } catch (Exception $e) {
                 $error = 'Error al actualizar contraseña: ' . $e->getMessage();

@@ -71,6 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $error = 'Tu cuenta de usuario se encuentra desactivada.';
                     } elseif (!$usuario['empresa_activa']) {
                         $error = 'La empresa asociada se encuentra inactiva.';
+                    } elseif (($usuario['rol'] ?? '') === 'OPERADOR' && !esAccesoPlantaLocal()) {
+                        $error = 'Las cuentas de Operador (pesador) son de uso exclusivo en la red local de planta.';
                     } else {
                         // Limpiar contador de intentos fallidos para esta cuenta
                         limpiarTasaLimite('usr:' . mb_strtolower($usuarioIngresado));

@@ -114,7 +114,8 @@ function cargarTablasMaestrasSync(PDO $pdo): array
 {
     return [
         't_empresas'                => $pdo->query('SELECT * FROM t_empresas')->fetchAll(PDO::FETCH_ASSOC),
-        't_usuarios'                => $pdo->query('SELECT * FROM t_usuarios')->fetchAll(PDO::FETCH_ASSOC),
+        // Excluir usuarios OPERADOR (pesadores locales con claves rápidas) por seguridad en la nube
+        't_usuarios'                => $pdo->query("SELECT * FROM t_usuarios WHERE rol <> 'OPERADOR'")->fetchAll(PDO::FETCH_ASSOC),
         't_categorias'              => $pdo->query('SELECT * FROM t_categorias')->fetchAll(PDO::FETCH_ASSOC),
         't_presentaciones'          => $pdo->query('SELECT * FROM t_presentaciones')->fetchAll(PDO::FETCH_ASSOC),
         't_productos'               => $pdo->query('SELECT * FROM t_productos')->fetchAll(PDO::FETCH_ASSOC),
