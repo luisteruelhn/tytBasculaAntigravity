@@ -166,35 +166,9 @@ $sql = "
     JOIN t_producto_presentaciones pr ON pr.id = p.presentacion_id
     JOIN t_productos prod ON prod.id = pr.producto_id
     WHERE p.empresa_id = :empresa_id
+    ORDER BY p.idpesada DESC LIMIT 500
 ";
 $params = [':empresa_id' => $empresaId];
-
-if ($busqueda !== '') {
-    $sql .= " AND (p.placa LIKE :q1 OR cp.nombre LIKE :q2 OR p.id_compra LIKE :q_num1 OR p.id_venta LIKE :q_num2)";
-    $likeTexto = '%' . $busqueda . '%';
-    $likeNum   = '%' . ltrim($busqueda, '#0') . '%';
-    $params[':q1']     = $likeTexto;
-    $params[':q2']     = $likeTexto;
-    $params[':q_num1'] = $likeNum;
-    $params[':q_num2'] = $likeNum;
-}
-
-if ($filtroTipo === 'COMPRA' || $filtroTipo === 'VENTA') {
-    $sql .= " AND p.tipo_operacion = :tipo";
-    $params[':tipo'] = $filtroTipo;
-}
-
-if ($filtroEst !== '' && $filtroEst !== 'TODOS') {
-    $sql .= " AND p.estado = :estado";
-    $params[':estado'] = $filtroEst;
-}
-
-if ($filtroFecha !== '') {
-    $sql .= " AND DATE(p.fecha_at) = :fecha";
-    $params[':fecha'] = $filtroFecha;
-}
-
-$sql .= " ORDER BY p.idpesada DESC LIMIT 150";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -243,19 +217,19 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
         <?php endif; ?>
 
         <!-- FILTROS RÁPIDOS -->
-        <form method="GET" action="pesadas.php" style="display: flex; gap: 0.85rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.75rem;">
+        <form method="GET" action="pesadas.php" id="formFiltrosHistorial" style="display: flex; gap: 0.85rem; align-items: flex-end; flex-wrap: wrap; margin-bottom: 1.75rem;">
             <div style="flex: 1; min-width: 220px;">
                 <label for="q" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                     Buscar placa, cliente o # boleta
                 </label>
-                <input type="text" id="q" name="q" class="form-control" placeholder="Ej. 0000003, HAA1234, Vallecillo..." value="<?= htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8') ?>" style="height: 40px; border-radius: 6px;">
+                <input type="search" id="q" name="q" class="form-control" placeholder="Ej. 0000003, HAA1234, Vallecillo..." value="<?= htmlspecialchars($busqueda, ENT_QUOTES, 'UTF-8') ?>" autocomplete="off" style="height: 40px; border-radius: 6px;">
             </div>
 
             <div style="width: 140px;">
                 <label for="tipo" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                     Operación
                 </label>
-                <select id="tipo" name="tipo" class="form-control" style="height: 40px; border-radius: 6px;" onchange="this.form.submit()">
+                <select id="tipo" name="tipo" class="form-control" style="height: 40px; border-radius: 6px;">
                     <option value="TODOS" <?= $filtroTipo === 'TODOS' ? 'selected' : '' ?>>Todas</option>
                     <option value="COMPRA" <?= $filtroTipo === 'COMPRA' ? 'selected' : '' ?>>Compra</option>
                     <option value="VENTA" <?= $filtroTipo === 'VENTA' ? 'selected' : '' ?>>Venta</option>
@@ -266,7 +240,7 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                 <label for="estado" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                     Estado
                 </label>
-                <select id="estado" name="estado" class="form-control" style="height: 40px; border-radius: 6px;" onchange="this.form.submit()">
+                <select id="estado" name="estado" class="form-control" style="height: 40px; border-radius: 6px;">
                     <option value="TODOS" <?= $filtroEst === 'TODOS' ? 'selected' : '' ?>>Todos</option>
                     <option value="CERRADA" <?= $filtroEst === 'CERRADA' ? 'selected' : '' ?>>Cerradas</option>
                     <option value="ABIERTA" <?= $filtroEst === 'ABIERTA' ? 'selected' : '' ?>>Abiertas</option>
@@ -277,16 +251,14 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                 <label for="fecha" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
                     Fecha
                 </label>
-                <input type="date" id="fecha" name="fecha" class="form-control" value="<?= htmlspecialchars($filtroFecha, ENT_QUOTES, 'UTF-8') ?>" style="height: 40px; border-radius: 6px;" onchange="this.form.submit()">
+                <input type="date" id="fecha" name="fecha" class="form-control" value="<?= htmlspecialchars($filtroFecha, ENT_QUOTES, 'UTF-8') ?>" style="height: 40px; border-radius: 6px;">
             </div>
 
             <button type="submit" class="btn btn-secondary" style="height: 40px; padding: 0 1.25rem; font-weight: 600; border-radius: 6px; background: #e8f0fe; color: #1e40af; border: none;">
                 Filtrar
             </button>
 
-            <?php if ($busqueda !== '' || $filtroTipo !== 'TODOS' || $filtroEst !== 'TODOS' || $filtroFecha !== ''): ?>
-                <a href="pesadas.php" class="btn btn-secondary" style="height: 40px; padding: 0 0.85rem; display: inline-flex; align-items: center; border-radius: 6px;" title="Limpiar filtros">&times; Limpiar</a>
-            <?php endif; ?>
+            <button type="button" id="btnLimpiarFiltrosHistorial" class="btn btn-secondary" style="height: 40px; padding: 0 0.85rem; display: none; align-items: center; border-radius: 6px;" title="Limpiar filtros">&times; Limpiar</button>
         </form>
 
         <!-- TABLA DE HISTORIAL -->
@@ -304,7 +276,7 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                         <th style="background: transparent; color: #475569; font-weight: 600; font-size: 0.78rem; text-transform: uppercase; padding: 0.75rem 0.5rem; text-align: right;">Acción</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tablaHistorialBody">
                     <?php if (empty($boletas)): ?>
                         <tr>
                             <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3.5rem 1rem;">
@@ -315,11 +287,23 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                         <?php foreach ($boletas as $b): 
                             $numCorr = ($b['tipo_operacion'] === 'COMPRA') ? (int)$b['id_compra'] : (int)$b['id_venta'];
                             $numFormato = '# ' . sprintf('%07d', $numCorr);
+                            $numSinEspacio = '#' . sprintf('%07d', $numCorr);
                             $fechaFmt = date('d/m/Y H:i', strtotime($b['segunda_pesada_at'] ?? $b['fecha_at']));
+                            $fechaIso = date('Y-m-d', strtotime((string)$b['fecha_at']));
                             $esCerrada = ($b['estado'] === 'CERRADA');
                             $esAnulada = ($b['estado'] === 'ANULADA');
+                            $textoBusq = trim(implode(' ', [
+                                $numFormato,
+                                $numSinEspacio,
+                                (string)$numCorr,
+                                (string)($b['placa'] ?? ''),
+                                (string)($b['persona_nombre'] ?? ''),
+                                (string)($b['producto_nombre'] ?? ''),
+                                (string)($b['presentacion_nombre'] ?? ''),
+                                (string)$b['tipo_operacion'],
+                            ]));
                         ?>
-                            <tr style="border-bottom: 1px solid var(--border-color);">
+                            <tr class="fila-historial" data-op="<?= htmlspecialchars($b['tipo_operacion'], ENT_QUOTES, 'UTF-8') ?>" data-est="<?= htmlspecialchars($b['estado'], ENT_QUOTES, 'UTF-8') ?>" data-fecha="<?= htmlspecialchars($fechaIso, ENT_QUOTES, 'UTF-8') ?>" data-texto="<?= htmlspecialchars($textoBusq, ENT_QUOTES, 'UTF-8') ?>" style="border-bottom: 1px solid var(--border-color);">
                                 <td style="padding: 1rem 0.5rem; font-family: monospace; font-weight: 800; font-size: 0.95rem; color: <?= ($b['tipo_operacion'] === 'COMPRA' ? '#1e40af' : '#047857') ?>;">
                                     <?= htmlspecialchars($numFormato, ENT_QUOTES, 'UTF-8') ?>
                                     <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; font-family: sans-serif;"><?= $b['tipo_operacion'] ?></div>
@@ -398,6 +382,11 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
                                 </td>
                             </tr>
                         <?php endforeach; ?>
+                        <tr id="filaSinCoincidenciasHistorial" style="display: none;">
+                            <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 3rem 1rem;">
+                                No se encontraron boletas en el historial con los filtros indicados.
+                            </td>
+                        </tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -436,6 +425,76 @@ function cerrarModalAnular() {
 }
 </script>
 <?php endif; ?>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputQ = document.getElementById('q');
+    const selTipo = document.getElementById('tipo');
+    const selEst = document.getElementById('estado');
+    const inpFecha = document.getElementById('fecha');
+    const btnLimpiar = document.getElementById('btnLimpiarFiltrosHistorial');
+    const formFiltros = document.getElementById('formFiltrosHistorial');
+    const filas = Array.from(document.querySelectorAll('#tablaHistorialBody tr.fila-historial'));
+    const filaVacia = document.getElementById('filaSinCoincidenciasHistorial');
+
+    const normalizar = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+    function filtrarHistorialEnVivo() {
+        const q = normalizar(inputQ ? inputQ.value : '');
+        const op = selTipo ? selTipo.value : 'TODOS';
+        const est = selEst ? selEst.value : 'TODOS';
+        const fecha = inpFecha ? inpFecha.value : '';
+
+        let visibles = 0;
+        filas.forEach(tr => {
+            const matchQ = (q === '' || normalizar(tr.getAttribute('data-texto')).includes(q));
+            const matchOp = (op === 'TODOS' || tr.getAttribute('data-op') === op);
+            const matchEst = (est === 'TODOS' || tr.getAttribute('data-est') === est);
+            const matchFecha = (fecha === '' || tr.getAttribute('data-fecha') === fecha);
+
+            const mostrar = matchQ && matchOp && matchEst && matchFecha;
+            tr.style.display = mostrar ? '' : 'none';
+            if (mostrar) visibles++;
+        });
+
+        if (filaVacia) {
+            filaVacia.style.display = (filas.length > 0 && visibles === 0) ? '' : 'none';
+        }
+        if (btnLimpiar) {
+            const hayFiltros = (q !== '' || op !== 'TODOS' || est !== 'TODOS' || fecha !== '');
+            btnLimpiar.style.display = hayFiltros ? 'inline-flex' : 'none';
+        }
+    }
+
+    if (inputQ) {
+        inputQ.addEventListener('input', filtrarHistorialEnVivo);
+        inputQ.addEventListener('search', filtrarHistorialEnVivo);
+    }
+    if (selTipo) selTipo.addEventListener('change', filtrarHistorialEnVivo);
+    if (selEst) selEst.addEventListener('change', filtrarHistorialEnVivo);
+    if (inpFecha) {
+        inpFecha.addEventListener('change', filtrarHistorialEnVivo);
+        inpFecha.addEventListener('input', filtrarHistorialEnVivo);
+    }
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', function() {
+            if (inputQ) inputQ.value = '';
+            if (selTipo) selTipo.value = 'TODOS';
+            if (selEst) selEst.value = 'TODOS';
+            if (inpFecha) inpFecha.value = '';
+            filtrarHistorialEnVivo();
+        });
+    }
+    if (formFiltros) {
+        formFiltros.addEventListener('submit', function(e) {
+            e.preventDefault();
+            filtrarHistorialEnVivo();
+        });
+    }
+
+    filtrarHistorialEnVivo();
+});
+</script>
 
 <?php
 renderizarPie();
