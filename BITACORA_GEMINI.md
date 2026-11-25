@@ -302,7 +302,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregada tarjeta KPI **Pesadas manuales** y tabla detallada **Pesadas manuales en el rango** con enlace a la boleta, operación, fecha, cliente/proveedor, producto/placa, cuál captura fue manual (`Peso Bruto`, `Tara Vehículo` o `Bruto y Tara`) y pesos registrados.
 * **Corrección de Buscador en Boletas e Historial (`web/public/pesadas.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` al filtrar por texto/placa/boleta separando los placeholders `:q1`, `:q2`, `:q_num1` y `:q_num2` bajo `ATTR_EMULATE_PREPARES = false`.
-  - Implementado filtrado instantáneo en vivo (`q`, `tipo`, `estado` y `fecha`) para mostrar resultados mientras se escribe o cambian los selectores, restaurando todo el historial al limpiar o borrar el texto.
+  - Implementado filtrado instantáneo en vivo (`q`, `tipo`, `estado` y `fecha`) para mostrar resultados mientras se escribe o cambian los selectores (tratando espacios como comodines y tolerando `#` / espacios), restaurando todo el historial al limpiar o borrar el texto.
   - Convertido el número/ID de boleta en enlace directo: abre `boleta.php` si está cerrada o `segunda_pesada.php` (Camiones pendientes en patio) si está abierta (respetando rol `REMOTO`).
   - Agregado botón **Volver al Inicio** (`index.php`) en el encabezado de `pesadas.php`.
 * **Buscador Instantáneo en Filtros de Reportes (`web/public/reportes.php`)**:
@@ -317,7 +317,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Agregada tarjeta KPI **Pesadas manuales** y tabla detallada **Pesadas manuales en el rango** con enlace a la boleta, operación, fecha, cliente/proveedor, producto/placa, cuál captura fue manual (`Peso Bruto`, `Tara Vehículo` o `Bruto y Tara`) y pesos registrados.
 * **Corrección de Buscador en Boletas e Historial (`web/public/pesadas.php`)**:
   - Corregido `SQLSTATE[HY093]: Invalid parameter number` al filtrar por texto/placa/boleta separando los placeholders `:q1`, `:q2`, `:q_num1` y `:q_num2` bajo `ATTR_EMULATE_PREPARES = false`.
-  - Implementado filtrado instantáneo en vivo (`q`, `tipo`, `estado` y `fecha`) para mostrar resultados mientras se escribe o cambian los selectores, restaurando todo el historial al limpiar o borrar el texto.
+  - Implementado filtrado instantáneo en vivo (`q`, `tipo`, `estado` y `fecha`) para mostrar resultados mientras se escribe o cambian los selectores (tratando espacios como comodines y tolerando `#` / espacios), restaurando todo el historial al limpiar o borrar el texto.
   - Convertido el número/ID de boleta en enlace directo: abre `boleta.php` si está cerrada o `segunda_pesada.php` (Camiones pendientes en patio) si está abierta (respetando rol `REMOTO`).
   - Agregado botón **Volver al Inicio** (`index.php`) en el encabezado de `pesadas.php`.
 * **Buscador Instantáneo en Filtros de Reportes (`web/public/reportes.php`)**:

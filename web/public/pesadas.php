@@ -452,17 +452,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const filas = Array.from(document.querySelectorAll('#tablaHistorialBody tr.fila-historial'));
     const filaVacia = document.getElementById('filaSinCoincidenciasHistorial');
 
-    const normalizar = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+    const normalizar = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/#/g, ' ').replace(/\s+/g, ' ').toLowerCase().trim();
+    const compactar = (t) => normalizar(t).replace(/\s+/g, '');
 
     function filtrarHistorialEnVivo() {
         const q = normalizar(inputQ ? inputQ.value : '');
+        const qCompacta = compactar(inputQ ? inputQ.value : '');
+        const tokens = q ? q.split(' ').filter(Boolean) : [];
         const op = selTipo ? selTipo.value : 'TODOS';
         const est = selEst ? selEst.value : 'TODOS';
         const fecha = inpFecha ? inpFecha.value : '';
 
         let visibles = 0;
         filas.forEach(tr => {
-            const matchQ = (q === '' || normalizar(tr.getAttribute('data-texto')).includes(q));
+            const texto = normalizar(tr.getAttribute('data-texto'));
+            const matchQ = (q === '' || tokens.every(tok => texto.includes(tok)) || compactar(texto).includes(qCompacta));
             const matchOp = (op === 'TODOS' || tr.getAttribute('data-op') === op);
             const matchEst = (est === 'TODOS' || tr.getAttribute('data-est') === est);
             const matchFecha = (fecha === '' || tr.getAttribute('data-fecha') === fecha);
