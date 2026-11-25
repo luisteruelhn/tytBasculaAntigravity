@@ -744,5 +744,18 @@ renderizarEncabezado('Dashboard', 'dashboard');
 
 </div>
 
+<style>
+[data-theme="dark"] .card table td[style*="color: #334155"] {
+    color: #f1f5f9 !important;
+    font-weight: 600;
+}
+[data-theme="dark"] .card table th[style*="color: #475569"] {
+    color: #94a3b8 !important;
+}
+[data-theme="dark"] .card table tr[style*="border-bottom: 1px solid #f1f5f9"] {
+    border-bottom-color: var(--border-color) !important;
+}
+</style>
+
 <?php
 renderizarPie();
