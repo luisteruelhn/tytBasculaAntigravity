@@ -239,14 +239,6 @@ $sqlPendientes = "
 ";
 $paramsPend = [':empresa_id' => $empresaId];
 
-if ($filtroQ !== '') {
-    $sqlPendientes .= " AND (p.placa LIKE :q1 OR cp.nombre LIKE :q2 OR prod.nombre LIKE :q3)";
-    $likeQ = '%' . $filtroQ . '%';
-    $paramsPend[':q1'] = $likeQ;
-    $paramsPend[':q2'] = $likeQ;
-    $paramsPend[':q3'] = $likeQ;
-}
-
 $sqlPendientes .= " ORDER BY p.idpesada DESC";
 $stmtPend = $pdo->prepare($sqlPendientes);
 $stmtPend->execute($paramsPend);
@@ -651,8 +643,8 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                     </p>
                 </div>
 
-                <form method="GET" action="segunda_pesada.php" style="display: flex; gap: 0.65rem; align-items: center; max-width: 350px;">
-                    <input type="text" id="buscadorPendientes" name="q" class="form-control" placeholder="Buscar por placa, boleta o persona..." value="<?= htmlspecialchars($filtroQ, ENT_QUOTES, 'UTF-8') ?>" autocomplete="off" style="height: 40px; border-radius: 6px;">
+                <form method="GET" action="segunda_pesada.php" id="formBuscarPendientes" style="display: flex; gap: 0.65rem; align-items: center; max-width: 350px;">
+                    <input type="search" id="buscadorPendientes" name="q" class="form-control" placeholder="Buscar por placa, boleta o persona..." value="<?= htmlspecialchars($filtroQ, ENT_QUOTES, 'UTF-8') ?>" autocomplete="off" style="height: 40px; border-radius: 6px;">
                     <button type="submit" class="btn btn-secondary" style="height: 40px; padding: 0 1rem; font-weight: 600; background: #e8f0fe; color: #1e40af; border: none;">
                         Buscar
                     </button>
@@ -973,6 +965,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     inputBusq.addEventListener('input', filtrarEnVivo);
+    inputBusq.addEventListener('search', filtrarEnVivo);
+    const formBusq = document.getElementById('formBuscarPendientes');
+    if (formBusq) {
+        formBusq.addEventListener('submit', (e) => {
+            e.preventDefault();
+            filtrarEnVivo();
+        });
+    }
+    if (inputBusq.value.trim() !== '') {
+        filtrarEnVivo();
+    }
 });
 </script>
 
