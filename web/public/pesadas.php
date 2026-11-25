@@ -193,13 +193,16 @@ renderizarEncabezado('Boletas e Historial', 'pesadas');
             </span>
         </div>
 
-        <?php if (!$esRemoto): ?>
-        <div style="display: flex; gap: 0.75rem;">
+        <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+            <a href="index.php" class="btn btn-secondary" style="padding: 0.65rem 1.15rem; font-weight: 600; text-decoration: none; border-radius: 6px;">
+                Volver al Inicio
+            </a>
+            <?php if (!$esRemoto): ?>
             <a href="primera_pesada.php" class="btn btn-primary" style="padding: 0.65rem 1.25rem; font-weight: 700; background: #0b57d0; text-decoration: none; border-radius: 6px;">
                 + Nueva Primera Pesada
             </a>
+            <?php endif; ?>
         </div>
-        <?php endif; ?>
     </div>
 
     <!-- TARJETA PRINCIPAL -->
