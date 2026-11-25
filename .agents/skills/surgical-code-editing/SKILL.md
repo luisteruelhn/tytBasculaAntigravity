@@ -10,6 +10,7 @@ description: >-
 Esta skill define la metodología universal para modificar proyectos de manera precisa, eficiente y segura sin inflar código ni romper funciones existentes.
 
 ## 1. Principio Fundamental: Cero Rodeos y Cero Regresiones
+- **PROHIBIDO HACER MÁS CAMBIOS DE LOS QUE SE SOLICITAN**: Aplicar única y exclusivamente la instrucción literal pedida por el usuario. No agregar lógica extra, mensajes, vistas, archivos ni ejecutar acciones (como `git push`) que no hayan sido solicitadas explícitamente.
 - **Localización precisa**: Identificar exactamente el archivo y la línea afectada antes de editar.
 - **Intervención mínima**: Modificar solo lo estrictamente necesario para cumplir el requerimiento.
 - **Prohibido refactorizar sin permiso**: No renombrar variables existentes, no reestructurar carpetas ni cambiar patrones arquitectónicos si el usuario solo pidió una corrección o ajuste puntual.

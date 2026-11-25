@@ -296,3 +296,5 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Ajustado `SESION_TIMEOUT_INACTIVIDAD = 3600` (`1 hora`) y `session.gc_maxlifetime = 3600` en `web/src/auth.php`.
   - Evitado que el polling automático en segundo plano (`api_peso_local.php` cada `400 ms` y `api_sync_pendientes.php` cada `5 min`) reinicie el reloj de inactividad sin interacción humana (`obtenerUsuarioActual(false)`).
   - Integrado temporizador de inactividad en cliente (`web/src/layout.php`) que redirige automáticamente a `logout.php?motivo=inactividad` tras 60 minutos sin uso.
+* **Refuerzo en Skill `surgical-code-editing` (`.agents/skills/surgical-code-editing/SKILL.md`)**:
+  - Agregada como primera regla mandatoria: prohibido hacer más cambios de los que se solicitan (aplicar única y exclusivamente la instrucción literal del usuario).
