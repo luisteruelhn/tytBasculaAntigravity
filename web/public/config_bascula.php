@@ -45,11 +45,15 @@ $mensajeError = null;
 $sincronizarApiAlCargar = false;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $accion = trim((string)($_POST['accion'] ?? ''));
+    if (!validarCsrfToken($_POST['csrf_token'] ?? null)) {
+        $mensajeError = 'La sesión del formulario venció. Por favor recarga la página e intenta de nuevo.';
+        $accion = '';
+    } else {
+        $accion = trim((string)($_POST['accion'] ?? ''));
+    }
 
     if ($accion === 'guardar') {
         $puertoCom  = strtoupper(trim((string)($_POST['puerto_com'] ?? '')));
-        $geminiKey  = trim((string)($_POST['gemini_api_key'] ?? ''));
         $baudios    = (int)($_POST['baudios'] ?? 9600);
         $bitsDatos  = (int)($_POST['bits_datos'] ?? 8);
         $paridad    = trim((string)($_POST['paridad'] ?? 'N'));
@@ -69,7 +73,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmtUpdate = $pdo->prepare("
                 UPDATE t_configuracion_bascula SET
                     puerto_com = :puerto_com,
-                    gemini_api_key = :gemini_api_key,
                     baudios = :baudios,
                     bits_datos = :bits_datos,
                     paridad = :paridad,
@@ -88,7 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ");
             $stmtUpdate->execute([
                 ':puerto_com'           => $puertoCom ?: null,
-                ':gemini_api_key'       => $geminiKey ?: null,
                 ':baudios'              => $baudios,
                 ':bits_datos'           => $bitsDatos,
                 ':paridad'              => $paridad,
@@ -109,6 +111,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $sincronizarApiAlCargar = true;
             
             // Recargar datos
+            $stmt->execute([':empresa_id' => $empresaId]);
+            $config = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+    } elseif ($accion === 'guardar_gemini') {
+        if (!tieneRol($usuarioActual, ['SUPER', 'ADMINISTRADOR'])) {
+            $mensajeError = 'Solo Super o Administrador pueden configurar la API Key de Gemini.';
+        } else {
+            $geminiKey = trim((string)($_POST['gemini_api_key'] ?? ''));
+            $stmtGemini = $pdo->prepare("
+                UPDATE t_configuracion_bascula SET
+                    gemini_api_key = :gemini_api_key,
+                    actualizado_por = :uid,
+                    actualizada_at = NOW()
+                WHERE id = :id
+            ");
+            $stmtGemini->execute([
+                ':gemini_api_key' => ($geminiKey !== '' ? $geminiKey : null),
+                ':uid'            => (int)$usuarioActual['id'],
+                ':id'             => (int)$config['id'],
+            ]);
+            $mensajeExito = ($geminiKey !== '')
+                ? 'Ajuste de Google Gemini API Key guardado correctamente.'
+                : 'Google Gemini API Key eliminada correctamente.';
             $stmt->execute([':empresa_id' => $empresaId]);
             $config = $stmt->fetch(PDO::FETCH_ASSOC);
         }
@@ -162,6 +187,7 @@ if (PHP_OS_FAMILY === 'Windows' && function_exists('shell_exec')) {
 }
 
 $modoActual = ($config['modo'] ?? 'SERIAL') === 'SERIAL' ? 'REAL' : 'SIMULADO';
+$tokenCsrf = obtenerCsrfToken();
 
 renderizarEncabezado('Configuración Báscula', 'config');
 ?>
@@ -216,6 +242,7 @@ renderizarEncabezado('Configuración Báscula', 'config');
         </p>
 
         <form method="POST" action="config_bascula.php" id="formSerial">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="accion" value="guardar">
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
@@ -341,15 +368,6 @@ renderizarEncabezado('Configuración Báscula', 'config');
                     <input type="number" id="max_trama_bytes" name="max_trama_bytes" class="form-control" style="height: 40px; border-radius: 6px;" value="<?= (int)($config['max_trama_bytes'] ?? 512) ?>">
                 </div>
 
-                <!-- API Key de Gemini (Solo Administrador / Super) -->
-                <div style="grid-column: 1 / -1;">
-                    <label for="gemini_api_key" class="form-label" style="font-size: 0.82rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.35rem;">
-                        🤖 Google Gemini API Key (Asistente IA de Báscula)
-                    </label>
-                    <input type="password" id="gemini_api_key" name="gemini_api_key" class="form-control" style="height: 40px; border-radius: 6px; font-family: monospace;" value="<?= htmlspecialchars($config['gemini_api_key'] ?? '', ENT_QUOTES, 'UTF-8') ?>" placeholder="Pega aquí tu clave AI Studio (ej: AIzaSy...)">
-                    <small style="color: #64748b; font-size: 0.75rem;">Opcional. Activa el asistente inteligente en todo el sistema exclusivamente para Super y Administradores.</small>
-                </div>
-
             </div>
 
             <!-- BOTONES DE ACCIÓN -->
@@ -369,6 +387,46 @@ renderizarEncabezado('Configuración Báscula', 'config');
             </div>
         </form>
     </div>
+
+    <?php if (tieneRol($usuarioActual, ['SUPER', 'ADMINISTRADOR'])): ?>
+    <!-- TARJETA INDEPENDIENTE: ASISTENTE IA (GOOGLE GEMINI API KEY) -->
+    <div class="card" style="padding: 1.75rem 2.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.75rem;">
+        <form method="POST" action="config_bascula.php" autocomplete="off">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
+            <input type="hidden" name="accion" value="guardar_gemini">
+
+            <label for="gemini_api_key" class="form-label" style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem; display: block;">
+                🤖 Google Gemini API Key (Asistente IA de Báscula)
+            </label>
+
+            <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+                <input
+                    type="password"
+                    id="gemini_api_key"
+                    name="gemini_api_key"
+                    class="form-control"
+                    style="height: 40px; border-radius: 6px; font-family: monospace; flex: 1 1 320px;"
+                    value="<?= htmlspecialchars($config['gemini_api_key'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                    placeholder="Pega aquí tu clave AI Studio (ej: AIzaSy...)"
+                >
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    style="height: 40px; padding: 0 0.85rem; border-radius: 6px;"
+                    onclick="const el=document.getElementById('gemini_api_key'); el.type = (el.type === 'password') ? 'text' : 'password';"
+                    title="Mostrar / ocultar API Key"
+                >👁️</button>
+                <button type="submit" class="btn btn-primary" style="height: 40px; padding: 0 1.4rem; font-weight: 700; background: #0b57d0; border-radius: 6px;">
+                    Guardar ajuste
+                </button>
+            </div>
+
+            <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 0.45rem;">
+                Opcional. Activa el asistente inteligente en todo el sistema exclusivamente para Super y Administradores (sin tocar la configuración serial de la báscula).
+            </small>
+        </form>
+    </div>
+    <?php endif; ?>
 
     <!-- TARJETA 2: LECTURA DE PRUEBA -->
     <div class="card" style="padding: 2rem 2.25rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.75rem;">
@@ -422,6 +480,7 @@ renderizarEncabezado('Configuración Báscula', 'config');
         </p>
 
         <form method="POST" action="config_bascula.php" style="margin-bottom: 1.25rem;">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="accion" value="activar_real">
             
             <label style="display: flex; align-items: center; gap: 0.65rem; font-size: 0.88rem; font-weight: 600; color: #1e293b; margin-bottom: 1.25rem; cursor: pointer;">
@@ -435,6 +494,7 @@ renderizarEncabezado('Configuración Báscula', 'config');
         </form>
 
         <form method="POST" action="config_bascula.php" style="display: inline;">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="accion" value="activar_simulado">
             <button type="submit" class="btn btn-link" style="font-size: 0.85rem; color: #0b57d0; text-decoration: underline; background: none; border: none; padding: 0; cursor: pointer;">
                 Usar Simulado
