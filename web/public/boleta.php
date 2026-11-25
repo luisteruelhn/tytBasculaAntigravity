@@ -143,6 +143,91 @@ $quintales = $pesoFinal / 100.0;
         /* BOTONES DE PANTALLA (OCULTOS EN IMPRESIÓN) */
         .acciones-pantalla { max-width: 900px; margin: 0 auto 1.25rem auto; display: flex; justify-content: space-between; align-items: center; }
 
+        /* VISTA RESPONSIVA EXCLUSIVA PARA MÓVIL (NO AFECTA PC, IMPRESIÓN NI DESCARGA PDF) */
+        @media screen and (max-width: 768px) {
+            body:not(.generando-pdf) {
+                padding: 0.85rem 0.65rem;
+                overflow-x: hidden;
+            }
+            body:not(.generando-pdf) .acciones-pantalla {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.75rem;
+                margin-bottom: 1rem;
+            }
+            body:not(.generando-pdf) .acciones-pantalla > a {
+                white-space: nowrap;
+            }
+            body:not(.generando-pdf) .acciones-pantalla > div {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.55rem !important;
+                width: 100%;
+            }
+            body:not(.generando-pdf) .acciones-pantalla > div > a,
+            body:not(.generando-pdf) .acciones-pantalla > div > button {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+                padding: 0.55rem 0.5rem !important;
+                font-size: 0.82rem !important;
+                display: inline-flex !important;
+                align-items: center;
+            }
+            body:not(.generando-pdf) .boleta-contenedor {
+                padding: 1.1rem 0.95rem;
+                overflow: hidden;
+            }
+            body:not(.generando-pdf) .boleta-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.65rem;
+            }
+            body:not(.generando-pdf) .op-contenedor {
+                text-align: left;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: baseline;
+                flex-wrap: wrap;
+                gap: 0.35rem 0.75rem;
+                border-top: 1px dashed #cbd5e1;
+                padding-top: 0.5rem;
+            }
+            body:not(.generando-pdf) .op-tag {
+                font-size: 1.55rem;
+            }
+            body:not(.generando-pdf) .datos-grid {
+                grid-template-columns: 1fr;
+                gap: 0.35rem;
+            }
+            body:not(.generando-pdf) .dato-fila {
+                gap: 0.75rem;
+            }
+            body:not(.generando-pdf) .dato-label {
+                flex-shrink: 0;
+            }
+            body:not(.generando-pdf) .dato-val {
+                text-align: right;
+                word-break: break-word;
+            }
+            body:not(.generando-pdf) .tabla-pesaje-wrap {
+                width: 100%;
+                max-width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin-bottom: 0.85rem;
+            }
+            body:not(.generando-pdf) .tabla-pesaje {
+                min-width: 520px;
+                margin-bottom: 0;
+            }
+            body:not(.generando-pdf) .firmas-grid {
+                gap: 1.25rem;
+                font-size: 0.74rem;
+            }
+        }
+
         @media print {
             html, body {
                 background: #ffffff !important;
@@ -365,6 +450,7 @@ $renderizarBoleta = function(string $etiquetaCopia) use ($empresa, $tipoOp, $cor
         </div>
 
         <!-- 3. TABLA DE VALORES DE PESAJE -->
+        <div class="tabla-pesaje-wrap">
         <table class="tabla-pesaje">
             <thead>
                 <tr>
@@ -401,6 +487,7 @@ $renderizarBoleta = function(string $etiquetaCopia) use ($empresa, $tipoOp, $cor
                 </tr>
             </tbody>
         </table>
+        </div>
 
         <!-- 4. OBSERVACIONES -->
         <div class="boleta-notas">
@@ -474,10 +561,13 @@ function descargarBoletaPDF() {
         jsPDF:        { unit: 'mm', format: 'letter', orientation: 'portrait' }
     };
 
+    document.body.classList.add('generando-pdf');
     html2pdf().set(opt).from(elemento).save().then(() => {
+        document.body.classList.remove('generando-pdf');
         btn.disabled = false;
         btn.innerHTML = textoOriginal;
     }).catch(err => {
+        document.body.classList.remove('generando-pdf');
         console.error('Error html2pdf boleta:', err);
         window.print();
         btn.disabled = false;

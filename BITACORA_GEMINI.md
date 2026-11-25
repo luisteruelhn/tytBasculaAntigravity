@@ -320,6 +320,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Enlazado el ID de boleta en la lista de camiones pendientes en patio (`segunda_pesada.php`) hacia su pantalla de segunda pesada.
 * **Enlace de Retorno en Boleta (`web/public/boleta.php`)**:
   - Cambiado el enlace superior izquierdo `← Volver a Segunda Pesada` por `← Volver a Inicio` apuntando a `index.php`.
+  - Agregada adaptación responsiva exclusiva para móvil (`@media screen and (max-width: 768px)` con exclusión durante generación de PDF) en `boleta.php`: botones superiores en grilla uniforme de 2 columnas, datos en 1 columna sin solaparse y tabla de pesaje contenida con scroll horizontal limpio sin alterar la vista en PC ni la impresión.
 * **KPI y Detalle de Pesadas Manuales en Dashboard (`web/public/dashboard.php`)**:
   - Agregada tarjeta KPI **Pesadas manuales** y tabla detallada **Pesadas manuales en el rango** con enlace a la boleta, operación, fecha, cliente/proveedor, producto/placa, cuál captura fue manual (`Peso Bruto`, `Tara Vehículo` o `Bruto y Tara`) y pesos registrados.
   - Mejorada la legibilidad de los números y celdas de tablas en `dashboard.php` exclusivamente en Modo Oscuro (`[data-theme="dark"]`).
@@ -342,3 +343,4 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Enlazado el ID de boleta en la lista de camiones pendientes en patio (`segunda_pesada.php`) hacia su pantalla de segunda pesada.
 * **Enlace de Retorno en Boleta (`web/public/boleta.php`)**:
   - Cambiado el enlace superior izquierdo `← Volver a Segunda Pesada` por `← Volver a Inicio` apuntando a `index.php`.
+  - Agregada adaptación responsiva exclusiva para móvil (`@media screen and (max-width: 768px)` con exclusión durante generación de PDF) en `boleta.php`: botones superiores en grilla uniforme de 2 columnas, datos en 1 columna sin solaparse y tabla de pesaje contenida con scroll horizontal limpio sin alterar la vista en PC ni la impresión.
