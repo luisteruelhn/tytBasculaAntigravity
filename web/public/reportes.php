@@ -840,6 +840,7 @@ function filtrarTipoPersona(tipo) {
     });
 
     sel.value = '0';
+    if (typeof sel._comboSync === 'function') sel._comboSync();
 }
 
 function filtrarCategoria(catId) {
@@ -865,6 +866,123 @@ function filtrarCategoria(catId) {
             selProd.appendChild(opt);
         }
     });
+
+    if (typeof selProd._comboSync === 'function') selProd._comboSync();
+}
+
+function inicializarBuscadorFiltro(selectId, placeholderTexto) {
+    const select = document.getElementById(selectId);
+    if (!select || select.dataset.buscadorListo) return;
+    select.dataset.buscadorListo = '1';
+    select.style.display = 'none';
+
+    const wrap = document.createElement('div');
+    wrap.style.position = 'relative';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-control';
+    input.placeholder = placeholderTexto;
+    input.autocomplete = 'off';
+    input.style.cssText = 'height: 40px; border-radius: 6px; padding-right: 2rem;';
+
+    const btnLimpiar = document.createElement('button');
+    btnLimpiar.type = 'button';
+    btnLimpiar.innerHTML = '&times;';
+    btnLimpiar.title = 'Mostrar todos';
+    btnLimpiar.style.cssText = 'display: none; position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #64748b; font-size: 1.15rem; cursor: pointer; padding: 0 4px; line-height: 1;';
+
+    const lista = document.createElement('div');
+    lista.style.cssText = 'display: none; position: absolute; left: 0; right: 0; top: calc(100% + 2px); max-height: 240px; overflow-y: auto; background: var(--bg-surface, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 8px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16); z-index: 60;';
+
+    wrap.appendChild(input);
+    wrap.appendChild(btnLimpiar);
+    wrap.appendChild(lista);
+    select.parentNode.insertBefore(wrap, select.nextSibling);
+
+    const normalizar = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+
+    function sincronizarTextoDesdeSelect() {
+        const opt = select.selectedIndex >= 0 ? select.options[select.selectedIndex] : null;
+        if (opt && opt.value && opt.value !== '0') {
+            input.value = opt.text.trim();
+            btnLimpiar.style.display = 'block';
+        } else {
+            input.value = '';
+            btnLimpiar.style.display = 'none';
+        }
+    }
+    select._comboSync = sincronizarTextoDesdeSelect;
+
+    function renderOpciones(filtroRaw) {
+        const filtro = normalizar(filtroRaw);
+        lista.innerHTML = '';
+        let visibles = 0;
+
+        Array.from(select.options).forEach((opt) => {
+            if (opt.style.display === 'none') return;
+            const texto = opt.text.trim();
+            if (filtro !== '' && !normalizar(texto).includes(filtro)) return;
+
+            const item = document.createElement('div');
+            item.textContent = texto;
+            const seleccionado = (select.value === opt.value);
+            item.style.cssText = 'padding: 0.5rem 0.75rem; font-size: 0.86rem; cursor: pointer; color: var(--text-main); border-bottom: 1px solid var(--border-color, #f1f5f9);' +
+                (seleccionado ? 'background: rgba(37, 99, 235, 0.12); font-weight: 700;' : '');
+
+            item.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                select.value = opt.value;
+                sincronizarTextoDesdeSelect();
+                lista.style.display = 'none';
+            });
+            item.addEventListener('mouseenter', () => { item.style.background = 'rgba(37, 99, 235, 0.08)'; });
+            item.addEventListener('mouseleave', () => { item.style.background = seleccionado ? 'rgba(37, 99, 235, 0.12)' : 'transparent'; });
+
+            lista.appendChild(item);
+            visibles++;
+        });
+
+        if (visibles === 0) {
+            const vacio = document.createElement('div');
+            vacio.textContent = 'Sin coincidencias';
+            vacio.style.cssText = 'padding: 0.6rem 0.75rem; font-size: 0.84rem; color: var(--text-muted); text-align: center;';
+            lista.appendChild(vacio);
+        }
+        lista.style.display = 'block';
+    }
+
+    input.addEventListener('focus', () => {
+        input.select();
+        renderOpciones('');
+    });
+    input.addEventListener('input', () => {
+        btnLimpiar.style.display = input.value ? 'block' : 'none';
+        if (select.value !== '0') {
+            select.value = '0';
+        }
+        renderOpciones(input.value);
+    });
+    input.addEventListener('blur', () => {
+        setTimeout(() => {
+            lista.style.display = 'none';
+            if (!select.value || select.value === '0') {
+                input.value = '';
+                btnLimpiar.style.display = 'none';
+            } else {
+                sincronizarTextoDesdeSelect();
+            }
+        }, 160);
+    });
+
+    btnLimpiar.addEventListener('click', () => {
+        select.value = '0';
+        input.value = '';
+        btnLimpiar.style.display = 'none';
+        input.focus();
+    });
+
+    sincronizarTextoDesdeSelect();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -872,6 +990,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (catSel && catSel.value !== '0') {
         filtrarCategoria(catSel.value);
     }
+    inicializarBuscadorFiltro('persona_id', 'Todos (escribir para buscar...)');
+    inicializarBuscadorFiltro('producto_id', 'Todos los productos (buscar...)');
 });
 
 function imprimirReporte() {
