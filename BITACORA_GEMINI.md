@@ -283,3 +283,6 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
 * **Blindaje Anti-Fuerza Bruta Extendido (`api_sync.php` y `mi_clave.php`)**:
   - En `web/public/api_sync.php`: bloqueo automático `HTTP 429` por 15 minutos (`900 s`) tras 5 intentos con `X-Bascula-Token` inválido por IP, limpiando el contador ante envíos legítimos de planta.
   - En `web/public/mi_clave.php`: límite de 5 intentos fallidos en ventana de 5 minutos (`300 s`) al verificar la contraseña actual.
+* **Corrección de Conexión del Asistente TYTOne (`web/public/api_chat.php`)**:
+  - Detectado en `C:\xampp\apache\logs\error.log` error fatal `Call to undefined function curl_init()` bajo Apache de XAMPP en Windows.
+  - Implementado cliente HTTPS híbrido (`curl_init` cuando está disponible y respaldo nativo `stream_context_create` + OpenSSL cuando no), liberación temprana `session_write_close()` y cascada automática de modelos Gemini (`gemini-flash-lite-latest`, `gemini-3.5-flash-lite`, `gemini-3.7-flash`, `gemini-3.8-flash`) ante picos `503` o retiro `404`.

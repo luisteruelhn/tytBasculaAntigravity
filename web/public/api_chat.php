@@ -19,6 +19,7 @@ if (!$usuario) {
     echo json_encode(['ok' => false, 'error' => 'Sesión expirada o no autenticado.']);
     exit;
 }
+session_write_close();
 
 // Control estricto de roles: Solo SUPER, ADMINISTRADORES y REMOTO (solo lectura)
 if (!tieneRol($usuario, ['SUPER', 'ADMINISTRADOR', 'ADMIN', 'REMOTO'])) {
@@ -270,38 +271,118 @@ $payload = [
     ]
 ];
 
-$url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=' . urlencode($apiKey);
+// 4. LLAMADA HTTPS A LA API DE GEMINI (CON CASCADA DE MODELOS Y RESPALDO NATIVO SIN CURL)
+$jsonPayload = (string)json_encode($payload, JSON_UNESCAPED_UNICODE);
+$modelosCandidatos = [
+    'gemini-flash-lite-latest',
+    'gemini-3.5-flash-lite',
+    'gemini-3.7-flash',
+    'gemini-3.8-flash',
+    'gemini-flash-latest',
+];
 
-$ch = curl_init($url);
-curl_setopt_array($ch, [
-    CURLOPT_POST           => true,
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-    CURLOPT_POSTFIELDS     => json_encode($payload),
-    CURLOPT_TIMEOUT        => 15
-]);
+/**
+ * Ejecuta una petición POST JSON hacia Gemini usando cURL si está cargado o streams OpenSSL nativos.
+ *
+ * @return array{http: int, body: string, error: string}
+ */
+function consultarEndpointGemini(string $url, string $jsonBody, int $timeout = 15): array
+{
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json; charset=utf-8'],
+            CURLOPT_POSTFIELDS     => $jsonBody,
+            CURLOPT_TIMEOUT        => $timeout,
+            CURLOPT_CONNECTTIMEOUT => 5,
+        ]);
+        $resp = curl_exec($ch);
+        $http = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        curl_close($ch);
+        return [
+            'http'  => $http,
+            'body'  => ($resp !== false) ? (string)$resp : '',
+            'error' => $err,
+        ];
+    }
 
-$response = curl_exec($ch);
-$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-$errorCurl = curl_error($ch);
-curl_close($ch);
+    $ctx = stream_context_create([
+        'http' => [
+            'method'        => 'POST',
+            'ignore_errors' => true,
+            'timeout'       => $timeout,
+            'header'        => "Content-Type: application/json; charset=utf-8\r\n",
+            'content'       => $jsonBody,
+        ],
+    ]);
 
-if ($errorCurl !== '') {
-    echo json_encode(['ok' => false, 'error' => 'Error de conexión con Gemini: ' . $errorCurl]);
+    $http_response_header = [];
+    $resp = @file_get_contents($url, false, $ctx);
+    if ($resp === false) {
+        $lastErr = error_get_last();
+        return [
+            'http'  => 0,
+            'body'  => '',
+            'error' => (string)($lastErr['message'] ?? 'No se pudo conectar con generativelanguage.googleapis.com'),
+        ];
+    }
+
+    $httpCode = 200;
+    foreach ($http_response_header as $hdr) {
+        if (preg_match('#^HTTP/\S+\s+(\d{3})#i', $hdr, $m)) {
+            $httpCode = (int)$m[1];
+        }
+    }
+
+    return [
+        'http'  => $httpCode,
+        'body'  => (string)$resp,
+        'error' => '',
+    ];
+}
+
+$response  = '';
+$httpCode  = 0;
+$errorRed  = '';
+
+foreach ($modelosCandidatos as $modelo) {
+    $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $modelo . ':generateContent?key=' . urlencode($apiKey);
+    $resIntento = consultarEndpointGemini($url, $jsonPayload, 15);
+    $httpCode = $resIntento['http'];
+    $response = $resIntento['body'];
+    $errorRed = $resIntento['error'];
+
+    if ($errorRed !== '') {
+        break;
+    }
+    if ($httpCode === 200) {
+        break;
+    }
+    // Si el modelo puntual está en alta demanda (503) o retirado (404), probar el siguiente candidato
+    if (!in_array($httpCode, [404, 503], true)) {
+        break;
+    }
+}
+
+if ($errorRed !== '') {
+    echo json_encode(['ok' => false, 'error' => 'Error de conexión con Gemini: ' . $errorRed]);
     exit;
 }
 
 if ($httpCode !== 200) {
-    $errDecoded = json_decode((string)$response, true);
+    $errDecoded = json_decode($response, true);
     $msgErr = $errDecoded['error']['message'] ?? ('HTTP Error ' . $httpCode);
     echo json_encode(['ok' => false, 'error' => 'Gemini API Error: ' . $msgErr]);
     exit;
 }
 
-$dataRes = json_decode((string)$response, true);
+$dataRes = json_decode($response, true);
 $textoRespuesta = $dataRes['candidates'][0]['content']['parts'][0]['text'] ?? 'No se pudo obtener respuesta del modelo.';
 
 echo json_encode([
     'ok' => true,
     'respuesta' => trim($textoRespuesta)
-]);
+], JSON_UNESCAPED_UNICODE);
