@@ -73,11 +73,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
             try {
                 $pdo->beginTransaction();
 
-                // Obtener correlativo único continuo (Compra y Venta comparten secuencia a partir de 418)
+                // Obtener correlativo único continuo (Compra y Venta comparten secuencia a partir de 419)
                 $colCorrelativo = ($tipoOperacion === 'COMPRA') ? 'id_compra' : 'id_venta';
                 $stmtCorr = $pdo->prepare("
                     SELECT GREATEST(
-                        417,
+                        418,
                         COALESCE(MAX(id_compra), 0),
                         COALESCE(MAX(id_venta), 0)
                     ) + 1 AS sig

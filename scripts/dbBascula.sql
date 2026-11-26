@@ -304,7 +304,7 @@ CREATE TABLE IF NOT EXISTS t_pesadas (
             AND emitida_at IS NOT NULL AND emitida_at >= segunda_pesada_at
             AND emitida_por IS NOT NULL AND peso_final_lb IS NOT NULL)
     )
-) ENGINE=InnoDB AUTO_INCREMENT=418;
+) ENGINE=InnoDB AUTO_INCREMENT=419;
 
 CREATE TABLE IF NOT EXISTS t_pesada_anulaciones (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

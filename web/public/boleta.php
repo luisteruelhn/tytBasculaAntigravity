@@ -96,9 +96,10 @@ $quintales = $pesoFinal / 100.0;
         .empresa-detalle { font-size: 0.78rem; color: #475569; margin-top: 0.15rem; line-height: 1.35; }
 
         .op-contenedor { text-align: right; }
-        .op-tag { font-size: 2rem; font-weight: 900; letter-spacing: -0.5px; line-height: 1; color: <?= ($tipoOp === 'COMPRA' ? '#1e40af' : '#047857') ?>; }
-        .op-sub { font-size: 1.05rem; font-weight: 800; color: #475569; margin-top: 0.15rem; font-family: monospace; letter-spacing: 0.5px; }
-        .op-cierre { font-size: 0.78rem; color: #64748b; margin-top: 0.25rem; }
+        .op-titulo { font-size: 1.35rem; font-weight: 900; letter-spacing: 0.8px; text-transform: uppercase; color: #0f172a; line-height: 1.1; }
+        .op-sub { font-size: 1.2rem; font-weight: 900; color: #991b1b; margin-top: 0.15rem; font-family: monospace; letter-spacing: 0.5px; line-height: 1.1; }
+        .op-tag { font-size: 1.25rem; font-weight: 900; letter-spacing: 0.4px; line-height: 1.1; margin-top: 0.18rem; color: <?= ($tipoOp === 'COMPRA' ? '#1e40af' : '#047857') ?>; }
+        .op-cierre { font-size: 0.78rem; color: #64748b; margin-top: 0.2rem; }
 
         /* GRID DE DATOS */
         .datos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem 2rem; margin-bottom: 0.85rem; font-size: 0.82rem; }
@@ -194,8 +195,14 @@ $quintales = $pesoFinal / 100.0;
                 border-top: 1px dashed #cbd5e1;
                 padding-top: 0.5rem;
             }
+            body:not(.generando-pdf) .op-titulo {
+                font-size: 1.15rem;
+            }
+            body:not(.generando-pdf) .op-sub {
+                font-size: 1.05rem;
+            }
             body:not(.generando-pdf) .op-tag {
-                font-size: 1.55rem;
+                font-size: 1.1rem;
             }
             body:not(.generando-pdf) .datos-grid {
                 grid-template-columns: 1fr;
@@ -265,8 +272,14 @@ $quintales = $pesoFinal / 100.0;
             .empresa-nombre {
                 font-size: 1.2rem !important;
             }
+            .op-titulo {
+                font-size: 1.3rem !important;
+            }
+            .op-sub {
+                font-size: 1.15rem !important;
+            }
             .op-tag {
-                font-size: 1.9rem !important;
+                font-size: 1.2rem !important;
             }
             .datos-grid {
                 gap: 0.25rem 2rem !important;
@@ -377,14 +390,14 @@ $renderizarBoleta = function(string $etiquetaCopia) use ($empresa, $tipoOp, $cor
             </div>
 
             <div class="op-contenedor">
-                <div style="font-size: 0.72rem; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #64748b; margin-bottom: 0.15rem;">
+                <div class="op-titulo">
                     BOLETA DE PESO
-                </div>
-                <div class="op-tag">
-                    <?= $tipoOp ?>
                 </div>
                 <div class="op-sub">
                     # <?= sprintf('%07d', $correlativo) ?>
+                </div>
+                <div class="op-tag">
+                    <?= $tipoOp ?>
                 </div>
                 <div class="op-cierre">
                     Cierre: <?= $fechaCierre ?>

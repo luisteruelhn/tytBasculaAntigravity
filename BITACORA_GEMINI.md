@@ -350,3 +350,7 @@ Registro cronológico y detallado de todas las actividades, decisiones técnicas
   - Generado respaldo previo en `dbbackup/respaldo_pre_limpieza_pesadas_20261125.sql`.
   - Limpiadas las tablas `t_pesada_anulaciones`, `t_pesadas` y eventos pendientes de pesadas en `t_sincronizacion_pendiente`, ajustando `AUTO_INCREMENT = 418` en `t_pesadas` y sincronizando la limpieza con Hostinger (`sincronizarTodoConNube`).
   - Configurado correlativo unificado continuo a partir de `418` (`GREATEST(417, COALESCE(MAX(id_compra), 0), COALESCE(MAX(id_venta), 0)) + 1`) en `primera_pesada.php` para continuar después de la boleta `417` del sistema anterior sin importar si es Compra o Venta, preservando intacta la configuración `SERIAL` del indicador real.
+* **Ajuste de Inicio de Numeración de Pesadas a `#0000419` (`web/public/primera_pesada.php`, `scripts/dbBascula.sql`)**:
+  - Actualizado el correlativo inicial unificado a `419` (`GREATEST(418, COALESCE(MAX(id_compra), 0), COALESCE(MAX(id_venta), 0)) + 1`) y ajustado `AUTO_INCREMENT = 419` en `t_pesadas` (respaldo previo en `dbbackup/respaldo_pre_419_20261126.sql`).
+* **Jerarquía de Encabezado en Impresión de Boleta (`web/public/boleta.php`)**:
+  - Ampliado el título `BOLETA DE PESO` (`1.35rem`), colocado debajo el correlativo `#` en rojo oscuro (`#991b1b`, `1.2rem`) y debajo la operación `COMPRA` (azul `#1e40af`) o `VENTA` (verde `#047857`) en tamaño más compacto (`1.25rem` pantalla / `1.2rem` impresión).
