@@ -405,7 +405,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
 <div style="max-width: 1040px; margin: 0 auto;">
 
     <!-- ENCABEZADO -->
-    <div class="cockpit-page-header" style="margin-bottom: 1.5rem;">
+    <div class="cockpit-page-header" style="margin-bottom: <?= $pesadaActiva ? '0.65rem' : '1.5rem' ?>;">
         <span class="cockpit-eyebrow" style="font-size: 0.78rem; font-weight: 800; color: #1e40af; letter-spacing: 1.5px; text-transform: uppercase;">
             PESAJE
         </span>
@@ -667,13 +667,13 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
             </div>
 
             <!-- FILA 3: TARA DE EMPAQUE, DESCUENTOS DETALLADOS, OBSERVACIONES Y CIERRE -->
-            <div id="seccionLiquidacionSegunda" class="card" style="padding: 1.1rem 1.35rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 1.25rem;">
-                <h3 style="font-size: 1.02rem; font-weight: 800; margin: 0 0 0.75rem 0; color: var(--text-main);">
+            <div id="seccionLiquidacionSegunda" class="card" style="padding: 0.9rem 1.35rem; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); margin-bottom: 0.85rem;">
+                <h3 style="font-size: 1rem; font-weight: 800; margin: 0 0 0.55rem 0; color: var(--text-main);">
                     Tara de empaque y descuentos
                 </h3>
 
                 <!-- 4 CONTROLES EN UNA SOLA FILA BALANCEADA -->
-                <div class="cockpit-grid-4" style="display: grid; grid-template-columns: 1.2fr 0.9fr 0.95fr 0.95fr; gap: 0.85rem; margin-bottom: 0.9rem;">
+                <div class="cockpit-grid-4" style="display: grid; grid-template-columns: 1.2fr 0.9fr 0.95fr 0.95fr; gap: 0.85rem; margin-bottom: 0.65rem;">
                     <div>
                         <label for="idempaque" class="form-label" style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.25rem;">
                             Empaque o saco
@@ -775,47 +775,47 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
 
                 <div id="avisoPesoInvalido" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 8px; padding: 0.6rem 0.85rem; margin-bottom: 0.75rem; font-size: 0.84rem; font-weight: 600;"></div>
 
-                <!-- BLOQUE INFERIOR BALANCEADO: LIQUIDACIÓN DETALLADA (IZQUIERDA) + OBSERVACIONES (DERECHA) -->
-                <div class="cockpit-split-bottom" style="display: grid; grid-template-columns: 1.35fr 0.85fr; gap: 1rem; align-items: stretch; margin-bottom: 0.9rem;">
-                    <!-- IZQUIERDA: LIQUIDACIÓN CON CADA DESCUENTO DETALLADO -->
-                    <div style="background: #f8fafc; padding: 0.85rem 1.1rem; border-radius: 10px; border: 1px solid #cbd5e1; display: flex; flex-direction: column; justify-content: space-between;">
-                        <div class="cockpit-liq-5" style="display: grid; grid-template-columns: repeat(4, 1fr) 1.25fr; gap: 0.6rem; align-items: center; margin-bottom: 0.55rem;">
-                            <div>
-                                <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Neto Inicial</span>
-                                <div id="resNetoInicial" style="font-size: 1.1rem; font-weight: 800; color: var(--text-main);">0 lb</div>
-                            </div>
-                            <div>
-                                <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Tara Sacos</span>
-                                <div id="resTaraSacos" style="font-size: 1.1rem; font-weight: 800; color: #475569;">0 lb</div>
-                            </div>
-                            <div>
-                                <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Desc. Humedad</span>
-                                <div id="resDescHumedadLb" style="font-size: 1.1rem; font-weight: 800; color: #b91c1c;">0 lb</div>
-                                <small id="resDescHumedadPct" style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">0%</small>
-                            </div>
-                            <div>
-                                <span style="font-size: 0.68rem; color: #64748b; font-weight: 700; text-transform: uppercase; display: block;">Desc. Calidad</span>
-                                <div id="resDescCalidadLb" style="font-size: 1.1rem; font-weight: 800; color: #b91c1c;">0 lb</div>
-                                <small id="resDescCalidadPct" style="font-size: 0.7rem; color: #94a3b8; font-weight: 700;">0%</small>
-                            </div>
-                            <div class="cockpit-liq-total" style="background: #eff6ff; padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid #bfdbfe; text-align: right;">
-                                <span style="font-size: 0.68rem; color: #1e40af; font-weight: 800; text-transform: uppercase; display: block;">Peso Final</span>
-                                <div id="resPesoFinal" style="font-size: 1.35rem; font-weight: 900; color: #1e40af; line-height: 1.05;">0 lb</div>
-                                <small id="resQuintales" style="font-weight: 800; color: #1e3a8a; font-size: 0.82rem;">0.00 QQ</small>
-                            </div>
-                        </div>
-                        <div id="resDesgloseTexto" style="font-size: 0.76rem; color: #64748b; border-top: 1px dashed #cbd5e1; padding-top: 0.45rem; line-height: 1.35;">
-                            Fija el peso complementario para ver la liquidación en vivo.
-                        </div>
-                    </div>
+                <!-- TABLA DE DESGLOSE IDÉNTICA A LA BOLETA (TODO EN UNA SOLA VISTA) -->
+                <div class="tabla-liq-segunda-wrap" style="margin-bottom: 0.65rem;">
+                    <table class="tabla-liq-segunda">
+                        <thead>
+                            <tr>
+                                <th>Bruto</th>
+                                <th>Tara</th>
+                                <th>Neto</th>
+                                <th>Sacos</th>
+                                <th>Tara Sacos</th>
+                                <th>Neto</th>
+                                <th>%H</th>
+                                <th>%D</th>
+                                <th class="th-total-qq">Total QQ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td id="resBruto"><?= $pesadaActiva['tipo_primera_pesada'] === 'BRUTO' ? number_format($primerPeso, 0) : '--' ?></td>
+                                <td id="resTara"><?= $pesadaActiva['tipo_primera_pesada'] === 'TARA' ? number_format($primerPeso, 0) : '--' ?></td>
+                                <td id="resNetoInicial">0</td>
+                                <td id="resSacos">0</td>
+                                <td id="resTaraSacos">0</td>
+                                <td>
+                                    <div id="resBaseLb">0</div>
+                                    <div id="resBaseQQ" class="sub-qq">0.00 QQ</div>
+                                </td>
+                                <td id="resDescHumedadPct">0%</td>
+                                <td id="resDescCalidadPct">0%</td>
+                                <td id="resQuintales" class="td-total-qq">0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                    <!-- DERECHA: OBSERVACIONES DE SALIDA -->
-                    <div style="background: #f8fafc; padding: 0.85rem 1rem; border-radius: 10px; border: 1px solid #cbd5e1; display: flex; flex-direction: column;">
-                        <label for="observaciones_segunda" class="form-label" style="font-size: 0.76rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
-                            Observaciones de salida
-                        </label>
-                        <textarea id="observaciones_segunda" name="observaciones_segunda" class="form-control" rows="2" style="font-size: 0.86rem; flex: 1; resize: none;" placeholder="Notas sobre el estado de la carga o cierre"></textarea>
-                    </div>
+                <!-- OBSERVACIONES DE SALIDA EN UN SOLO RENGLÓN LARGO -->
+                <div class="obs-renglon-unico" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.7rem;">
+                    <label for="observaciones_segunda" class="form-label" style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin: 0; white-space: nowrap;">
+                        Observaciones de salida:
+                    </label>
+                    <input type="text" id="observaciones_segunda" name="observaciones_segunda" class="form-control" style="height: 36px; font-size: 0.86rem; border-radius: 6px; flex: 1;" placeholder="Notas opcionales sobre el estado de la carga o cierre...">
                 </div>
 
                 <div id="avisoFaltanteGuardar" style="display: none; margin-bottom: 0.75rem; padding: 0.75rem 0.95rem; border-radius: 8px; background: #fef2f2; border: 1px solid #fca5a5; color: #991b1b; font-size: 0.86rem; font-weight: 600;"></div>
@@ -1127,58 +1127,55 @@ function calcularTotales() {
         if (resAviso) resAviso.style.display = 'none';
     }
 
-    const netoInicial = Math.max(0, bruto - tara);
-    document.getElementById('resNetoInicial').innerText = netoInicial.toLocaleString('en-US') + ' lb';
+    const tieneAmbosValidos = (segundoPeso > 0 && bruto > tara);
+    const netoInicial = tieneAmbosValidos ? Math.max(0, bruto - tara) : 0;
 
     // Tara de sacos
     const selEmpaque = document.getElementById('idempaque');
     let taraUnitaria = 0;
-    let empaqueNombre = 'Sin empaque';
     if (selEmpaque && selEmpaque.selectedIndex >= 0) {
         const optEmpaque = selEmpaque.options[selEmpaque.selectedIndex];
         taraUnitaria = parseFloat(optEmpaque.getAttribute('data-peso') || '0');
-        empaqueNombre = optEmpaque.text;
     }
-    const cantEmpaques = parseInt(document.getElementById('cantidad_empaques').value || '0', 10);
+    const cantEmpaques = Math.max(0, parseInt(document.getElementById('cantidad_empaques').value || '0', 10) || 0);
     const taraSacos = Math.ceil(Number((taraUnitaria * cantEmpaques).toFixed(4)));
-    document.getElementById('resTaraSacos').innerText = taraSacos.toLocaleString('en-US') + ' lb';
 
-    // Base de descuentos
-    const baseDesc = Math.max(0, netoInicial - taraSacos);
+    // Base de descuentos (Neto después de tara de sacos)
+    const baseDesc = tieneAmbosValidos ? Math.max(0, netoInicial - taraSacos) : 0;
 
     // Descuentos porcentuales detallados (redondeo hacia arriba)
-    const pctHum = parseFloat(document.getElementById('ajuste_humedad_pct').value || '0');
-    const pctDef = parseFloat(document.getElementById('descuento_calidad_pct').value || '0');
+    const pctHum = Math.max(0, parseFloat(document.getElementById('ajuste_humedad_pct').value || '0') || 0);
+    const pctDef = Math.max(0, parseFloat(document.getElementById('descuento_calidad_pct').value || '0') || 0);
     const descHum = Math.ceil(Number((baseDesc * (pctHum / 100.0)).toFixed(4)));
     const descDef = Math.ceil(Number((baseDesc * (pctDef / 100.0)).toFixed(4)));
     const totalDesc = descHum + descDef;
 
-    const elHumLb = document.getElementById('resDescHumedadLb');
-    const elHumPct = document.getElementById('resDescHumedadPct');
-    const elCalLb = document.getElementById('resDescCalidadLb');
-    const elCalPct = document.getElementById('resDescCalidadPct');
-    if (elHumLb) elHumLb.innerText = descHum.toLocaleString('en-US') + ' lb';
-    if (elHumPct) elHumPct.innerText = pctHum + '%';
-    if (elCalLb) elCalLb.innerText = descDef.toLocaleString('en-US') + ' lb';
-    if (elCalPct) elCalPct.innerText = pctDef + '%';
+    const pesoFinal = tieneAmbosValidos ? Math.max(0, baseDesc - totalDesc) : 0;
+    const fmtPct = (v) => Number(v.toFixed(2)) + '%';
 
-    const pesoFinal = Math.max(0, baseDesc - totalDesc);
-    document.getElementById('resPesoFinal').innerText = pesoFinal.toLocaleString('en-US') + ' lb';
-    document.getElementById('resQuintales').innerText = (pesoFinal / 100.0).toFixed(2) + ' QQ';
+    const elBruto = document.getElementById('resBruto');
+    const elTara  = document.getElementById('resTara');
+    const elNeto1 = document.getElementById('resNetoInicial');
+    const elSacos = document.getElementById('resSacos');
+    const elTSaco = document.getElementById('resTaraSacos');
+    const elBaseL = document.getElementById('resBaseLb');
+    const elBaseQ = document.getElementById('resBaseQQ');
+    const elHumP  = document.getElementById('resDescHumedadPct');
+    const elCalP  = document.getElementById('resDescCalidadPct');
+    const elTotQQ = document.getElementById('resQuintales');
 
-    // Retroalimentación explicativa en texto
-    const elTexto = document.getElementById('resDesgloseTexto');
-    if (elTexto) {
-        if (segundoPeso <= 0) {
-            elTexto.innerHTML = 'Fija el peso complementario para ver la liquidación en vivo.';
-        } else if (bruto <= tara) {
-            elTexto.innerHTML = '<strong style="color: #b91c1c;">No se puede liquidar:</strong> El Peso Bruto debe ser estrictamente mayor a la Tara del vehículo.';
-        } else {
-            elTexto.innerHTML = `<strong>Desglose:</strong> Bruto (${bruto.toLocaleString()} lb) &minus; Tara (${tara.toLocaleString()} lb) = <strong>Neto Inicial: ${netoInicial.toLocaleString()} lb</strong>. ` +
-                (taraSacos > 0 ? `Menos tara empaques (${cantEmpaques} &times; ${taraUnitaria} lb = ${taraSacos.toLocaleString()} lb) &rarr; Base: <strong>${baseDesc.toLocaleString()} lb</strong>. ` : '') +
-                (totalDesc > 0 ? `Menos descuentos (Humedad ${pctHum}%: ${descHum.toLocaleString()} lb + Defectos ${pctDef}%: ${descDef.toLocaleString()} lb) &rarr; ` : '') +
-                `<strong>Final: ${pesoFinal.toLocaleString()} lb (${(pesoFinal / 100.0).toFixed(2)} QQ)</strong>.`;
-        }
+    if (elBruto) elBruto.innerText = (tipoPrimera === 'BRUTO') ? primerPeso.toLocaleString('en-US') : (segundoPeso > 0 ? segundoPeso.toLocaleString('en-US') : '--');
+    if (elTara)  elTara.innerText  = (tipoPrimera === 'TARA')  ? primerPeso.toLocaleString('en-US') : (segundoPeso > 0 ? segundoPeso.toLocaleString('en-US') : '--');
+    if (elNeto1) elNeto1.innerText = netoInicial.toLocaleString('en-US');
+    if (elSacos) elSacos.innerText = cantEmpaques.toLocaleString('en-US');
+    if (elTSaco) elTSaco.innerText = taraSacos.toLocaleString('en-US');
+    if (elBaseL) elBaseL.innerText = baseDesc.toLocaleString('en-US');
+    if (elBaseQ) elBaseQ.innerText = (baseDesc / 100.0).toFixed(2) + ' QQ';
+    if (elHumP)  elHumP.innerText  = fmtPct(pctHum);
+    if (elCalP)  elCalP.innerText  = fmtPct(pctDef);
+    if (elTotQQ) {
+        elTotQQ.innerText = (pesoFinal / 100.0).toFixed(2);
+        elTotQQ.title = pesoFinal.toLocaleString('en-US') + ' lb finales';
     }
 }
 
@@ -1221,6 +1218,87 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 </script>
+
+<style>
+.tabla-liq-segunda-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.tabla-liq-segunda {
+    width: 100%;
+    min-width: 580px;
+    border-collapse: collapse;
+    background: #ffffff;
+}
+.tabla-liq-segunda th {
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 0.42rem 0.35rem;
+    text-align: center;
+    border-top: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+}
+.tabla-liq-segunda th.th-total-qq {
+    background: #ffe4e6;
+    color: #881337;
+    font-weight: 700;
+}
+.tabla-liq-segunda td {
+    padding: 0.5rem 0.35rem;
+    text-align: center;
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: #0f172a;
+    border-bottom: 1px solid #e2e8f0;
+}
+.tabla-liq-segunda .sub-qq {
+    font-size: 0.72rem;
+    color: #475569;
+    font-weight: 700;
+    margin-top: 0.05rem;
+}
+.tabla-liq-segunda td.td-total-qq {
+    background: #fff1f2;
+    color: #881337;
+    font-size: 1.35rem;
+    font-weight: 900;
+}
+[data-theme="dark"] .tabla-liq-segunda {
+    background: transparent;
+}
+[data-theme="dark"] .tabla-liq-segunda th {
+    background: var(--bg-surface-elevated);
+    color: #94a3b8;
+    border-color: var(--border-color);
+}
+[data-theme="dark"] .tabla-liq-segunda td {
+    color: #f1f5f9;
+    border-bottom-color: var(--border-color);
+}
+[data-theme="dark"] .tabla-liq-segunda .sub-qq {
+    color: #94a3b8;
+}
+[data-theme="dark"] .tabla-liq-segunda th.th-total-qq {
+    background: rgba(244, 63, 94, 0.22);
+    color: #fda4af;
+}
+[data-theme="dark"] .tabla-liq-segunda td.td-total-qq {
+    background: rgba(244, 63, 94, 0.14);
+    color: #fda4af;
+}
+@media screen and (max-width: 640px) {
+    .obs-renglon-unico {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 0.25rem !important;
+    }
+}
+</style>
 
 <?php
 renderizarPie();
