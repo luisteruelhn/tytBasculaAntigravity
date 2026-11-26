@@ -295,6 +295,16 @@ $listaUsuarios = $usuarios->fetchAll(PDO::FETCH_ASSOC);
 
 $listaEmpaques = $pdo->query("SELECT idempaque, nombre, taralbs FROM t_taras ORDER BY taralbs ASC")->fetchAll(PDO::FETCH_ASSOC);
 
+// Consultar placas con boleta ABIERTA en patio para prevenir doble registro accidental
+$stmtPatio = $pdo->prepare("
+    SELECT p.idpesada, p.placa, p.tipo_operacion, p.id_compra, p.id_venta, cp.nombre AS persona_nombre
+    FROM t_pesadas p
+    LEFT JOIN t_clie_prov cp ON cp.id = p.clie_prov_id
+    WHERE p.empresa_id = :empresa_id AND p.estado = 'ABIERTA' AND p.placa IS NOT NULL AND p.placa <> ''
+");
+$stmtPatio->execute([':empresa_id' => $empresaId]);
+$placasAbiertasPatio = $stmtPatio->fetchAll(PDO::FETCH_ASSOC);
+
 $tokenCsrf = obtenerCsrfToken();
 renderizarEncabezado('Primera Pesada', 'primera');
 ?>
@@ -409,12 +419,12 @@ renderizarEncabezado('Primera Pesada', 'primera');
                 <span class="cockpit-tx-label" style="font-size: 0.82rem; font-weight: 800; color: var(--text-main); text-transform: uppercase; letter-spacing: 0.5px;">
                     Transacción:
                 </span>
-                <div style="display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 9px; gap: 4px;">
-                    <button type="button" id="btnTxCompra" onclick="cambiarTransaccionPrincipal('COMPRA')" style="padding: 0.45rem 1.15rem; border-radius: 7px; font-weight: 800; font-size: 0.88rem; border: none; cursor: pointer; background: #1e40af; color: #ffffff; transition: all 0.15s ease;">
-                        📥 COMPRA
+                <div style="display: inline-flex; background: #e2e8f0; padding: 3px; border-radius: 9px; gap: 4px; flex-wrap: wrap;">
+                    <button type="button" id="btnTxCompra" onclick="cambiarTransaccionPrincipal('COMPRA')" style="padding: 0.45rem 1.05rem; border-radius: 7px; font-weight: 800; font-size: 0.86rem; border: none; cursor: pointer; background: #1e40af; color: #ffffff; transition: all 0.15s ease;">
+                        📥 COMPRA (Entra cargado)
                     </button>
-                    <button type="button" id="btnTxVenta" onclick="cambiarTransaccionPrincipal('VENTA')" style="padding: 0.45rem 1.15rem; border-radius: 7px; font-weight: 800; font-size: 0.88rem; border: none; cursor: pointer; background: transparent; color: #475569; transition: all 0.15s ease;">
-                        📤 VENTA
+                    <button type="button" id="btnTxVenta" onclick="cambiarTransaccionPrincipal('VENTA')" style="padding: 0.45rem 1.05rem; border-radius: 7px; font-weight: 800; font-size: 0.86rem; border: none; cursor: pointer; background: transparent; color: #475569; transition: all 0.15s ease;">
+                        📤 VENTA (Entra vacío)
                     </button>
                 </div>
                 <span id="badgeOpOperacion" style="font-size: 0.75rem; font-weight: 800; background: #dbeafe; color: #1e40af; padding: 0.2rem 0.65rem; border-radius: 999px;">
@@ -610,6 +620,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
                     <input type="text" id="licencia" name="licencia" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;">
                 </div>
             </div>
+            <div id="avisoPlacaEnPatio" style="display: none; margin-bottom: 0.75rem; padding: 0.6rem 0.9rem; border-radius: 8px; background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; font-size: 0.84rem; font-weight: 600;"></div>
 
             <!-- LÍNEA 3: ORIGEN, DESTINO, OBSERVACIONES (3 COLUMNAS) -->
             <div class="cockpit-grid-3" style="display: grid; grid-template-columns: 1fr 1fr 1.3fr; gap: 0.85rem; margin-bottom: 0.9rem;">
@@ -781,6 +792,7 @@ renderizarEncabezado('Primera Pesada', 'primera');
 
 <script>
 const TODAS_PRESENTACIONES = <?= json_encode($listaPresentaciones, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
+const PLACAS_ABIERTAS_PATIO = <?= json_encode($placasAbiertasPatio, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
 let pesoEnVivo = 0;
 let esPesoEstable = true;
 
@@ -1316,6 +1328,40 @@ function inicializarBuscadorSelect(selectId, placeholderTexto) {
 document.addEventListener('DOMContentLoaded', () => {
     inicializarBuscadorSelect('clie_prov_id', 'Buscar cliente o proveedor...');
     inicializarBuscadorSelect('producto_id', 'Buscar producto...');
+
+    const inpPlaca = document.getElementById('placa');
+    const boxPatio = document.getElementById('avisoPlacaEnPatio');
+    if (inpPlaca && boxPatio && Array.isArray(PLACAS_ABIERTAS_PATIO) && PLACAS_ABIERTAS_PATIO.length > 0) {
+        const normPlaca = (s) => String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+        const verificarPlacaPatio = () => {
+            const pBusq = normPlaca(inpPlaca.value);
+            if (pBusq.length < 3) {
+                boxPatio.style.display = 'none';
+                return;
+            }
+            const coincidencia = PLACAS_ABIERTAS_PATIO.find(item => normPlaca(item.placa) === pBusq);
+            if (coincidencia) {
+                const corr = coincidencia.tipo_operacion === 'COMPRA' ? coincidencia.id_compra : coincidencia.id_venta;
+                const numBol = '#' + String(corr || '').padStart(7, '0');
+                const opTxt = coincidencia.tipo_operacion === 'COMPRA' ? 'Compra' : 'Venta';
+                const perTxt = coincidencia.persona_nombre ? ' · ' + coincidencia.persona_nombre : '';
+                boxPatio.innerHTML = '';
+                const spanTxt = document.createElement('span');
+                spanTxt.textContent = `⚠️ La placa ${coincidencia.placa} ya tiene abierta en patio la boleta ${numBol} (${opTxt}${perTxt}). ¿Viene de salida? `;
+                const linkSeg = document.createElement('a');
+                linkSeg.href = 'segunda_pesada.php?id=' + encodeURIComponent(coincidencia.idpesada);
+                linkSeg.style.cssText = 'font-weight: 800; text-decoration: underline; margin-left: 0.35rem; color: inherit;';
+                linkSeg.textContent = 'Ir a Segunda Pesada para cerrarla →';
+                boxPatio.appendChild(spanTxt);
+                boxPatio.appendChild(linkSeg);
+                boxPatio.style.display = 'block';
+            } else {
+                boxPatio.style.display = 'none';
+            }
+        };
+        inpPlaca.addEventListener('input', verificarPlacaPatio);
+        inpPlaca.addEventListener('change', verificarPlacaPatio);
+    }
 });
 
 function filtrarPresentaciones(productoId) {

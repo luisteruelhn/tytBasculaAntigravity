@@ -25,6 +25,144 @@ $pdo = obtenerDB();
 $mensajeExito = '';
 $error = '';
 $pesadaCerrada = null;
+$pesoPrevioFijado = 0;
+
+// 0. CORREGIR / INVERTIR OPERACIÓN (COMPRA <-> VENTA) EN NOTA ABIERTA
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['accion'] ?? '') === 'invertir_operacion') {
+    if (!validarCsrfToken($_POST['csrf_token'] ?? null)) {
+        $error = 'La sesión del formulario venció. Por favor recarga e intenta de nuevo.';
+    } else {
+        $idInvertir    = (int)($_POST['idpesada'] ?? 0);
+        $nuevoClieProv = (int)($_POST['nuevo_clie_prov_id'] ?? 0);
+        $pesoPrevioFijado = max(0, (int)round((float)($_POST['peso_previo'] ?? 0)));
+
+        if ($idInvertir <= 0 || $nuevoClieProv <= 0) {
+            $error = 'Selecciona el Cliente o Proveedor válido antes de aplicar la corrección.';
+        } else {
+            try {
+                $pdo->beginTransaction();
+
+                $stmtNota = $pdo->prepare("
+                    SELECT * FROM t_pesadas
+                    WHERE idpesada = :id AND empresa_id = :empresa_id AND estado = 'ABIERTA'
+                    LIMIT 1 FOR UPDATE
+                ");
+                $stmtNota->execute([':id' => $idInvertir, ':empresa_id' => $empresaId]);
+                $notaAbierta = $stmtNota->fetch(PDO::FETCH_ASSOC);
+
+                if (!$notaAbierta) {
+                    throw new RuntimeException('La nota seleccionada ya no está abierta o no existe.');
+                }
+
+                $nuevoTipoOp = ($notaAbierta['tipo_operacion'] === 'COMPRA') ? 'VENTA' : 'COMPRA';
+
+                // Validar que la persona pertenezca a la empresa y tenga el rol correspondiente
+                $stmtPer = $pdo->prepare("
+                    SELECT id, es_cliente, es_proveedor
+                    FROM t_clie_prov
+                    WHERE id = :id AND empresa_id = :empresa_id AND activo = 1
+                    LIMIT 1
+                ");
+                $stmtPer->execute([':id' => $nuevoClieProv, ':empresa_id' => $empresaId]);
+                $perValida = $stmtPer->fetch(PDO::FETCH_ASSOC);
+
+                if (!$perValida) {
+                    throw new RuntimeException('El cliente o proveedor seleccionado no es válido.');
+                }
+                if ($nuevoTipoOp === 'VENTA' && !(int)$perValida['es_cliente']) {
+                    throw new RuntimeException('Para cambiar la nota a VENTA debes seleccionar un Cliente.');
+                }
+                if ($nuevoTipoOp === 'COMPRA' && !(int)$perValida['es_proveedor']) {
+                    throw new RuntimeException('Para cambiar la nota a COMPRA debes seleccionar un Proveedor.');
+                }
+
+                // Conservar el mismo número correlativo (o siguiente libre si existiera colisión histórica)
+                $corrActual = (int)($notaAbierta['id_compra'] ?? $notaAbierta['id_venta']);
+                $colDestino = ($nuevoTipoOp === 'COMPRA') ? 'id_compra' : 'id_venta';
+                $stmtDup = $pdo->prepare("
+                    SELECT COUNT(*) FROM t_pesadas
+                    WHERE empresa_id = :empresa_id AND {$colDestino} = :corr AND idpesada <> :id
+                ");
+                $stmtDup->execute([':empresa_id' => $empresaId, ':corr' => $corrActual, ':id' => $idInvertir]);
+                if ((int)$stmtDup->fetchColumn() > 0) {
+                    $stmtSig = $pdo->prepare("
+                        SELECT GREATEST(418, COALESCE(MAX(id_compra), 0), COALESCE(MAX(id_venta), 0)) + 1
+                        FROM t_pesadas WHERE empresa_id = :empresa_id FOR UPDATE
+                    ");
+                    $stmtSig->execute([':empresa_id' => $empresaId]);
+                    $corrActual = (int)$stmtSig->fetchColumn();
+                }
+
+                $nuevoIdCompra = ($nuevoTipoOp === 'COMPRA') ? $corrActual : null;
+                $nuevoIdVenta  = ($nuevoTipoOp === 'VENTA') ? $corrActual : null;
+
+                // Invertir tipo de primera pesada y mover peso/auditoría inicial (cumpliendo chk_pesadas_capturas y chk_pesadas_origen)
+                if ($notaAbierta['tipo_primera_pesada'] === 'BRUTO') {
+                    $nuevoTipoPrimera = 'TARA';
+                    $nuevoBruto       = null;
+                    $nuevoBrutoPor    = null;
+                    $nuevoOrigenBruto = null;
+                    $nuevaTara        = (float)$notaAbierta['peso_bruto_lb'];
+                    $nuevaTaraPor     = (int)$notaAbierta['bruto_capturado_por'];
+                    $nuevoOrigenTara  = $notaAbierta['origen_bruto'];
+                } else {
+                    $nuevoTipoPrimera = 'BRUTO';
+                    $nuevoBruto       = (float)$notaAbierta['tara_vehiculo_lb'];
+                    $nuevoBrutoPor    = (int)$notaAbierta['tara_capturada_por'];
+                    $nuevoOrigenBruto = $notaAbierta['origen_tara'];
+                    $nuevaTara        = null;
+                    $nuevaTaraPor     = null;
+                    $nuevoOrigenTara  = null;
+                }
+
+                $stmtInv = $pdo->prepare("
+                    UPDATE t_pesadas SET
+                        tipo_operacion = :tipo_op,
+                        id_compra = :id_compra,
+                        id_venta = :id_venta,
+                        clie_prov_id = :clie_prov_id,
+                        tipo_primera_pesada = :tipo_primera,
+                        peso_bruto_lb = :peso_bruto,
+                        bruto_capturado_por = :bruto_por,
+                        origen_bruto = :origen_bruto,
+                        tara_vehiculo_lb = :tara_vehiculo,
+                        tara_capturada_por = :tara_por,
+                        origen_tara = :origen_tara
+                    WHERE idpesada = :id AND empresa_id = :empresa_id AND estado = 'ABIERTA'
+                ");
+                $stmtInv->execute([
+                    ':tipo_op'       => $nuevoTipoOp,
+                    ':id_compra'     => $nuevoIdCompra,
+                    ':id_venta'      => $nuevoIdVenta,
+                    ':clie_prov_id'  => $nuevoClieProv,
+                    ':tipo_primera'  => $nuevoTipoPrimera,
+                    ':peso_bruto'    => $nuevoBruto,
+                    ':bruto_por'     => $nuevoBrutoPor,
+                    ':origen_bruto'  => $nuevoOrigenBruto,
+                    ':tara_vehiculo' => $nuevaTara,
+                    ':tara_por'      => $nuevaTaraPor,
+                    ':origen_tara'   => $nuevoOrigenTara,
+                    ':id'            => $idInvertir,
+                    ':empresa_id'    => $empresaId,
+                ]);
+
+                $pdo->commit();
+
+                require_once dirname(__DIR__) . '/src/sync_nube.php';
+                sincronizarPesadaAutomatica($idInvertir);
+
+                $_GET['id'] = (string)$idInvertir;
+                $mensajeExito = 'Nota corregida a ' . $nuevoTipoOp . ' #' . sprintf('%07d', $corrActual) . ' (' . ($nuevoTipoPrimera === 'TARA' ? 'Entrada registrada como Tara' : 'Entrada registrada como Peso Bruto') . ').';
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                $_GET['id'] = (string)$idInvertir;
+                $error = 'No se pudo corregir la operación: ' . $e->getMessage();
+            }
+        }
+    }
+}
 
 // 1. PROCESAR CIERRE DE SEGUNDA PESADA
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'cerrar_pesada') {
@@ -208,11 +346,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
 // 2. PESADA SELECCIONADA PARA CERRAR (SI SE PASÓ POR ?id=...)
 $idSeleccionada = (int)($_GET['id'] ?? 0);
 $pesadaActiva = null;
+$personasCambioOp = [];
 
 if ($idSeleccionada > 0 && !$pesadaCerrada) {
     $stmtActiva = $pdo->prepare("
-        SELECT p.*, cp.nombre AS persona_nombre, pr.nombre AS presentacion_nombre, 
-               prod.nombre AS producto_nombre, u.nombre AS responsable_nombre
+        SELECT p.*, cp.nombre AS persona_nombre, cp.es_cliente AS persona_es_cliente, cp.es_proveedor AS persona_es_proveedor,
+               pr.nombre AS presentacion_nombre, prod.nombre AS producto_nombre, u.nombre AS responsable_nombre
         FROM t_pesadas p
         JOIN t_clie_prov cp ON cp.id = p.clie_prov_id
         JOIN t_producto_presentaciones pr ON pr.id = p.presentacion_id
@@ -223,6 +362,18 @@ if ($idSeleccionada > 0 && !$pesadaCerrada) {
     ");
     $stmtActiva->execute([':id' => $idSeleccionada, ':empresa_id' => $empresaId]);
     $pesadaActiva = $stmtActiva->fetch(PDO::FETCH_ASSOC);
+
+    if ($pesadaActiva) {
+        $tipoOpDestino = ($pesadaActiva['tipo_operacion'] === 'COMPRA') ? 'VENTA' : 'COMPRA';
+        $condRolPer = ($tipoOpDestino === 'VENTA') ? 'es_cliente = 1' : 'es_proveedor = 1';
+        $stmtPerCambio = $pdo->prepare("
+            SELECT id, nombre FROM t_clie_prov
+            WHERE empresa_id = :empresa_id AND activo = 1 AND {$condRolPer}
+            ORDER BY nombre ASC
+        ");
+        $stmtPerCambio->execute([':empresa_id' => $empresaId]);
+        $personasCambioOp = $stmtPerCambio->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
 
 // 3. CONSULTA DE PESADAS PENDIENTES (PASO 1)
@@ -265,6 +416,12 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
             <?= htmlspecialchars($empresaNombre, ENT_QUOTES, 'UTF-8') ?>
         </span>
     </div>
+
+    <?php if ($mensajeExito !== ''): ?>
+        <div class="alert alert-success" style="margin-bottom: 1rem;">
+            <span>✅ <?= htmlspecialchars($mensajeExito, ENT_QUOTES, 'UTF-8') ?></span>
+        </div>
+    <?php endif; ?>
 
     <?php if ($error !== ''): ?>
         <div class="alert alert-error" style="margin-bottom: 1.5rem;">
@@ -327,18 +484,65 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
     <?php elseif ($pesadaActiva): 
         $tipoFaltante = ($pesadaActiva['tipo_primera_pesada'] === 'BRUTO') ? 'TARA' : 'BRUTO';
         $primerPeso = (float)($pesadaActiva['peso_bruto_lb'] ?? $pesadaActiva['tara_vehiculo_lb']);
+        $tipoOpInvertido = ($pesadaActiva['tipo_operacion'] === 'COMPRA') ? 'VENTA' : 'COMPRA';
+        $corrMostrar = (int)($pesadaActiva['id_compra'] ?? $pesadaActiva['id_venta']);
+        $personaActualCompatible = ($tipoOpInvertido === 'VENTA')
+            ? ((int)($pesadaActiva['persona_es_cliente'] ?? 0) === 1)
+            : ((int)($pesadaActiva['persona_es_proveedor'] ?? 0) === 1);
     ?>
-        <div style="margin-bottom: 0.65rem;">
+        <div style="margin-bottom: 0.65rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
             <a href="segunda_pesada.php" style="color: #1e40af; font-size: 0.88rem; font-weight: 600; text-decoration: none;">
                 &larr; Volver a la lista de pendientes
             </a>
+            <button type="button" onclick="abrirPanelInvertirOperacion()" class="btn btn-secondary" style="padding: 0.3rem 0.75rem; font-size: 0.8rem; font-weight: 700; border-radius: 6px;">
+                ⇄ ¿Se registró al revés? Cambiar a <?= $tipoOpInvertido ?>
+            </button>
+        </div>
+
+        <!-- PANEL RÁPIDO PARA CORREGIR COMPRA <-> VENTA SIN PERDER EL CORRELATIVO -->
+        <div id="panelInvertirOperacion" class="card" style="display: none; padding: 1rem 1.25rem; margin-bottom: 0.85rem; border-radius: 10px; border: 2px solid #f59e0b; background: var(--bg-surface);">
+            <form method="POST" action="segunda_pesada.php?id=<?= (int)$pesadaActiva['idpesada'] ?>" id="formInvertirOperacion" autocomplete="off" style="margin: 0;">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="accion" value="invertir_operacion">
+                <input type="hidden" name="idpesada" value="<?= (int)$pesadaActiva['idpesada'] ?>">
+                <input type="hidden" name="peso_previo" id="inputPesoPrevioInvertir" value="0">
+
+                <div style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.35rem;">
+                    ⇄ Corregir nota #<?= sprintf('%07d', $corrMostrar) ?> de <?= $pesadaActiva['tipo_operacion'] ?> a <?= $tipoOpInvertido ?>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 0.75rem 0; line-height: 1.4;">
+                    El primer peso (<strong><?= number_format($primerPeso, 0) ?> lb</strong>) pasará de <strong><?= $pesadaActiva['tipo_primera_pesada'] === 'BRUTO' ? 'Peso Bruto' : 'Tara' ?></strong> a <strong><?= $pesadaActiva['tipo_primera_pesada'] === 'BRUTO' ? 'Tara (camión vacío)' : 'Peso Bruto (camión cargado)' ?></strong> conservando la misma boleta <strong>#<?= sprintf('%07d', $corrMostrar) ?></strong>. Confirma el <?= $tipoOpInvertido === 'VENTA' ? 'Cliente' : 'Proveedor' ?>:
+                </p>
+
+                <div style="display: flex; gap: 0.75rem; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 240px;">
+                        <label for="nuevo_clie_prov_id" class="form-label" style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.25rem;">
+                            <?= $tipoOpInvertido === 'VENTA' ? 'Cliente para esta Venta' : 'Proveedor para esta Compra' ?> <span style="color: var(--danger);">*</span>
+                        </label>
+                        <select id="nuevo_clie_prov_id" name="nuevo_clie_prov_id" class="form-control" style="height: 38px; border-radius: 6px; font-size: 0.88rem;" required>
+                            <option value="" disabled <?= !$personaActualCompatible ? 'selected' : '' ?>>Selecciona <?= $tipoOpInvertido === 'VENTA' ? 'el cliente' : 'el proveedor' ?>...</option>
+                            <?php foreach ($personasCambioOp as $perOp): ?>
+                                <option value="<?= (int)$perOp['id'] ?>" <?= ($personaActualCompatible && (int)$perOp['id'] === (int)$pesadaActiva['clie_prov_id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($perOp['nombre'], ENT_QUOTES, 'UTF-8') ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="height: 38px; padding: 0 1.15rem; font-weight: 700; background: <?= $tipoOpInvertido === 'VENTA' ? '#047857' : '#1e40af' ?>; border-radius: 6px; font-size: 0.86rem;">
+                        Confirmar cambio a <?= $tipoOpInvertido ?>
+                    </button>
+                    <button type="button" onclick="cerrarPanelInvertirOperacion()" class="btn btn-secondary" style="height: 38px; padding: 0 0.9rem; font-size: 0.85rem; border-radius: 6px;">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
         </div>
 
         <form method="POST" action="segunda_pesada.php" id="formSegundaPesada" autocomplete="off">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($tokenCsrf, ENT_QUOTES, 'UTF-8') ?>">
             <input type="hidden" name="accion" value="cerrar_pesada">
             <input type="hidden" name="idpesada" value="<?= (int)$pesadaActiva['idpesada'] ?>">
-            <input type="hidden" name="peso_fijado" id="inputPesoFijado" value="0">
+            <input type="hidden" name="peso_fijado" id="inputPesoFijado" value="<?= (int)$pesoPrevioFijado ?>">
             <input type="hidden" id="primerPesoVal" value="<?= $primerPeso ?>">
             <input type="hidden" id="tipoPrimeraPesada" value="<?= $pesadaActiva['tipo_primera_pesada'] ?>">
 
@@ -410,7 +614,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                                 <?= ($tipoFaltante === 'TARA' ? 'TARA FIJADA' : 'PESO BRUTO FIJADO') ?>
                             </span>
                             <div style="font-size: 1.75rem; font-weight: 900; line-height: 1; display: flex; align-items: baseline; gap: 0.35rem;">
-                                <span id="valorSegundoPeso">--</span>
+                                <span id="valorSegundoPeso"><?= $pesoPrevioFijado > 0 ? number_format($pesoPrevioFijado, 0) : '--' ?></span>
                                 <span style="font-size: 0.95rem; font-weight: 600; opacity: 0.85;">lb</span>
                             </div>
                         </div>
@@ -512,7 +716,7 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                     </div>
                 </div>
 
-                <?php if (($notaSeleccionada['tipo_operacion'] ?? '') === 'VENTA'): ?>
+                <?php if (($pesadaActiva['tipo_operacion'] ?? '') === 'VENTA'): ?>
                 <!-- GUÍA DE REMISIÓN COMPACTA (SOLO VENTAS) -->
                 <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 0.9rem;">
                     <div style="font-size: 0.8rem; font-weight: 800; color: #047857; margin-bottom: 0.5rem; text-transform: uppercase;">
@@ -756,9 +960,33 @@ function conectarLecturaEnVivo() {
     }, 400);
 }
 
+function abrirPanelInvertirOperacion() {
+    const panel = document.getElementById('panelInvertirOperacion');
+    if (!panel) return;
+    const pesoActual = document.getElementById('inputPesoFijado')?.value || '0';
+    const inpPrevio = document.getElementById('inputPesoPrevioInvertir');
+    if (inpPrevio) inpPrevio.value = pesoActual;
+    panel.style.display = 'block';
+    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function cerrarPanelInvertirOperacion() {
+    const panel = document.getElementById('panelInvertirOperacion');
+    if (panel) panel.style.display = 'none';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     conectarLecturaEnVivo();
     calcularTotales();
+
+    const formInv = document.getElementById('formInvertirOperacion');
+    if (formInv) {
+        formInv.addEventListener('submit', () => {
+            const inpPrevio = document.getElementById('inputPesoPrevioInvertir');
+            const pesoActual = document.getElementById('inputPesoFijado')?.value || '0';
+            if (inpPrevio) inpPrevio.value = pesoActual;
+        });
+    }
 
     const form = document.getElementById('formSegundaPesada');
     if (form) {
@@ -801,10 +1029,12 @@ function obtenerFaltantesSegundaPesada() {
         const bruto = (tipoPrimera === 'BRUTO') ? primerPeso : segundoPeso;
         const tara  = (tipoPrimera === 'BRUTO') ? segundoPeso : primerPeso;
         if (bruto <= tara) {
+            const opSug = (tipoPrimera === 'BRUTO') ? 'VENTA' : 'COMPRA';
             faltantes.push(
-                tipoPrimera === 'TARA'
+                (tipoPrimera === 'TARA'
                     ? `El peso bruto complementario (${bruto.toLocaleString('en-US')} lb) debe ser mayor que la tara inicial (${tara.toLocaleString('en-US')} lb).`
-                    : `La tara del vehículo (${tara.toLocaleString('en-US')} lb) debe ser menor que el peso bruto inicial (${bruto.toLocaleString('en-US')} lb).`
+                    : `La tara del vehículo (${tara.toLocaleString('en-US')} lb) debe ser menor que el peso bruto inicial (${bruto.toLocaleString('en-US')} lb).`) +
+                ` <a href="#panelInvertirOperacion" onclick="event.preventDefault(); abrirPanelInvertirOperacion();" style="font-weight: 800; text-decoration: underline; color: inherit;">⇄ Cambiar esta nota a ${opSug}</a>`
             );
         }
     }
@@ -881,10 +1111,17 @@ function calcularTotales() {
     const resAviso = document.getElementById('avisoPesoInvalido');
     if (segundoPeso > 0 && bruto <= tara) {
         if (resAviso) {
-            resAviso.style.display = 'block';
-            resAviso.innerText = (tipoPrimera === 'TARA') 
-                ? '⚠️ El peso bruto complementario (' + bruto.toLocaleString('en-US') + ' lb) debe ser mayor que la tara inicial (' + tara.toLocaleString('en-US') + ' lb).'
-                : '⚠️ La tara del vehículo (' + tara.toLocaleString('en-US') + ' lb) no puede ser mayor o igual al peso bruto (' + bruto.toLocaleString('en-US') + ' lb).';
+            const opSugerida = (tipoPrimera === 'BRUTO') ? 'VENTA' : 'COMPRA';
+            const explicacion = (tipoPrimera === 'BRUTO')
+                ? `⚠️ El peso fijado (${tara.toLocaleString('en-US')} lb) es mayor o igual al peso inicial (${bruto.toLocaleString('en-US')} lb). Si el camión entró vacío a cargar, corrige esta nota a <strong>VENTA</strong>:`
+                : `⚠️ El peso fijado (${bruto.toLocaleString('en-US')} lb) es menor o igual a la tara inicial (${tara.toLocaleString('en-US')} lb). Si el camión entró cargado a descargar, corrige esta nota a <strong>COMPRA</strong>:`;
+            resAviso.style.display = 'flex';
+            resAviso.style.alignItems = 'center';
+            resAviso.style.justifyContent = 'space-between';
+            resAviso.style.flexWrap = 'wrap';
+            resAviso.style.gap = '0.65rem';
+            resAviso.innerHTML = `<span>${explicacion}</span>` +
+                `<button type="button" onclick="abrirPanelInvertirOperacion()" class="btn btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.82rem; font-weight: 700; background: ${opSugerida === 'VENTA' ? '#047857' : '#1e40af'}; border-radius: 6px; white-space: nowrap;">⇄ Cambiar esta nota a ${opSugerida}</button>`;
         }
     } else {
         if (resAviso) resAviso.style.display = 'none';
