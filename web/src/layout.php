@@ -593,7 +593,7 @@ setInterval(intentarSyncPendientesNube, 300000);
 })();
 </script>
 <?php endif; ?>
-<script src="assets/js/pesaje.js?v=20261127a"></script>
+<script src="assets/js/pesaje.js?v=20261127b"></script>
 <script src="assets/js/sidebar.js?v=20261124m"></script>
 </body>
 </html>

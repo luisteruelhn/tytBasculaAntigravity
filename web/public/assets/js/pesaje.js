@@ -137,7 +137,7 @@ function actualizarBotonLecturaComLive(activo) {
     lecturaComLiveActiva = Boolean(activo);
     const btn = document.getElementById('btnToggleLecturaComLive');
     if (!btn) return;
-    btn.textContent = lecturaComLiveActiva ? '⏹️ Parar' : '▶️ Arrancar';
+    btn.textContent = lecturaComLiveActiva ? '⏹️ Parar Lectura' : '▶️ Arrancar Lectura';
     btn.style.background = lecturaComLiveActiva ? '#b91c1c' : '#1e40af';
     btn.title = lecturaComLiveActiva ? 'Detener lectura y liberar puerto COM' : 'Arrancar lectura del indicador';
 }
