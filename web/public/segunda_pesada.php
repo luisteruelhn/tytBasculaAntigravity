@@ -665,7 +665,13 @@ renderizarEncabezado('Segunda Pesada', 'segunda');
                             <span style="font-size: 0.72rem; color: #64748b; margin-left: 0.45rem;" id="liveUltimaLectura">--:--:--</span>
                         </div>
                         <div style="text-align: right;">
+                            <?php if (esAccesoPlantaLocal()): ?>
+                            <button type="button" id="btnToggleLecturaComLive" onclick="alternarLecturaComLive()" style="background: #1e40af; color: #ffffff; border: 1px solid rgba(255,255,255,0.2); padding: 0.32rem 0.78rem; font-size: 0.76rem; font-weight: 700; border-radius: 6px; cursor: pointer; white-space: nowrap;">
+                                ▶️ Arrancar
+                            </button>
+                            <?php else: ?>
                             <span style="color: #cbd5e1;">Fuente &middot; Configurada</span>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

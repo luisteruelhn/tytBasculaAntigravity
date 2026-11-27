@@ -126,4 +126,57 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elDisplay && elDisplay.dataset.modoRemoto !== '1') {
         window.monitorBascula = new MonitorBascula();
     }
+    if (document.getElementById('btnToggleLecturaComLive')) {
+        consultarEstadoLecturaComLive();
+    }
 });
+
+let lecturaComLiveActiva = false;
+
+function actualizarBotonLecturaComLive(activo) {
+    lecturaComLiveActiva = Boolean(activo);
+    const btn = document.getElementById('btnToggleLecturaComLive');
+    if (!btn) return;
+    btn.textContent = lecturaComLiveActiva ? '⏹️ Parar' : '▶️ Arrancar';
+    btn.style.background = lecturaComLiveActiva ? '#b91c1c' : '#1e40af';
+    btn.title = lecturaComLiveActiva ? 'Detener lectura y liberar puerto COM' : 'Arrancar lectura del indicador';
+}
+
+async function consultarEstadoLecturaComLive() {
+    try {
+        const resp = await fetch('api_peso_local.php?accion=salud', { credentials: 'same-origin' });
+        if (resp.ok) {
+            const s = await resp.json();
+            actualizarBotonLecturaComLive(Boolean(s.lector_activo));
+        } else {
+            actualizarBotonLecturaComLive(false);
+        }
+    } catch (e) {
+        actualizarBotonLecturaComLive(false);
+    }
+}
+
+async function alternarLecturaComLive() {
+    const btn = document.getElementById('btnToggleLecturaComLive');
+    if (!btn) return;
+    const accion = lecturaComLiveActiva ? 'parar' : 'arrancar';
+    btn.disabled = true;
+    btn.textContent = accion === 'arrancar' ? 'Iniciando...' : 'Deteniendo...';
+
+    try {
+        const resp = await fetch('api_bascula_control.php?accion=' + accion, {
+            method: 'POST',
+            credentials: 'same-origin',
+        });
+        const data = await resp.json();
+        if (!data.ok) {
+            alert(data.error || 'No se pudo cambiar el estado del lector.');
+        }
+        await consultarEstadoLecturaComLive();
+    } catch (e) {
+        alert('Error de comunicación con el servidor local.');
+        await consultarEstadoLecturaComLive();
+    } finally {
+        btn.disabled = false;
+    }
+}
